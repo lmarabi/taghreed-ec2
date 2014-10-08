@@ -1,8 +1,8 @@
-./bin/*
-./dist/*
-./README.md
-./build/*
-./export/*
-./report.csv
-./summary.txt
-./config.properties
+bin
+dist
+README.md
+build/*
+export/*
+report.csv
+summary.txt
+config.properties
