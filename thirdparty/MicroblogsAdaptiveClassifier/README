@@ -1,0 +1,27 @@
+To run the project:
+	1- provide svm training window size and language in resources/classifier.config file
+	2- Provide 3 proxies and 3 twitter tokens to crawel tweets from Twitter in resources/proxies.config and resources/twitterTokens.config respicetively.
+	3- provide topic boolean queries to build the boolean classifier in resources/topic_queries.txt
+	4- provide random queries (e.g stopwords) to crawl random tweets in resources/random_queries.txt
+	5- import the project in eclipse
+	6- run Program.java with JVM argument: -Djava.library.path=PATH/MicroblogsAdaptiveClassifier/svm_light_lib
+
+Output:
+- Boolean classifier dumps its output to two files (one for positive and one for negative)
+
+	*   boolean_positive_tweets.txt
+	*   boolean_negative_tweets.txt
+
+- SVM Classifier dumps  its output to two files (one for positive and one for negative)
+
+	*   svm_positive_tweets.txt
+	*   svm_negative_tweets.txt
+
+- output of classifiers is of the following format:
+	[ID] TAB [tweet_text] TAB [time_stamp]
+
+
+Notes:
+* The SVM mode is empty the first time the program runs so the program fetches random tweets in order to build the SVM model
+* Stopping the execution of the program the first time while fetching the random tweets determines how many tweets would be used to build the classifier.
+* The SVM model gets built the second time the program runs and the classification of tweets (whether positive or negative) starts to appear in the output file.
