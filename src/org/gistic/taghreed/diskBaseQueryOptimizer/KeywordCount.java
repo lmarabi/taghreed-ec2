@@ -87,7 +87,7 @@ public class KeywordCount {
                         //increament the keyword
                         try{
                         int oldValue = keywordList.get(token);
-                        keywordList.replace(token, oldValue, (oldValue+1));
+                        keywordList.put(token,(oldValue+1));
                         }catch (Exception e){
                             System.out.println("error in change value");
                         }
