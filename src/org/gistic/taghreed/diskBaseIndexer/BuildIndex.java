@@ -5,6 +5,7 @@
 package org.gistic.taghreed.diskBaseIndexer;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -15,9 +16,12 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import org.gistic.invertedIndex.KWIndexBuilder;
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
+
+import sun.tools.jar.CommandLine;
 
 /**
  *
@@ -111,6 +115,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -copyFromLocal " + tweetFile +" "+Commons.getHadoopHDFSPath();
         System.out.println(command);
         Process myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         String line = null;
@@ -118,45 +123,55 @@ public class BuildIndex {
             System.out.println(line);
         }
         //Build index 
-        command = config.getHadoopDir() + "/bin/hadoop jar "+config.getShadoopJar()+" index "+Commons.getHadoopHDFSPath()+ file.getName() +" "+ Commons.getHadoopHDFSPath() +"index." + file.getName() + " -overwrite  sindex:str+ shape:tweets blocksize:12.mb -no-local";
+        command = config.getHadoopDir() + "/bin/hadoop jar "+ config.getHadoopDir()+"/"+config.getShadoopJar()+" index "+Commons.getHadoopHDFSPath()+ file.getName() +" "+ Commons.getHadoopHDFSPath() +"index." + file.getName() + " -overwrite  sindex:str+ shape:tweets blocksize:12.mb -no-local";
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
+        line = null;
+        while ((line = in.readLine()) != null) {
+            System.out.println(line);
+        }
+        in = new BufferedReader(
+                new InputStreamReader(myProcess.getErrorStream()));
         line = null;
         while ((line = in.readLine()) != null) {
             System.out.println(line);
         }
         //Copy to local
-        command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal " + Commons.getHadoopHDFSPath()+"index." + file.getName() + " " + config.getQueryRtreeIndex() + "tweets/Day/";
-        System.out.println(command);
-        myProcess = Runtime.getRuntime().exec(command);
-        in = new BufferedReader(
-                new InputStreamReader(myProcess.getInputStream()));
-        line = null;
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
+//        command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal " + Commons.getHadoopHDFSPath()+"index." + file.getName() + " " + config.getQueryRtreeIndex() + "tweets/Day/";
+//        System.out.println(command);
+//        myProcess = Runtime.getRuntime().exec(command);
+//        myProcess.waitFor();
+//        in = new BufferedReader(
+//                new InputStreamReader(myProcess.getInputStream()));
+//        line = null;
+//        while ((line = in.readLine()) != null) {
+//            System.out.println(line);
+//        }
         //remove from hdfs 
-        command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() + file.getName();
-        System.out.println(command);
-        myProcess = Runtime.getRuntime().exec(command);
-        in = new BufferedReader(
-                new InputStreamReader(myProcess.getInputStream()));
-        line = null;
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
-        command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() +"index." + file.getName();
-        System.out.println(command);
-        myProcess = Runtime.getRuntime().exec(command);
-        in = new BufferedReader(
-                new InputStreamReader(myProcess.getInputStream()));
-        line = null;
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
-        
+//        command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() + file.getName();
+//        System.out.println(command);
+//        myProcess = Runtime.getRuntime().exec(command);
+//        myProcess.waitFor();
+//        in = new BufferedReader(
+//                new InputStreamReader(myProcess.getInputStream()));
+//        line = null;
+//        while ((line = in.readLine()) != null) {
+//            System.out.println(line);
+//        }
+//        command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() +"index." + file.getName();
+//        System.out.println(command);
+//        myProcess = Runtime.getRuntime().exec(command);
+//        myProcess.waitFor();
+//        in = new BufferedReader(
+//                new InputStreamReader(myProcess.getInputStream()));
+//        line = null;
+//        while ((line = in.readLine()) != null) {
+//            System.out.println(line);
+//        }
+        in.close();
         AddSelectivityToMasterFile(config.getQueryRtreeIndex() + "tweets/Day/index." + file.getName());
     }
 
@@ -179,6 +194,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -copyFromLocal " + hashtagFile + " " +Commons.getHadoopHDFSPath();
         System.out.println(command);
         Process myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         String line = null;
@@ -186,9 +202,10 @@ public class BuildIndex {
             System.out.println(line);
         }
         //Build index 
-        command = config.getHadoopDir() + "/bin/hadoop jar "+config.getShadoopJar()+" index "+ Commons.getHadoopHDFSPath() + file.getName() +" "+ Commons.getHadoopHDFSPath()+"index." + file.getName() + " -overwrite  sindex:str+ shape:hashtag blocksize:12.mb -no-local";
+        command = config.getHadoopDir() + "/bin/hadoop jar "+ config.getHadoopDir()+"/"+config.getShadoopJar()+" index "+ Commons.getHadoopHDFSPath() + file.getName() +" "+ Commons.getHadoopHDFSPath()+"index." + file.getName() + " -overwrite  sindex:str+ shape:hashtag blocksize:12.mb -no-local";
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -199,6 +216,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "+ Commons.getHadoopHDFSPath() + "index." + file.getName() + " " + config.getQueryRtreeIndex() + "hashtags/Day/";
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -208,6 +226,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() + file.getName();
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -217,13 +236,14 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() +"index." + file.getName();
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
         while ((line = in.readLine()) != null) {
             System.out.println(line);
         }
-        
+        in.close();
         AddSelectivityToMasterFile(config.getQueryRtreeIndex() + "hashtags/Day/index." + file.getName());
 
     }
@@ -239,12 +259,14 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -mkdir "+ Commons.getHadoopHDFSPath() + folderName;
         System.out.println(command);
         Process myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         String line = null;
         while ((line = in.readLine()) != null) {
             System.out.println(line);
         }
+        in.close();
     }
 
     /**
@@ -259,12 +281,14 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -copyFromLocal " + fileDir + " "+ Commons.getHadoopHDFSPath() + folderName + "/";
         System.out.println(command);
         Process myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         String line = null;
         while ((line = in.readLine()) != null) {
             System.out.println(line);
         }
+        in.close();
     }
 
     /**
@@ -281,9 +305,10 @@ public class BuildIndex {
             f.mkdirs();
         }
         //Build index 
-        command = config.getHadoopDir() + "/bin/hadoop jar "+config.getShadoopJar()+" index "+ Commons.getHadoopHDFSPath() + folderName + " " +Commons.getHadoopHDFSPath()+"index." + folderName + " -overwrite  sindex:str+ shape:hashtag blocksize:12.mb -no-local";
+        command = config.getHadoopDir() + "/bin/hadoop jar "+ config.getHadoopDir()+"/"+config.getShadoopJar()+" index "+ Commons.getHadoopHDFSPath() + folderName + " " +Commons.getHadoopHDFSPath()+"index." + folderName + " -overwrite  sindex:str+ shape:hashtag blocksize:12.mb -no-local";
         System.out.println(command);
         Process myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         String line = null;
@@ -294,6 +319,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal " + Commons.getHadoopHDFSPath()+"index." + folderName + " " + config.getQueryRtreeIndex() + "hashtags/" + level + "/";
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -304,6 +330,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() + folderName;
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -313,12 +340,14 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() +"index." + folderName;
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
         while ((line = in.readLine()) != null) {
             System.out.println(line);
         }
+        in.close();
         AddSelectivityToMasterFile(config.getQueryRtreeIndex() + "hashtags/" + level + "/index." + folderName);
     }
 
@@ -336,9 +365,10 @@ public class BuildIndex {
             f.mkdirs();
         }
         //Build index 
-        command = config.getHadoopDir() + "/bin/hadoop jar "+config.getShadoopJar()+" index "+ Commons.getHadoopHDFSPath() + folderName + " "+ Commons.getHadoopHDFSPath()+ "index." + folderName + " -overwrite  sindex:str+ shape:tweets blocksize:12.mb -no-local";
+        command = config.getHadoopDir() + "/bin/hadoop jar "+ config.getHadoopDir()+"/"+config.getShadoopJar()+" index "+ Commons.getHadoopHDFSPath() + folderName + " "+ Commons.getHadoopHDFSPath()+ "index." + folderName + " -overwrite  sindex:str+ shape:tweets blocksize:12.mb -no-local";
         System.out.println(command);
         Process myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         String line = null;
@@ -349,6 +379,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "+ Commons.getHadoopHDFSPath() + "index." + folderName + " " + config.getQueryRtreeIndex() + "tweets/" + level + "/";
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -359,6 +390,7 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() + folderName;
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
@@ -368,12 +400,14 @@ public class BuildIndex {
         command = config.getHadoopDir() + "/bin/hadoop fs -rmr " + Commons.getHadoopHDFSPath() +"index." + folderName;
         System.out.println(command);
         myProcess = Runtime.getRuntime().exec(command);
+        myProcess.waitFor();
         in = new BufferedReader(
                 new InputStreamReader(myProcess.getInputStream()));
         line = null;
         while ((line = in.readLine()) != null) {
             System.out.println(line);
         }
+        in.close();
         AddSelectivityToMasterFile(config.getQueryRtreeIndex() + "tweets/" + level + "/index." + folderName);
     }
 
@@ -451,6 +485,11 @@ public class BuildIndex {
         KWIndexBuilder indexbuilder = new KWIndexBuilder();
         String indexfolder = config.getQueryInvertedIndex() + "/hashtags/Day/index." + tweetFile.getName();
         indexbuilder.buildIndex(file, indexfolder, KWIndexBuilder.dataType.hashtags);
+    }
+    
+    public void commandExecuter(String command){
+    	
+        
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
