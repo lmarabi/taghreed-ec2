@@ -21,6 +21,8 @@ public class Commons {
     
     public static String hadoopDir;
     
+    public static String hadoopHDFSPath;
+    
     public static String accessToken;
     
     public static String consumerSecret;
@@ -30,12 +32,21 @@ public class Commons {
     public static String accessTokenSecret;
     
     public static String filterLocationsFile;
+    
+    public static String shadoopJar;
 
     public Commons() throws IOException {
         this.loadConfigFile();
        
     }
     
+    public static String getHadoopHDFSPath() {
+		return hadoopHDFSPath;
+	}
+    
+    public static void setHadoopHDFSPath(String hadoopHDFSPath) {
+		Commons.hadoopHDFSPath = hadoopHDFSPath;
+	}
     
 
     public  int getPortNumber() {
@@ -125,6 +136,14 @@ public class Commons {
         Commons.filterLocationsFile = filterLocationsFile;
     }
     
+    public static String getShadoopJar() {
+		return shadoopJar;
+	}
+    
+    public static void setShadoopJar(String shadoopJar) {
+		Commons.shadoopJar = shadoopJar;
+	}
+    
     
     
     
@@ -138,6 +157,8 @@ public class Commons {
         Commons.consumerSecret = prop.getProperty("consumerSecret");
         Commons.filterLocationsFile = prop.getProperty("filterLocationsFile");
         Commons.hadoopDir = prop.getProperty("hadoopDir");
+        Commons.shadoopJar = prop.getProperty("shadoopJar");
+        Commons.hadoopHDFSPath = prop.getProperty("hadoopHDFSPath");
         Commons.hashtagFlushDir = prop.getProperty("hashtagFlushDir");
         Commons.portNumber = Integer.parseInt(prop.getProperty("portNumber"));
         Commons.queryInvertedIndex = prop.getProperty("queryInvertedIndex");

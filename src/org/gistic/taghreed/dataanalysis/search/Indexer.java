@@ -41,8 +41,8 @@ public class Indexer {
 
         if (indexWriter == null || create == true) {
             ram = new RAMDirectory();
-            Analyzer stdAn = new WhitespaceAnalyzer(Version.LUCENE_47);
-            IndexWriterConfig iwConf = new IndexWriterConfig(Version.LUCENE_47, stdAn);
+            Analyzer stdAn = new WhitespaceAnalyzer(Version.LUCENE_45);
+            IndexWriterConfig iwConf = new IndexWriterConfig(Version.LUCENE_45, stdAn);
             indexWriter= new IndexWriter(ram, iwConf);
         }
         return indexWriter;

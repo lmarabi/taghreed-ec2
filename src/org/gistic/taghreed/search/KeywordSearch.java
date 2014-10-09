@@ -42,7 +42,7 @@ public class KeywordSearch {
             }
             IndexSearcher searcher = new IndexSearcher(reader);
 
-            Query query = new QueryParser(Version.LUCENE_47, "tweet_text", new ArabicAnalyzer(Version.LUCENE_47)).parse(keyword);
+            Query query = new QueryParser(Version.LUCENE_45, "tweet_text", new ArabicAnalyzer(Version.LUCENE_45)).parse(keyword);
 
             TopDocs topDocs = searcher.search(query, Integer.MAX_VALUE);
             for (int i = 0; i < topDocs.scoreDocs.length; i++) {

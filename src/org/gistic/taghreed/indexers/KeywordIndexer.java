@@ -28,7 +28,7 @@ import java.util.List;
 public class KeywordIndexer {
 
     boolean indexClosed = false;
-    IndexWriterConfig icw = new IndexWriterConfig(Version.LUCENE_47 , new ArabicAnalyzer(Version.LUCENE_47));
+    IndexWriterConfig icw = new IndexWriterConfig(Version.LUCENE_45 , new ArabicAnalyzer(Version.LUCENE_45));
     IndexWriter writer = null;
 
     {
@@ -112,7 +112,7 @@ public class KeywordIndexer {
     public void parseAndIndexTweet(String tweet) throws IOException, ParseException, java.text.ParseException {
 
         if(indexClosed)
-            writer  = new IndexWriter(Crawler.ramDir, new IndexWriterConfig(Version.LUCENE_47 , new ArabicAnalyzer(Version.LUCENE_47)));
+            writer  = new IndexWriter(Crawler.ramDir, new IndexWriterConfig(Version.LUCENE_45 , new ArabicAnalyzer(Version.LUCENE_45)));
 
         List<String> hashtags = new ArrayList<String>();
         // Parse Tweets
@@ -204,7 +204,7 @@ public class KeywordIndexer {
         try {
             Commons commons = new Commons();
             Directory dir = FSDirectory.open(new File(commons.getTweetFlushDir()));
-            IndexWriter writer = new IndexWriter(dir , new IndexWriterConfig(Version.LUCENE_47 , new ArabicAnalyzer(Version.LUCENE_47)));
+            IndexWriter writer = new IndexWriter(dir , new IndexWriterConfig(Version.LUCENE_45 , new ArabicAnalyzer(Version.LUCENE_45)));
             writer.addIndexes(ramDirectory);
             writer.forceMerge(1);
             writer.close();

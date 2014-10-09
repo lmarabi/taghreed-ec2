@@ -31,7 +31,7 @@ public class QuadTreeIndex{
     SpatialContext spatialContext = null ;
     SpatialStrategy strategy = null ;
     RAMDirectory quadRamDirectory = new RAMDirectory();
-    IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_47 , new ArabicAnalyzer(Version.LUCENE_47));
+    IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_45 , new ArabicAnalyzer(Version.LUCENE_45));
 
     Rectangle worldBounds = new RectangleImpl(-180 , 180 , -180 ,180 , spatialContext );
     IndexWriter writer;
@@ -56,7 +56,7 @@ public class QuadTreeIndex{
 
     public void parseAndIndex(List<String> tweets) throws IOException {
         if(indexClosed)
-            writer = new IndexWriter(Crawler.quadRamDir , new IndexWriterConfig(Version.LUCENE_47  , new ArabicAnalyzer(Version.LUCENE_47)));
+            writer = new IndexWriter(Crawler.quadRamDir , new IndexWriterConfig(Version.LUCENE_45  , new ArabicAnalyzer(Version.LUCENE_45)));
         for(String tweet : tweets)
         {
             JSONObject twitterPost = new JSONObject(tweet);
@@ -93,7 +93,7 @@ public class QuadTreeIndex{
     }
     public void parseAndIndexTweet(String tweet) throws IOException, ParseException, java.text.ParseException {
         if(indexClosed)
-            writer = new IndexWriter(Crawler.quadRamDir , new IndexWriterConfig(Version.LUCENE_47  , new ArabicAnalyzer(Version.LUCENE_47)));
+            writer = new IndexWriter(Crawler.quadRamDir , new IndexWriterConfig(Version.LUCENE_45  , new ArabicAnalyzer(Version.LUCENE_45)));
 
         JSONObject twitterPost = new JSONObject(tweet);
         JSONObject user = twitterPost.getJSONObject("user");

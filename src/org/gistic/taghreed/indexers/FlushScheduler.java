@@ -30,7 +30,7 @@ public class FlushScheduler extends TimerTask {
         try {
             Commons commons = new Commons();
             Directory dir = FSDirectory.open(new File(commons.getTweetFlushDir()));
-            IndexWriter writer = new IndexWriter(dir , new IndexWriterConfig(Version.LUCENE_47 , new ArabicAnalyzer(Version.LUCENE_47)));
+            IndexWriter writer = new IndexWriter(dir , new IndexWriterConfig(Version.LUCENE_45 , new ArabicAnalyzer(Version.LUCENE_45)));
             writer.addIndexes(ramDirectory);
             writer.close();
             ramDirectory.close();

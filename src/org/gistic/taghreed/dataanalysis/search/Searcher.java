@@ -58,7 +58,7 @@ public class Searcher {
         
         try {
             
-            analyzer = new WhitespaceAnalyzer(Version.LUCENE_47);
+            analyzer = new WhitespaceAnalyzer(Version.LUCENE_45);
             normalizer = new ArabicNormalizer();
 
             query = new PhraseQuery();
