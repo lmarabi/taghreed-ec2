@@ -52,7 +52,7 @@
 	<target name="jar" depends="compile">
 		<jar destfile="${dist.dir}\taghreed.jar" basedir="${build.dir}">
 			<manifest>
-				<attribute name="Main-Class" value="org.gistic.taghreed.diskBaedIndex.MainBackendIndex.main" />
+				<attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
 			</manifest>
 		</jar>
 	</target>

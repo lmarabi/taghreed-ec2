@@ -63,7 +63,7 @@ public class BuildIndex {
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			String[] temp = line.split(",");
-			File f = new File(path + "/" + temp[5]);
+			File f = new File(path + "/" + temp[7]);
 			BufferedReader partitionReader = new BufferedReader(new FileReader(
 					f));
 			String tweets = null;
@@ -85,6 +85,35 @@ public class BuildIndex {
 			fileWriter.write(it.next().toString());
 		}
 		fileWriter.close();
+
+	}
+	
+	
+	/**
+	 * This method get the Threshold of MBR in R+tree index
+	 * 
+	 * @param rtreeFolder
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static int getThreshold(String rtreeFolder)
+			throws FileNotFoundException, IOException {
+		// Read the master file outputed from spatial hadoop
+		String path = rtreeFolder;
+		int threshold = Integer.MAX_VALUE;
+		BufferedReader reader = new BufferedReader(new FileReader(new File(path
+				+ "/_master.str+")));
+		List<String> metaData = new ArrayList<String>();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			String[] temp = line.split(",");
+			//Get the minimum number of partition
+			if(Integer.parseInt(temp[5]) < threshold){
+				threshold = Integer.parseInt(temp[5]);
+			}
+		}
+		reader.close();
+		return threshold;
 
 	}
 
@@ -135,7 +164,7 @@ public class BuildIndex {
 		// Copy to local
 		command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + file.getName() + " "
-				+ config.getQueryRtreeIndex() + "tweets/Day/";
+				+ config.getQueryRtreeIndex() + "tweets/Day/"+ "index." + file.getName() + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -147,8 +176,7 @@ public class BuildIndex {
 				+ config.getHadoopHDFSPath() + "index." + file.getName();
 
 		commandExecuter(command);
-		AddSelectivityToMasterFile(config.getQueryRtreeIndex()
-				+ "tweets/Day/index." + file.getName());
+		
 	}
 
 	/**
@@ -200,7 +228,7 @@ public class BuildIndex {
 		// Copy to local
 		command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + file.getName() + " "
-				+ config.getQueryRtreeIndex() + "hashtags/Day/";
+				+ config.getQueryRtreeIndex() + "hashtags/Day/"+ "index." + file.getName() + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -212,8 +240,6 @@ public class BuildIndex {
 				+ config.getHadoopHDFSPath() + "index." + file.getName();
 
 		commandExecuter(command);
-		AddSelectivityToMasterFile(config.getQueryRtreeIndex()
-				+ "hashtags/Day/index." + file.getName());
 
 	}
 
@@ -287,7 +313,7 @@ public class BuildIndex {
 		// Copy to local
 		command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + folderName + " "
-				+ config.getQueryRtreeIndex() + "hashtags/" + level + "/";
+				+ config.getQueryRtreeIndex() + "hashtags/" + level + "/"+ "index." + folderName + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -299,8 +325,7 @@ public class BuildIndex {
 				+ config.getHadoopHDFSPath() + "index." + folderName;
 
 		commandExecuter(command);
-		AddSelectivityToMasterFile(config.getQueryRtreeIndex() + "hashtags/"
-				+ level + "/index." + folderName);
+		
 	}
 
 	/**
@@ -343,7 +368,7 @@ public class BuildIndex {
 		// Copy to local
 		command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + folderName + " "
-				+ config.getQueryRtreeIndex() + "tweets/" + level + "/";
+				+ config.getQueryRtreeIndex() + "tweets/" + level + "/"+ "index." + folderName + " ";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -355,8 +380,7 @@ public class BuildIndex {
 				+ config.getHadoopHDFSPath() + "index." + folderName;
 
 		commandExecuter(command);
-		AddSelectivityToMasterFile(config.getQueryRtreeIndex() + "tweets/"
-				+ level + "/index." + folderName);
+		
 	}
 
 	/**
@@ -368,9 +392,9 @@ public class BuildIndex {
 	 */
 	public void UpdatelookupTable(Level level) throws IOException {
 		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex());
-		UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
+//		UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
 		UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
-		UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
+//		UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
 
 	}
 
@@ -425,7 +449,8 @@ public class BuildIndex {
 		// create the meta data for the index
 		md.buildMetaData(config.getQueryInvertedIndex() + "/tweets/Day/index."
 				+ tweetsFile.getName(), config.getQueryInvertedIndex(),
-				tweetsFile.getName());
+				tweetsFile.getName(),getThreshold(config.getQueryRtreeIndex()+ "/tweets/Day/index."
+						+ tweetsFile.getName()));
 	}
 
 	public void createInvertedHashtagIndex() {
@@ -454,19 +479,19 @@ public class BuildIndex {
 		System.out.println(command);
 		Process myProcess = Runtime.getRuntime().exec(command);
 		myProcess.waitFor();
-		// BufferedReader in = new BufferedReader(
-		// new InputStreamReader(myProcess.getInputStream()));
-		// String line = null;
-		// while ((line = in.readLine()) != null) {
-		// System.out.println(line);
-		// }
-		// in = new BufferedReader(
-		// new InputStreamReader(myProcess.getErrorStream()));
-		// line = null;
-		// while ((line = in.readLine()) != null) {
-		// System.out.println(line);
-		// }
-		// in.close();
+		 BufferedReader in = new BufferedReader(
+		 new InputStreamReader(myProcess.getInputStream()));
+		 String line = null;
+		 while ((line = in.readLine()) != null) {
+		 System.out.println(line);
+		 }
+		 in = new BufferedReader(
+		 new InputStreamReader(myProcess.getErrorStream()));
+		 line = null;
+		 while ((line = in.readLine()) != null) {
+		 System.out.println(line);
+		 }
+		 in.close();
 
 	}
 
@@ -486,6 +511,6 @@ public class BuildIndex {
 		// hashtagFile, config.getQueryRtreeIndex(), invertedindex);
 		// index.UpdatelookupTable(BuildIndex.Level.Day);
 		BuildIndex in = new BuildIndex();
-		in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/index.2014-05-04");
+		in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/");
 	}
 }

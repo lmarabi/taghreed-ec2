@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.gistic.invertedIndex.KWIndexBuilder;
+import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.collections.PyramidWeek;
 
@@ -50,14 +51,14 @@ public class BuildPyramidIndex {
     public void CreateIndex() throws IOException, InterruptedException, ParseException {
         //Create the rtree index using hadoop
         CreateRtreeTweetWeekIndex();
-        CreateRtreeHashtagWeekIndex();
+//        CreateRtreeHashtagWeekIndex();
         createRtreeTweetMonths();
-        createRtreeHashtagMonths();
+//        createRtreeHashtagMonths();
         //Create the inverted index 
         CreateInvertedTweetWeekIndex();
         createInvertedTweetMonths();
-        CreateInvertedHashtagWeekIndex();
-        createInvertedHashtagMonths();
+//        CreateInvertedHashtagWeekIndex();
+//        createInvertedHashtagMonths();
         //update the lookup tables for all indeces
         indexer.UpdatelookupTable(BuildIndex.Level.Day);
         indexer.UpdatelookupTable(BuildIndex.Level.Week);
@@ -102,6 +103,11 @@ public class BuildPyramidIndex {
                             KWIndexBuilder kWIndexBuilder = new KWIndexBuilder();
                             boolean status = kWIndexBuilder.buildIndex(temp.getFiles(), weekdir,KWIndexBuilder.dataType.tweets);
                             System.out.println("status: "+status+" "+weekdir);
+                            MetaData md = new MetaData();
+                    		// create the meta data for the index
+                    		md.buildMetaData(weekdir,
+                    				config.getQueryInvertedIndex(), hadoopOutputFolder,
+                    				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Week/index."+ hadoopOutputFolder));
                         }
                     }
 
@@ -201,6 +207,11 @@ public class BuildPyramidIndex {
                 KWIndexBuilder builder = new KWIndexBuilder();
                 boolean status = builder.buildIndex(week.getFiles(), Monthdir,KWIndexBuilder.dataType.tweets);
                 System.out.println("status: "+status+" "+Monthdir);
+                MetaData md = new MetaData();
+        		// create the meta data for the index
+        		md.buildMetaData(Monthdir,
+        				config.getQueryInvertedIndex(), folderName,
+        				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Month/index."+ folderName));
             } else {
                 System.out.println("Index exist " + folderName);
             }
