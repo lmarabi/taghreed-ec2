@@ -4,7 +4,6 @@
  */
 package org.gistic.taghreed.diskBaseQuery.query;
 
-import org.gistic.taghreed.diskBaseIndexer.Week;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -13,7 +12,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.gistic.taghreed.collections.TweetVolumes;
+import org.gistic.taghreed.collections.Week;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 
 /**

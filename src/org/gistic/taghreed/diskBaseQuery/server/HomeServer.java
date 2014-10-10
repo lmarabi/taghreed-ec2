@@ -4,7 +4,6 @@
  */
 package org.gistic.taghreed.diskBaseQuery.server;
 
-import com.google.gson.stream.JsonWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,9 +13,11 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -26,6 +27,8 @@ import org.gistic.taghreed.collections.PopularUsers;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseIndexer.BuildIndex;
+
+import com.google.gson.stream.JsonWriter;
 
 /**
  *

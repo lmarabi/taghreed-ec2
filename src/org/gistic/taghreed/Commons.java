@@ -34,6 +34,9 @@ public class Commons {
     public static String filterLocationsFile;
     
     public static String shadoopJar;
+    
+    public static String libJars;
+    
 
     public Commons() throws IOException {
         this.loadConfigFile();
@@ -144,7 +147,13 @@ public class Commons {
 		Commons.shadoopJar = shadoopJar;
 	}
     
+    public static String getLibJars() {
+		return libJars;
+	}
     
+    public static void setLibJars(String libJars) {
+		Commons.libJars = libJars;
+	}
     
     
     private void loadConfigFile() throws IOException {
@@ -158,6 +167,7 @@ public class Commons {
         Commons.filterLocationsFile = prop.getProperty("filterLocationsFile");
         Commons.hadoopDir = prop.getProperty("hadoopDir");
         Commons.shadoopJar = prop.getProperty("shadoopJar");
+        Commons.libJars = prop.getProperty("libJars");
         Commons.hadoopHDFSPath = prop.getProperty("hadoopHDFSPath");
         Commons.hashtagFlushDir = prop.getProperty("hashtagFlushDir");
         Commons.portNumber = Integer.parseInt(prop.getProperty("portNumber"));

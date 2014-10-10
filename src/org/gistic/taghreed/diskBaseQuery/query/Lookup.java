@@ -4,7 +4,8 @@
  */
 package org.gistic.taghreed.diskBaseQuery.query;
 
-import org.gistic.taghreed.diskBaseIndexer.Week;
+import org.gistic.taghreed.collections.Week;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.joda.time.DateTime;
 import org.joda.time.Months;
 

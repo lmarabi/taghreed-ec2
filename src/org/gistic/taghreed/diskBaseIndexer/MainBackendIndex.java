@@ -29,18 +29,6 @@ public class MainBackendIndex {
     private BuildIndex indexer;
     private BuildPyramidIndex pyramidIndexer;
 
-//    public MainBackendIndex(String hadoopDir, String hashtagsDir, 
-//            String tweetsDir, String rtreeIndexDir, String invertedIndexDir, 
-//            String tweetsFile, String hashtagsFile) {
-//        this.hadoopDir = hadoopDir;
-//        this.hashtagsDir = hashtagsDir;
-//        this.tweetsDir = tweetsDir;
-//        this.rtreeIndexDir = rtreeIndexDir;
-//        this.tweetsFile = tweetsFile;
-//        this.hashtagsFile = hashtagsFile;
-//        this.invertedIndexDir = invertedIndexDir;
-//    }
-
     public MainBackendIndex(String tweetsFile, String hashtagsFile) throws IOException {
     	this.config = new Commons();
         this.tweetsFile = tweetsFile;
@@ -126,6 +114,7 @@ public class MainBackendIndex {
         MainBackendIndex index = new MainBackendIndex(sortedtweetsFile.get(0), sortedhashtagFile.get(0));
         index.run(args);
         out.close();
+        
         
     }
 
