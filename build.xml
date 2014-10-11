@@ -48,17 +48,37 @@
 		</javadoc>
 	</target>
 
-	<!--Creates the deployable jar file  -->
+	<!-- Creates the deployable jar file -->
 	<target name="jar" depends="compile">
 		<jar destfile="${dist.dir}\taghreed.jar" basedir="${build.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
 			</manifest>
+ 			<zipfileset excludes="META-INF/**/*" dir="${lib.dir}" includes="*.jar">
+			</zipfileset>
 		</jar>
 	</target>
 
 	<target name="main" depends="compile, jar">
 		<description>Main target</description>
 	</target>
+
+
+<!--
+<target name="jar" depends="compile" description="Create one big jarfile.">
+    <jar jarfile="${dist.dir}/deps.jar">
+        <zipgroupfileset dir="jars">
+            <include name="**/*.jar" />
+        </zipgroupfileset>
+    </jar>
+    <sleep seconds="1" />
+    <jar jarfile="${dist.dir}/myjar.jar" basedir="${classes.dir}">
+        <zipfileset src="${dist.dir}/deps.jar" excludes="META-INF/*.SF" />
+        <manifest>
+            <attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
+        </manifest>
+    </jar>
+</target>
+-->
 
 </project>

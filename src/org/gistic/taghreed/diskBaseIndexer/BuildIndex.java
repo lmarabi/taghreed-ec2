@@ -400,6 +400,7 @@ public class BuildIndex {
 
 	private void UpdatelookupTable(String type, Level level, String directory)
 			throws IOException {
+/*
 		System.out.println("Update lookupTable Type:" + type + " level:"
 				+ level.toString());
 		File lookupTweet = new File(directory + "/" + type + "/"
@@ -423,7 +424,7 @@ public class BuildIndex {
 			}
 		}
 		writer.close();
-
+*/
 	}
 
 	public void createInvertedTweetIndex() throws IOException {
