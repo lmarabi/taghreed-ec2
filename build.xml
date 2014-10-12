@@ -7,6 +7,8 @@
 	<property name="dist.dir" location="dist" />
 	<property name="docs.dir" location="docs" />
 	<property name="lib.dir" location="lib" />
+	<property name="class.dir" location="build/classes" />
+	<property name="version" value="2" />
 	
 	<!--
 	    Create a classpath container which can be later used in the ant task
@@ -22,6 +24,7 @@
 		<delete dir="${build.dir}" />
 		<delete dir="${docs.dir}" />
 		<delete dir="${dist.dir}" />
+		<delete dir="${build1}" />
 	</target>
 
 	<!-- Creates the  build, docs and dist directory-->
@@ -29,6 +32,7 @@
 		<mkdir dir="${build.dir}" />
 		<mkdir dir="${docs.dir}" />
 		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${build1}" />
 	</target>
 
 	<!-- Compiles the java code (including the usage of library for JUnit -->
@@ -47,38 +51,26 @@
 			</fileset>
 		</javadoc>
 	</target>
-
-	<!-- Creates the deployable jar file -->
-	<target name="jar" depends="compile">
-		<jar destfile="${dist.dir}\taghreed.jar" basedir="${build.dir}">
-			<manifest>
-				<attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
-			</manifest>
- 			<zipfileset excludes="META-INF/**/*" dir="${lib.dir}" includes="*.jar">
-			</zipfileset>
-		</jar>
+	
+	<!--Creates the deployable jar file -->
+	<target name="jar" depends="compile" description="Create one big jarfile.">
+    	<jar jarfile="${dist.dir}/taghreed-${version}.jar">
+       	 <zipgroupfileset dir="${lib.dir}">
+       	     <include name="**/*.jar" />
+       	 </zipgroupfileset>
+   	 </jar>
+   	 <sleep seconds="1" />
+   	 <jar jarfile="${dist.dir}/taghreed-${version}-withlib.jar" basedir="${class.dir}">
+       		 <zipfileset src="${dist.dir}/taghreed-${version}.jar" excludes="META-INF/*.SF" />
+       		 <manifest>
+            		<attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
+        	</manifest>
+   	 </jar>
 	</target>
+
 
 	<target name="main" depends="compile, jar">
-		<description>Main target</description>
-	</target>
-
-
-<!--
-<target name="jar" depends="compile" description="Create one big jarfile.">
-    <jar jarfile="${dist.dir}/deps.jar">
-        <zipgroupfileset dir="jars">
-            <include name="**/*.jar" />
-        </zipgroupfileset>
-    </jar>
-    <sleep seconds="1" />
-    <jar jarfile="${dist.dir}/myjar.jar" basedir="${classes.dir}">
-        <zipfileset src="${dist.dir}/deps.jar" excludes="META-INF/*.SF" />
-        <manifest>
-            <attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
-        </manifest>
-    </jar>
-</target>
--->
+                <description>Main target</description>
+        </target>
 
 </project>

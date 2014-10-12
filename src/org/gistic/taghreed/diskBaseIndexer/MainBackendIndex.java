@@ -44,14 +44,14 @@ public class MainBackendIndex {
             System.out.println("Build the Day rtree index of tweets");
             indexer.CreateRtreeTweetIndex();
             System.out.println("Build the Day rtree index of hashtags");
-//            indexer.CreateRtreeHashtagIndex();
+ //           indexer.CreateRtreeHashtagIndex();
             System.out.println("Build the Day inverted index of tweets");
             indexer.createInvertedTweetIndex();
             System.out.println("Build the Day inverted index of hashtags");
 //            indexer.createInvertedHashtagIndex();
             //update lookupTable 
             System.out.println("Update the lookup table");
-            indexer.UpdatelookupTable(BuildIndex.Level.Day);
+//            indexer.UpdatelookupTable(BuildIndex.Level.Day);
             pyramidIndexer.CreateIndex();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainBackendIndex.class.getName()).log(Level.SEVERE, null, ex);
