@@ -7,7 +7,6 @@
 	<property name="dist.dir" location="dist" />
 	<property name="docs.dir" location="docs" />
 	<property name="lib.dir" location="lib" />
-	<property name="class.dir" location="build/classes" />
 	<property name="version" value="2" />
 	
 	<!--
@@ -24,7 +23,6 @@
 		<delete dir="${build.dir}" />
 		<delete dir="${docs.dir}" />
 		<delete dir="${dist.dir}" />
-		<delete dir="${build1}" />
 	</target>
 
 	<!-- Creates the  build, docs and dist directory-->
@@ -32,7 +30,6 @@
 		<mkdir dir="${build.dir}" />
 		<mkdir dir="${docs.dir}" />
 		<mkdir dir="${dist.dir}" />
-		<mkdir dir="${build1}" />
 	</target>
 
 	<!-- Compiles the java code (including the usage of library for JUnit -->
@@ -60,7 +57,7 @@
        	 </zipgroupfileset>
    	 </jar>
    	 <sleep seconds="1" />
-   	 <jar jarfile="${dist.dir}/taghreed-${version}-withlib.jar" basedir="${class.dir}">
+   	 <jar jarfile="${dist.dir}/taghreed-${version}-withlib.jar" basedir="${build.dir}" >
        		 <zipfileset src="${dist.dir}/taghreed-${version}.jar" excludes="META-INF/*.SF" />
        		 <manifest>
             		<attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
