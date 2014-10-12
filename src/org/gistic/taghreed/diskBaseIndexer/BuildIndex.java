@@ -53,42 +53,42 @@ public class BuildIndex {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void AddSelectivityToMasterFile(String rtreeFolder)
-			throws FileNotFoundException, IOException {
-		// Read the master file outputed from spatial hadoop
-		String path = rtreeFolder;
-		BufferedReader reader = new BufferedReader(new FileReader(new File(path
-				+ "/_master.str+")));
-		List<String> metaData = new ArrayList<String>();
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			String[] temp = line.split(",");
-			File f = new File(path + "/" + temp[7]);
-			BufferedReader partitionReader = new BufferedReader(new FileReader(
-					f));
-			String tweets = null;
-			int count = 0;
-			while ((tweets = partitionReader.readLine()) != null) {
-				count++;
-			}
-			partitionReader.close();
-			metaData.add(line + "," + count + "\n");
-		}
-		reader.close();
-		// rewrite the master file with the number of data in each partition
-		File f = new File(path + "/_master.str+");
-		f.delete();
-		f.createNewFile();
-		FileWriter fileWriter = new FileWriter(f);
-		Iterator it = metaData.iterator();
-		while (it.hasNext()) {
-			fileWriter.write(it.next().toString());
-		}
-		fileWriter.close();
+//	public void AddSelectivityToMasterFile(String rtreeFolder)
+//			throws FileNotFoundException, IOException {
+//		// Read the master file outputed from spatial hadoop
+//		String path = rtreeFolder;
+//		BufferedReader reader = new BufferedReader(new FileReader(new File(path
+//				+ "/_master.str+")));
+//		List<String> metaData = new ArrayList<String>();
+//		String line = null;
+//		while ((line = reader.readLine()) != null) {
+//			String[] temp = line.split(",");
+//			File f = new File(path + "/" + temp[7]);
+//			BufferedReader partitionReader = new BufferedReader(new FileReader(
+//					f));
+//			String tweets = null;
+//			int count = 0;
+//			while ((tweets = partitionReader.readLine()) != null) {
+//				count++;
+//			}
+//			partitionReader.close();
+//			metaData.add(line + "," + count + "\n");
+//		}
+//		reader.close();
+//		// rewrite the master file with the number of data in each partition
+//		File f = new File(path + "/_master.str+");
+//		f.delete();
+//		f.createNewFile();
+//		FileWriter fileWriter = new FileWriter(f);
+//		Iterator it = metaData.iterator();
+//		while (it.hasNext()) {
+//			fileWriter.write(it.next().toString());
+//		}
+//		fileWriter.close();
+//
+//	}
+	
 
-	}
-	
-	
 	/**
 	 * This method get the Threshold of MBR in R+tree index
 	 * 
