@@ -51,8 +51,8 @@ public class MainBackendIndex {
 //            indexer.createInvertedHashtagIndex();
             //update lookupTable 
             System.out.println("Update the lookup table");
-//            indexer.UpdatelookupTable(BuildIndex.Level.Day);
             pyramidIndexer.CreateIndex();
+            indexer.UpdatelookupTable(BuildIndex.Level.Day);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainBackendIndex.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
