@@ -65,6 +65,7 @@ public class MainBackendIndex {
     }
     
     public static void main(String[] args) throws IOException, InterruptedException{
+    	System.out.println("new version 2");
     	System.out.println(System.getProperty("user.dir"));
         File logger = new File(System.getProperty("user.dir")+"/summary.txt");
         OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(logger));
