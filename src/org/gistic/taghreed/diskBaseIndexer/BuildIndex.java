@@ -511,7 +511,7 @@ public class BuildIndex {
 		// BuildIndex index = new BuildIndex(config.getHadoopDir(), tweetFile,
 		// hashtagFile, config.getQueryRtreeIndex(), invertedindex);
 		// index.UpdatelookupTable(BuildIndex.Level.Day);
-		BuildIndex in = new BuildIndex();
-		in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/");
+//		BuildIndex in = new BuildIndex();
+//		in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/");
 	}
 }
