@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.invertedIndex.KWIndexBuilder;
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
@@ -43,6 +44,14 @@ public class BuildIndex {
 
 	public BuildIndex() throws IOException {
 		this.config = new Commons();
+	}
+	
+	public void setHashtagFile(String hashtagFile) {
+		this.hashtagFile = hashtagFile;
+	}
+	
+	public void setTweetFile(String tweetFile) {
+		this.tweetFile = tweetFile;
 	}
 
 
@@ -131,7 +140,7 @@ public class BuildIndex {
 			tweetFolder.mkdirs();
 		}
 		if (new File(config.getQueryRtreeIndex() + "tweets/Day/index."
-				+ file.getName()).exists()) {
+				+ file.getName().replace(".bz2", "")).exists()) {
 			return;
 		}
 		// copy to hdfs
@@ -155,7 +164,7 @@ public class BuildIndex {
 				+ " "
 				+ config.getHadoopHDFSPath()
 				+ "index."
-				+ file.getName()
+				+ file.getName().replace(".bz2", "")
 				+ " -overwrite  sindex:str+ shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
 				+ " blocksize:12.mb -no-local";
@@ -163,8 +172,8 @@ public class BuildIndex {
 		commandExecuter(command);
 		// Copy to local
 		command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "
-				+ config.getHadoopHDFSPath() + "index." + file.getName() + " "
-				+ config.getQueryRtreeIndex() + "tweets/Day/"+ "index." + file.getName() + "/";
+				+ config.getHadoopHDFSPath() + "index." + file.getName().replace(".bz2", "") + " "
+				+ config.getQueryRtreeIndex() + "tweets/Day/"+ "index." + file.getName().replace(".bz2", "") + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -173,7 +182,7 @@ public class BuildIndex {
 
 		commandExecuter(command);
 		command = config.getHadoopDir() + "/bin/hadoop fs -rmr "
-				+ config.getHadoopHDFSPath() + "index." + file.getName();
+				+ config.getHadoopHDFSPath() + "index." + file.getName().replace(".bz2", "");
 
 		commandExecuter(command);
 		
@@ -219,7 +228,7 @@ public class BuildIndex {
 				+ " "
 				+ config.getHadoopHDFSPath()
 				+ "index."
-				+ file.getName()
+				+ file.getName().replace(".bz2", "")
 				+ " -overwrite  sindex:str+ "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags "
 				+ "blocksize:12.mb -no-local";
@@ -228,7 +237,7 @@ public class BuildIndex {
 		// Copy to local
 		command = config.getHadoopDir() + "/bin/hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + file.getName() + " "
-				+ config.getQueryRtreeIndex() + "hashtags/Day/"+ "index." + file.getName() + "/";
+				+ config.getQueryRtreeIndex() + "hashtags/Day/"+ "index." + file.getName().replace(".bz2", "") + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -237,7 +246,7 @@ public class BuildIndex {
 
 		commandExecuter(command);
 		command = config.getHadoopDir() + "/bin/hadoop fs -rmr "
-				+ config.getHadoopHDFSPath() + "index." + file.getName();
+				+ config.getHadoopHDFSPath() + "index." + file.getName().replace(".bz2", "");
 
 		commandExecuter(command);
 
@@ -400,7 +409,7 @@ public class BuildIndex {
 
 	private void UpdatelookupTable(String type, Level level, String directory)
 			throws IOException {
-/*
+
 		System.out.println("Update lookupTable Type:" + type + " level:"
 				+ level.toString());
 		File lookupTweet = new File(directory + "/" + type + "/"
@@ -409,6 +418,11 @@ public class BuildIndex {
 		if (lookupTweet.exists()) {
 			lookupTweet.delete();
 		}
+		File dir = new File(lookupTweet.getParent());
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+		lookupTweet.createNewFile();
 		OutputStreamWriter writer = new FileWriter(lookupTweet, true);
 		File lookupDir = new File(directory + "/" + type + "/"
 				+ level.toString() + "/");
@@ -424,10 +438,10 @@ public class BuildIndex {
 			}
 		}
 		writer.close();
-*/
+
 	}
 
-	public void createInvertedTweetIndex() throws IOException {
+	public void createInvertedTweetIndex() throws IOException, CompressorException {
 		List<File> file = new ArrayList<File>();
 		File tweetFolder = new File(config.getQueryInvertedIndex()
 				+ "/tweets/Day/");
@@ -454,7 +468,7 @@ public class BuildIndex {
 						+ tweetsFile.getName()));
 	}
 
-	public void createInvertedHashtagIndex() {
+	public void createInvertedHashtagIndex() throws CompressorException{
 		List<File> file = new ArrayList<File>();
 		File tweetFolder = new File(config.getQueryInvertedIndex()
 				+ "/hashtags/Day/");

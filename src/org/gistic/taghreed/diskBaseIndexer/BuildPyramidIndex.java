@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.invertedIndex.KWIndexBuilder;
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
@@ -47,8 +48,9 @@ public class BuildPyramidIndex {
 
     /**
      * Create the week pyramid indexMonth for both tweets and hashtags
+     * @throws CompressorException 
      */
-    public void CreateIndex() throws IOException, InterruptedException, ParseException {
+    public void CreateIndex() throws IOException, InterruptedException, ParseException, CompressorException {
         //Create the rtree index using hadoop
         CreateRtreeTweetWeekIndex();
 //        CreateRtreeHashtagWeekIndex();
@@ -72,8 +74,9 @@ public class BuildPyramidIndex {
      * @throws ParseException
      * @throws IOException
      * @throws InterruptedException 
+     * @throws CompressorException 
      */
-    private void CreateInvertedTweetWeekIndex() throws ParseException, IOException, InterruptedException{
+    private void CreateInvertedTweetWeekIndex() throws ParseException, IOException, InterruptedException, CompressorException{
         System.out.println("Create Tweets Week Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -119,7 +122,7 @@ public class BuildPyramidIndex {
         }
     }
     
-    private void CreateInvertedHashtagWeekIndex() throws ParseException, IOException, InterruptedException{
+    private void CreateInvertedHashtagWeekIndex() throws ParseException, IOException, InterruptedException, CompressorException{
         System.out.println("Create Tweets Week Index ");
         List<File> outputFiles = ListFiles(config.getHashtagFlushDir());
         Collections.sort(outputFiles);
@@ -166,8 +169,9 @@ public class BuildPyramidIndex {
      * @throws IOException
      * @throws InterruptedException
      * @throws ParseException 
+     * @throws CompressorException 
      */
-    private void createInvertedTweetMonths() throws IOException, InterruptedException, ParseException {
+    private void createInvertedTweetMonths() throws IOException, InterruptedException, ParseException, CompressorException {
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -224,8 +228,9 @@ public class BuildPyramidIndex {
      * @throws IOException
      * @throws InterruptedException
      * @throws ParseException 
+     * @throws CompressorException 
      */
-    private void createInvertedHashtagMonths() throws IOException, InterruptedException, ParseException {
+    private void createInvertedHashtagMonths() throws IOException, InterruptedException, ParseException, CompressorException {
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getHashtagFlushDir());
         Collections.sort(outputFiles);
@@ -288,15 +293,15 @@ public class BuildPyramidIndex {
                 temp.addNewFile(f);
                 firstF = false;
             } else {
-                if (temp.isTheSameWeek(f.getName())) {
+                if (temp.isTheSameWeek(f.getName().replace(".bz2", ""))) {
                     temp.addNewFile(f);
                 } else {
                     //if not in the same week of the year then index the founded
                     //week and then create a new list.
                     if (temp.getFiles().size() >= 5) {
                         System.out.println("*******\nFound week\n**********");
-                        String hadoopOutputFolder = temp.getFirstDayOfWeek()
-                                + "&" + temp.getLastDayofWeek();
+                        String hadoopOutputFolder = temp.getFirstDayOfWeek().replace(".bz2", "")
+                                + "&" + temp.getLastDayofWeek().replace(".bz2", "");
                         System.out.println(hadoopOutputFolder);
                         File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Week/index." + hadoopOutputFolder);
                         if (!indexFolder.exists()) {
@@ -335,15 +340,15 @@ public class BuildPyramidIndex {
                 temp.addNewFile(f);
                 firstF = false;
             } else {
-                if (temp.isTheSameWeek(f.getName())) {
+                if (temp.isTheSameWeek(f.getName().replace(".bz2", ""))) {
                     temp.addNewFile(f);
                 } else {
                     //if not in the same week of the year then index the founded
                     //week and then create a new list.
                     if (temp.getFiles().size() >= 5) {
                         System.out.println("*******\nFound week\n**********");
-                        String hadoopOutputFolder = temp.getFirstDayOfWeek()
-                                + "&" + temp.getLastDayofWeek();
+                        String hadoopOutputFolder = temp.getFirstDayOfWeek().replace(".bz2", "")
+                                + "&" + temp.getLastDayofWeek().replace(".bz2", "");
                         File indexFolder = new File(config.getQueryRtreeIndex() + "hashtags/Week/index." + hadoopOutputFolder);
                         if (!indexFolder.exists()) {
                             //Create folder in hdfs with hadoopoutputFolder
@@ -481,7 +486,7 @@ public class BuildPyramidIndex {
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException, ParseException {
+    public static void main(String[] args) throws IOException, InterruptedException, ParseException, CompressorException {
         BuildPyramidIndex x = new BuildPyramidIndex();
         x.createInvertedTweetMonths();
 //        x.indexer.UpdatelookupTable("Day");
