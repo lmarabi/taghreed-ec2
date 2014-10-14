@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.taghreed.Commons;
 
 /**
@@ -36,9 +38,18 @@ public class MainBackendIndex {
         this.indexer = new BuildIndex(tweetsFile, hashtagsFile);
         this.pyramidIndexer = new BuildPyramidIndex();
     }
+    
+    public MainBackendIndex() throws IOException {
+    	this.config = new Commons();
+    	this.pyramidIndexer = new BuildPyramidIndex();
+	}
+    
+    public void setTweetsFile(String tweetsFile) {
+		this.tweetsFile = tweetsFile;
+	}
 
 
-    public void run(String args[]) throws FileNotFoundException, IOException {
+    public void run(String args[]) throws FileNotFoundException, IOException, CompressorException {
         try {
             //Create Index in spatial hadoop
             System.out.println("Build the Day rtree index of tweets");
@@ -53,6 +64,8 @@ public class MainBackendIndex {
             System.out.println("Update the lookup table");
             pyramidIndexer.CreateIndex();
             indexer.UpdatelookupTable(BuildIndex.Level.Day);
+            indexer.UpdatelookupTable(BuildIndex.Level.Week);
+            indexer.UpdatelookupTable(BuildIndex.Level.Month);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainBackendIndex.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
@@ -64,7 +77,7 @@ public class MainBackendIndex {
         }
     }
     
-    public static void main(String[] args) throws IOException, InterruptedException{
+    public static void main(String[] args) throws IOException, InterruptedException, CompressorException{
     	System.out.println("new version 2");
     	System.out.println(System.getProperty("user.dir"));
         File logger = new File(System.getProperty("user.dir")+"/summary.txt");
@@ -79,28 +92,27 @@ public class MainBackendIndex {
             }
         }
         Collections.sort(sortedtweetsFile);
-        File hashtafolder = new File(config.getHashtagFlushDir());
-        List<String> sortedhashtagFile = new ArrayList<String>();
-        for(String file : hashtafolder.list()){
-            if(!file.equals(".DS_Store")){
-                sortedhashtagFile.add(config.getHashtagFlushDir()+file);
-            }
-        }
-        Collections.sort(sortedhashtagFile);
-        if(sortedhashtagFile.size() != sortedtweetsFile.size()){
-            System.out.println("Erorr hastags and tweet file doesn't match");
-//            return;
-        }
-        BuildIndex indexer = new BuildIndex(sortedtweetsFile.get(0), sortedhashtagFile.get(0));
-//        indexer.UpdatelookupTable(BuildIndex.Level.Day);
-//        indexer.UpdatelookupTable(BuildIndex.Level.Week);
-//        indexer.UpdatelookupTable(BuildIndex.Level.Month);
-        indexer.CreateRtreeTweetIndex();
+//        File hashtafolder = new File(config.getHashtagFlushDir());
+//        List<String> sortedhashtagFile = new ArrayList<String>();
+//        for(String file : hashtafolder.list()){
+//            if(!file.equals(".DS_Store")){
+//                sortedhashtagFile.add(config.getHashtagFlushDir()+file);
+//            }
+//        }
+//        Collections.sort(sortedhashtagFile);
+//        if(sortedhashtagFile.size() != sortedtweetsFile.size()){
+//            System.out.println("Erorr hastags and tweet file doesn't match");
+////            return;
+//        }
+        BuildIndex indexer = new BuildIndex();
+//        indexer.CreateRtreeTweetIndex();
 //        indexer.CreateRtreeHashtagIndex();
 //        indexer.createInvertedHashtagIndex();
-        indexer.createInvertedTweetIndex();
-        for(int i=1; i< sortedhashtagFile.size();i++){
-            BuildIndex index = new BuildIndex(sortedtweetsFile.get(i), sortedhashtagFile.get(i));
+//        indexer.createInvertedTweetIndex();
+        System.out.println(sortedtweetsFile.size());
+        for(int i=1; i< sortedtweetsFile.size();i++){
+            BuildIndex index = new BuildIndex();
+            index.setTweetFile(sortedtweetsFile.get(i));
             try {
                 index.CreateRtreeTweetIndex();
 //                index.CreateRtreeHashtagIndex();
@@ -111,8 +123,9 @@ public class MainBackendIndex {
                 out.write("Error in Building "+sortedtweetsFile.get(i));
             }
         }
-        
-        MainBackendIndex index = new MainBackendIndex(sortedtweetsFile.get(0), sortedhashtagFile.get(0));
+        indexer.UpdatelookupTable(BuildIndex.Level.Day);
+        MainBackendIndex index = new MainBackendIndex();
+        index.setTweetsFile(sortedtweetsFile.get(0));
         index.run(args);
         out.close();
         
