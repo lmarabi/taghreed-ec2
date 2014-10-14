@@ -38,6 +38,15 @@ public class MainBackendIndex {
         this.indexer = new BuildIndex(tweetsFile, hashtagsFile);
         this.pyramidIndexer = new BuildPyramidIndex();
     }
+    
+    public MainBackendIndex() throws IOException {
+    	this.config = new Commons();
+    	this.pyramidIndexer = new BuildPyramidIndex();
+	}
+    
+    public void setTweetsFile(String tweetsFile) {
+		this.tweetsFile = tweetsFile;
+	}
 
 
     public void run(String args[]) throws FileNotFoundException, IOException, CompressorException {
@@ -83,19 +92,19 @@ public class MainBackendIndex {
             }
         }
         Collections.sort(sortedtweetsFile);
-        File hashtafolder = new File(config.getHashtagFlushDir());
-        List<String> sortedhashtagFile = new ArrayList<String>();
-        for(String file : hashtafolder.list()){
-            if(!file.equals(".DS_Store")){
-                sortedhashtagFile.add(config.getHashtagFlushDir()+file);
-            }
-        }
-        Collections.sort(sortedhashtagFile);
-        if(sortedhashtagFile.size() != sortedtweetsFile.size()){
-            System.out.println("Erorr hastags and tweet file doesn't match");
-//            return;
-        }
-        BuildIndex indexer = new BuildIndex(sortedtweetsFile.get(0), sortedhashtagFile.get(0));
+//        File hashtafolder = new File(config.getHashtagFlushDir());
+//        List<String> sortedhashtagFile = new ArrayList<String>();
+//        for(String file : hashtafolder.list()){
+//            if(!file.equals(".DS_Store")){
+//                sortedhashtagFile.add(config.getHashtagFlushDir()+file);
+//            }
+//        }
+//        Collections.sort(sortedhashtagFile);
+//        if(sortedhashtagFile.size() != sortedtweetsFile.size()){
+//            System.out.println("Erorr hastags and tweet file doesn't match");
+////            return;
+//        }
+        BuildIndex indexer = new BuildIndex();
 //        indexer.CreateRtreeTweetIndex();
 //        indexer.CreateRtreeHashtagIndex();
 //        indexer.createInvertedHashtagIndex();
@@ -115,7 +124,8 @@ public class MainBackendIndex {
             }
         }
         indexer.UpdatelookupTable(BuildIndex.Level.Day);
-        MainBackendIndex index = new MainBackendIndex(sortedtweetsFile.get(0), sortedhashtagFile.get(0));
+        MainBackendIndex index = new MainBackendIndex();
+        index.setTweetsFile(sortedtweetsFile.get(0));
         index.run(args);
         out.close();
         
