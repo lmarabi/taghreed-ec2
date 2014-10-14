@@ -69,7 +69,7 @@ public class MainBackendIndex {
     	System.out.println(System.getProperty("user.dir"));
         File logger = new File(System.getProperty("user.dir")+"/summary.txt");
         OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(logger));
-        Commons config = new Commons();
+        Commons config = new Commons();	
         File tweetsFile = new File(config.getTweetFlushDir());
         List<String> sortedtweetsFile;
         sortedtweetsFile = new ArrayList<String>();
