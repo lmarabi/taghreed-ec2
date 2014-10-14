@@ -463,7 +463,7 @@ public class BuildIndex {
 		MetaData md = new MetaData();
 		// create the meta data for the index
 		md.buildMetaData(config.getQueryInvertedIndex() + "/tweets/Day/index."
-				+ tweetsFile.getName(), config.getQueryInvertedIndex(),
+				+ tweetsFile.getName().replaceAll(".bz2", ""), config.getQueryInvertedIndex(),
 				tweetsFile.getName().replaceAll(".bz2", ""),
 				getThreshold(config.getQueryRtreeIndex()+ "/tweets/Day/index."
 						+ tweetsFile.getName().replaceAll(".bz2", "")));
