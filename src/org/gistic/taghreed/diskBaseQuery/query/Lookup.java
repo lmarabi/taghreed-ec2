@@ -72,18 +72,18 @@ public class Lookup {
         reader.close();
 
         // Read The lookupTable for hashtags
-        reader = new BufferedReader(new FileReader(hashtagLookup));
-        line = null;
-        while ((line = reader.readLine()) != null) {
-            dayDatesHashtag.add(dateFormat.parse(line));
-            dayPathsHashtag.add(path + "/hashtags/Day/index."+line);
-        }
-        reader.close();
+//        reader = new BufferedReader(new FileReader(hashtagLookup));
+//        line = null;
+//        while ((line = reader.readLine()) != null) {
+//            dayDatesHashtag.add(dateFormat.parse(line));
+//            dayPathsHashtag.add(path + "/hashtags/Day/index."+line);
+//        }
+//        reader.close();
 
 
         //************************ Week lookup tables
         tweetsLookup = path + "/tweets/Week/lookupTable.txt";
-        hashtagLookup = path + "/hashtags/Week/lookupTable.txt";
+//        hashtagLookup = path + "/hashtags/Week/lookupTable.txt";
         System.out.println("Load lookup tables into memory");
         reader = new BufferedReader(new FileReader(tweetsLookup));
         line = null;
@@ -98,20 +98,20 @@ public class Lookup {
         reader.close();
 
         // Read The lookupTable for hashtags
-        reader = new BufferedReader(new FileReader(hashtagLookup));
-        line = null;
-        while ((line = reader.readLine()) != null) {
-            String[] temp = line.split(",");
-            String[] range = temp[0].split("&");
-            weekDatesHashtag.add(new Week(dateFormat.parse(range[0]),
-                    dateFormat.parse(range[1])));
-            weekPathsHashtag.add(path + "/hashtags/Week/index."+line);
-        }
-        reader.close();
+//        reader = new BufferedReader(new FileReader(hashtagLookup));
+//        line = null;
+//        while ((line = reader.readLine()) != null) {
+//            String[] temp = line.split(",");
+//            String[] range = temp[0].split("&");
+//            weekDatesHashtag.add(new Week(dateFormat.parse(range[0]),
+//                    dateFormat.parse(range[1])));
+//            weekPathsHashtag.add(path + "/hashtags/Week/index."+line);
+//        }
+//        reader.close();
 
         //********** Load lookup for Months 
         tweetsLookup = path + "/tweets/Month/lookupTable.txt";
-        hashtagLookup = path + "/hashtags/Month/lookupTable.txt";
+//        hashtagLookup = path + "/hashtags/Month/lookupTable.txt";
         System.out.println("Load lookup tables into memory");
         reader = new BufferedReader(new FileReader(tweetsLookup));
         line = null;
@@ -123,13 +123,13 @@ public class Lookup {
         reader.close();
 
         // Read The lookupTable for hashtags
-        reader = new BufferedReader(new FileReader(hashtagLookup));
-        line = null;
-        while ((line = reader.readLine()) != null) {
-            monthDatesHashtag.add(line);
-            monthPathsHashtag.add(path + "/hashtags/Month/index."+line);
-        }
-        reader.close();
+//        reader = new BufferedReader(new FileReader(hashtagLookup));
+//        line = null;
+//        while ((line = reader.readLine()) != null) {
+//            monthDatesHashtag.add(line);
+//            monthPathsHashtag.add(path + "/hashtags/Month/index."+line);
+//        }
+//        reader.close();
     }
 
     /**

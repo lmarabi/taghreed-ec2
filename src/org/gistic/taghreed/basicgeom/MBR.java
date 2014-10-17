@@ -75,5 +75,12 @@ public class MBR {
             return false;
         }
     }
+    
+    @Override
+    public String toString() {
+    	// TODO Auto-generated method stub
+    	return "max lon "+ this.max.getLon()+ "max lat " + this.max.getLat()+
+    			"min lon"+ this.min.getLon()+ "min lat" + this.min.getLat();
+    }
 
 }
