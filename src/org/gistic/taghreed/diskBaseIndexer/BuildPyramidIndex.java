@@ -110,7 +110,7 @@ public class BuildPyramidIndex {
                     		// create the meta data for the index
                     		md.buildMetaData(weekdir,
                     				config.getQueryInvertedIndex(), hadoopOutputFolder,
-                    				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Week/index."+ hadoopOutputFolder));
+                    				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Week/index."+ hadoopOutputFolder.replaceAll(".bz2", "")));
                         }
                     }
 
@@ -215,7 +215,7 @@ public class BuildPyramidIndex {
         		// create the meta data for the index
         		md.buildMetaData(Monthdir,
         				config.getQueryInvertedIndex(), folderName,
-        				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Month/index."+ folderName));
+        				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Month/index."+ folderName.replaceAll(".bz2", "")));
             } else {
                 System.out.println("Index exist " + folderName);
             }
