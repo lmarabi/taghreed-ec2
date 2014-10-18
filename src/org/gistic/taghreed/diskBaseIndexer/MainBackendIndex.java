@@ -112,13 +112,13 @@ public class MainBackendIndex {
 //        indexer.createInvertedTweetIndex();
         System.out.println(sortedtweetsFile.size());
         for(int i=1; i< sortedtweetsFile.size();i++){
-            BuildIndex index = new BuildIndex();
-            index.setTweetFile(sortedtweetsFile.get(i));
+            indexer = new BuildIndex();
+            indexer.setTweetFile(sortedtweetsFile.get(i));
             try {
-                index.CreateRtreeTweetIndex();
+                indexer.CreateRtreeTweetIndex();
 //                index.CreateRtreeHashtagIndex();
 //                index.createInvertedHashtagIndex();
-                index.createInvertedTweetIndex();
+                indexer.createInvertedTweetIndex();
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainBackendIndex.class.getName()).log(Level.SEVERE, null, ex);
                 out.write("Error in Building "+sortedtweetsFile.get(i));
