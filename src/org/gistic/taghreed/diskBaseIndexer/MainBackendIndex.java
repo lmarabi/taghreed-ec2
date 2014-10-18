@@ -44,8 +44,10 @@ public class MainBackendIndex {
     	this.pyramidIndexer = new BuildPyramidIndex();
 	}
     
-    public void setTweetsFile(String tweetsFile) {
+    public void setTweetsFile(String tweetsFile) throws IOException {
 		this.tweetsFile = tweetsFile;
+		this.indexer = new BuildIndex();
+		this.indexer.setTweetFile(this.tweetsFile);
 	}
 
 
