@@ -96,8 +96,8 @@ public class BuildPyramidIndex {
                     //week and then create a new list.
                     if (temp.getFiles().size() >= 5) {
                         System.out.println("*******\nFound week\n**********");
-                        String hadoopOutputFolder = temp.getFirstDayOfWeek()
-                                + "&" + temp.getLastDayofWeek();
+                        String hadoopOutputFolder = temp.getFirstDayOfWeek().replace(".bz2", "")
+                                + "&" + temp.getLastDayofWeek().replace(".bz2", "");
                         System.out.println(hadoopOutputFolder);
                         String weekdir = config.getQueryInvertedIndex() + "tweets/Week/index." + hadoopOutputFolder;
                         File indexFolder = new File(weekdir);
@@ -110,7 +110,7 @@ public class BuildPyramidIndex {
                     		// create the meta data for the index
                     		md.buildMetaData(weekdir,
                     				config.getQueryInvertedIndex(), hadoopOutputFolder,
-                    				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Week/index."+ hadoopOutputFolder.replaceAll(".bz2", "")));
+                    				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Week/index."+ hadoopOutputFolder.replace(".bz2", "")));
                         }
                     }
 
