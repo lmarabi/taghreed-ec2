@@ -52,7 +52,7 @@ public class MainBackendIndex {
     public void run(String args[]) throws FileNotFoundException, IOException, CompressorException {
         try {
             //Create Index in spatial hadoop
-            System.out.println("Build the Day rtree index of tweets");
+            System.out.println("Build the Day rtree index of tweets*");
             indexer.CreateRtreeTweetIndex();
             System.out.println("Build the Day rtree index of hashtags");
  //           indexer.CreateRtreeHashtagIndex();

@@ -315,7 +315,7 @@ public class DayQueryProcessor {
             // between hadoop and this program 
             // #filenumber,minLat,minLon,maxLat,maxLon
             //0,minLon,MinLat,MaxLon,MaxLat,Filename
-            if (temp.length == 7) {
+            if (temp.length == 8) {
                 Partition part = new Partition(line,path);
                 if (serverRequest.getMbr().Intersect(
                         part.getArea().getMax(), part.getArea().getMain())) {
@@ -437,7 +437,7 @@ public class DayQueryProcessor {
         if (serverRequest.getType().equals(ServerRequest.queryType.tweet)) {
             documents = indexSearcher.search(indexPath,
                     KWIndexSearcher.dataType.tweets,
-                    serverRequest.getQuery(), 5000);
+                    serverRequest.getQuery(), Integer.MAX_VALUE);
             //SpatialFilter to the documents
             for (String doc : documents) {
                 Tweet tweet = new Tweet(doc);
