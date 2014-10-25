@@ -402,7 +402,7 @@ public class BuildIndex {
 	public void UpdatelookupTable(Level level) throws IOException {
 		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex());
 //		UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
-		UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
+//		UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
 //		UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
 
 	}

@@ -57,8 +57,8 @@ public class BuildPyramidIndex {
         createRtreeTweetMonths();
 //        createRtreeHashtagMonths();
         //Create the inverted index 
-        CreateInvertedTweetWeekIndex();
-        createInvertedTweetMonths();
+//        CreateInvertedTweetWeekIndex();
+//        createInvertedTweetMonths();
 //        CreateInvertedHashtagWeekIndex();
 //        createInvertedHashtagMonths();
         //update the lookup tables for all indeces

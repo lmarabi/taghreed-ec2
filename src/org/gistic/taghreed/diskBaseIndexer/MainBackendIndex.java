@@ -60,7 +60,7 @@ public class MainBackendIndex {
             System.out.println("Build the Day rtree index of hashtags");
  //           indexer.CreateRtreeHashtagIndex();
             System.out.println("Build the Day inverted index of tweets");
-            indexer.createInvertedTweetIndex();
+//            indexer.createInvertedTweetIndex();
             System.out.println("Build the Day inverted index of hashtags");
 //            indexer.createInvertedHashtagIndex();
             //update lookupTable 
@@ -120,7 +120,7 @@ public class MainBackendIndex {
                 indexer.CreateRtreeTweetIndex();
 //                index.CreateRtreeHashtagIndex();
 //                index.createInvertedHashtagIndex();
-                indexer.createInvertedTweetIndex();
+//                indexer.createInvertedTweetIndex();
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainBackendIndex.class.getName()).log(Level.SEVERE, null, ex);
                 out.write("Error in Building "+sortedtweetsFile.get(i));
