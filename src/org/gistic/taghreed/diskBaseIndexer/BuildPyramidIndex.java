@@ -404,7 +404,7 @@ public class BuildPyramidIndex {
         PyramidWeek tempObj = new PyramidWeek();
         boolean flag = false;
         for (File f : outputFiles) {
-            tempObj = new PyramidWeek(f.getName());
+            tempObj = new PyramidWeek(f.getName().replace(".bz2", ""));
             if (indexMonth.containsKey(tempObj.getMonth())) {
                 Integer key = tempObj.getMonth();
                 tempObj = indexMonth.get(key);
