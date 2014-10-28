@@ -124,13 +124,13 @@ public class HomeServer extends AbstractHandler {
                         + tweetsResult.size() + "\n");
                 List<ActiveUsers> activePeople = null;
                 startTime = System.currentTimeMillis();
-                activePeople = req.getActivePeopleFast(tweetsResult);
+                activePeople = req.getActiveUser();
                 endTime = System.currentTimeMillis();
                 reportWriter.write(queryParameters + "Query-ActivePeople,Time= " + (endTime - startTime) + " ms,Time (sec): " + ((endTime - startTime) / 1000) + " sec, Number of ActivePeople= " + activePeople.size());
 
                 startTime = System.currentTimeMillis();
                 List<PopularUsers> popularPeople = null;
-                popularPeople = req.getPopularPeopleFast(tweetsResult);
+                popularPeople = req.getPopularUsers();
                 endTime = System.currentTimeMillis();
                 reportWriter.write(queryParameters + "Query-popularPeople,Time= " + (endTime - startTime) + " ms,Time (sec): " + ((endTime - startTime) / 1000) + " sec, Number of popularPeople= " + popularPeople.size());
 
@@ -240,8 +240,7 @@ public class HomeServer extends AbstractHandler {
                 //writer.beginObject();
                 writer.name("day_volume");
                 writer.beginArray();
-                Collections.sort(req.dayVolumes);
-                for (TweetVolumes vol : req.dayVolumes) {
+                for (TweetVolumes vol : req.getDayVolumes()) {
                     writer.beginObject();
                     writer.name("day").value(vol.dayName);
                     writer.name("tweet_count").value(vol.volume);

@@ -17,4 +17,9 @@ public class PopularUsers implements Comparable<PopularUsers> {
     public int compareTo(PopularUsers o) {
         return o.followersCount - followersCount;
     }
+    
+    @Override
+    public String toString() {
+    	return this.screenName+","+this.followersCount;
+    }
 }

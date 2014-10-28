@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.collections.PopularHashtags;
+import org.gistic.taghreed.collections.PopularUsers;
 import org.gistic.taghreed.collections.Tweet;
 
 /**
@@ -40,17 +41,26 @@ public class Main {
 		String minlon = "-180";
 		req.setMBR(maxlat, maxlon, minlat, minlon);
 
-		tweets = req.getTweetsRtreeDays();
+//		tweets = req.getTweetsRtreeDays();
+//		popularHashtags = req.getPopularHashtags();
+//		
+//		for (Tweet t : tweets) {
+//			System.out.println(t.toString());
+//		}
+//		for (PopularHashtags hash : popularHashtags) {
+//			System.out.println(hash.toString());
+//		}
 		
-		for (Tweet t : tweets) {
-			System.out.println(t.toString());
+		
+		
+		System.out.println("Tweets Size:" + req.getTweetsRtreeDays().size());
+		System.out.println("Hashtags Size = " + req.getHashtags().size());
+		System.out.println("Active user size= "+ req.getActiveUser().size());
+		System.out.println("popular users size= "+ req.getPopularUsers().size());
+		
+		for(PopularUsers user : req.getPopularUsers()){
+			System.out.println(user.toString());
 		}
-		for (PopularHashtags hash : popularHashtags) {
-			System.out.println(hash.toString());
-		}
-
-		System.out.println("Tweets Size:" + tweets.size());
-		System.out.println("Hashtags Size = " + popularHashtags.size());
 
 	}
 

@@ -17,4 +17,9 @@ public class ActiveUsers implements Comparable<ActiveUsers>{
     public int compareTo(ActiveUsers o) {
         return o.tweetCount - tweetCount;
     }
+    
+    @Override
+    public String toString() {
+    	return this.userName+","+this.tweetCount;
+    }
 }
