@@ -20,6 +20,7 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.invertedIndex.KWIndexBuilder;
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
+import org.gistic.taghreed.collections.PyramidMonth;
 import org.gistic.taghreed.collections.PyramidWeek;
 
 /**
@@ -37,7 +38,7 @@ public class BuildPyramidIndex {
 //    private String hashtagsDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/hashtags/";
 //    private String rtreeindexDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/result/invertedindex/";
     BuildIndex indexer ;
-    private Map<Integer, PyramidWeek> indexMonth = new HashMap<Integer, PyramidWeek>();
+    private Map<String, PyramidMonth> indexMonth = new HashMap<String, PyramidMonth>();
 
     public BuildPyramidIndex() throws IOException {
         this.indexer = new BuildIndex();
@@ -401,18 +402,17 @@ public class BuildPyramidIndex {
         Collections.sort(outputFiles);
         Calendar c = Calendar.getInstance();
         int weekOfMonth = 0;
-        PyramidWeek tempObj = new PyramidWeek();
+        PyramidMonth tempMonth = new PyramidMonth();
         boolean flag = false;
         for (File f : outputFiles) {
-            tempObj = new PyramidWeek(f.getName().replace(".bz2", ""));
-            if (indexMonth.containsKey(tempObj.getMonth())) {
-                Integer key = tempObj.getMonth();
-                tempObj = indexMonth.get(key);
-                tempObj.addNewFile(f);
-                indexMonth.put(key, tempObj);
+            tempMonth = new PyramidMonth(f.getName().replace(".bz2", ""));
+            if (indexMonth.containsKey(tempMonth.getKey())) {
+            		tempMonth = indexMonth.get(tempMonth.getKey());
+            		tempMonth.addFile(f);
+            		indexMonth.put(tempMonth.getKey(), tempMonth);
             } else {
-                tempObj.addNewFile(f);
-                indexMonth.put(tempObj.getMonth(), tempObj);
+                tempMonth.addFile(f);
+                indexMonth.put(tempMonth.getKey(), tempMonth);
             }
 
         }
@@ -488,7 +488,7 @@ public class BuildPyramidIndex {
 
     public static void main(String[] args) throws IOException, InterruptedException, ParseException, CompressorException {
         BuildPyramidIndex x = new BuildPyramidIndex();
-        x.createInvertedTweetMonths();
+        x.createRtreeTweetMonths();
 //        x.indexer.UpdatelookupTable("Day");
 //        x.indexer.UpdatelookupTable("Week");
 //        x.indexer.UpdatelookupTable("Month");

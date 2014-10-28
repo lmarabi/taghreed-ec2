@@ -4,6 +4,7 @@
  */
 package org.gistic.taghreed.collections;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,8 +17,10 @@ import java.util.List;
  * @author turtle
  */
 public class PyramidMonth {
-    private List<PyramidWeek> weeks = new ArrayList<PyramidWeek>();
+	private List<File> files = new ArrayList<File>();
     private int year;
+    private int month;
+    private String key;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public PyramidMonth() {
@@ -28,19 +31,20 @@ public class PyramidMonth {
         Date day = dateFormat.parse(date);
         c.setTime(day);
        this.year = c.get(Calendar.YEAR);
-    }
-
-    
-    public void setWeeks(List<PyramidWeek> weeks) {
-        this.weeks = weeks;
-    }
-
-    public List<PyramidWeek> getWeeks() {
-        return weeks;
+       this.month = c.get(Calendar.MONTH);
+       this.key = this.year+"-"+this.month;
     }
     
-    public void addWeek(PyramidWeek week){
-        this.weeks.add(week);
+    public String getKey(){
+    	return this.getKey();
+    }
+    
+    public void addFile(File file){
+    	this.files.add(file);
+    }
+    
+    public List<File> getFiles(){
+    	return this.files;
     }
 
     public void setYear(int year) {
@@ -50,5 +54,13 @@ public class PyramidMonth {
     public int getYear() {
         return year;
     }
+    
+    public void setMonth(int month){
+    	this.month = month;
+    }
+
+	public int getMonth() {
+		return month;
+	}
     
 }

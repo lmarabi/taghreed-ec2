@@ -494,21 +494,21 @@ public class BuildIndex {
 	public void commandExecuter(String command) throws IOException,
 			InterruptedException {
 		System.out.println(command);
-		Process myProcess = Runtime.getRuntime().exec(command);
-		myProcess.waitFor();
-		 BufferedReader in = new BufferedReader(
-		 new InputStreamReader(myProcess.getInputStream()));
-		 String line = null;
-		 while ((line = in.readLine()) != null) {
-		 System.out.println(line);
-		 }
-		 in = new BufferedReader(
-		 new InputStreamReader(myProcess.getErrorStream()));
-		 line = null;
-		 while ((line = in.readLine()) != null) {
-		 System.out.println(line);
-		 }
-		 in.close();
+//		Process myProcess = Runtime.getRuntime().exec(command);
+//		myProcess.waitFor();
+//		 BufferedReader in = new BufferedReader(
+//		 new InputStreamReader(myProcess.getInputStream()));
+//		 String line = null;
+//		 while ((line = in.readLine()) != null) {
+//		 System.out.println(line);
+//		 }
+//		 in = new BufferedReader(
+//		 new InputStreamReader(myProcess.getErrorStream()));
+//		 line = null;
+//		 while ((line = in.readLine()) != null) {
+//		 System.out.println(line);
+//		 }
+//		 in.close();
 
 	}
 
