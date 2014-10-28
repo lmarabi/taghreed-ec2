@@ -31,8 +31,8 @@ public class PyramidMonth {
         Date day = dateFormat.parse(date);
         c.setTime(day);
        this.year = c.get(Calendar.YEAR);
-       this.month = c.get(Calendar.MONTH);
-       this.key = this.year+this.month;
+       this.month = c.get(Calendar.MONTH);      
+       this.key = Integer.parseInt(Integer.toString(this.year)+Integer.toString(this.month));
     }
     
     public int getKey(){
