@@ -401,9 +401,7 @@ public class BuildPyramidIndex {
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
         Calendar c = Calendar.getInstance();
-        int weekOfMonth = 0;
         PyramidMonth tempMonth = new PyramidMonth();
-        boolean flag = false;
         for (File f : outputFiles) {
             tempMonth = new PyramidMonth(f.getName().replace(".bz2", ""));
             if (indexMonth.containsKey(tempMonth.getKey())) {

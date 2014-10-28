@@ -36,7 +36,7 @@ public class PyramidMonth {
     }
     
     public int getKey(){
-    	return this.getKey();
+    	return this.key;
     }
     
     public void addFile(File file){
