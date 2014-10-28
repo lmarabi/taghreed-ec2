@@ -201,12 +201,10 @@ public class BuildPyramidIndex {
             System.out.println("*** " + obj.getKey() + " ***");
             PyramidMonth month = (PyramidMonth) obj.getValue();
             String folderName = month.getYear() + "-" + (month.getMonth() + 1);
-            System.out.println(folderName);
-            String indexedMonth = month.getYear() + "-" + (month.getMonth()+1);
             //Create folder in hdfs with hadoopoutputFolder
             String Monthdir = config.getQueryInvertedIndex() + "tweets/Month/index." + folderName;
             File indexFolder = new File(Monthdir);
-            if (!indexFolder.exists() && !currentMonth.equals(indexedMonth)) {
+            if (!indexFolder.exists() && !currentMonth.equals(folderName)) {
                 //build the index
                 KWIndexBuilder builder = new KWIndexBuilder();
                 boolean status = builder.buildIndex(month.getFiles(), Monthdir,KWIndexBuilder.dataType.tweets);
@@ -423,11 +421,9 @@ public class BuildPyramidIndex {
             System.out.println("*** " + obj.getKey() + " ***");
             PyramidMonth month = (PyramidMonth) obj.getValue();
             String hadoopOutputFolder = month.getYear() + "-" + (month.getMonth() + 1);
-            System.out.println(hadoopOutputFolder);
-            String indexedMonth = month.getYear() + "-" + (month.getMonth()+1);
             //Create folder in hdfs with hadoopoutputFolder
             File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Month/index." + hadoopOutputFolder);
-            if (!indexFolder.exists() && !currentMonth.equals(indexedMonth)) {
+            if (!indexFolder.exists() && !currentMonth.equals(hadoopOutputFolder)) {
                 indexer.CreateHdfsFolder(hadoopOutputFolder);
                 for (File day : month.getFiles()) {
                     indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath());
