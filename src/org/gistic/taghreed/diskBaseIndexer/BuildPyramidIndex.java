@@ -38,7 +38,7 @@ public class BuildPyramidIndex {
 //    private String hashtagsDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/hashtags/";
 //    private String rtreeindexDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/result/invertedindex/";
     BuildIndex indexer ;
-    private Map<String, PyramidMonth> indexMonth = new HashMap<String, PyramidMonth>();
+    private Map<Integer, PyramidMonth> indexMonth = new HashMap<Integer, PyramidMonth>();
 
     public BuildPyramidIndex() throws IOException {
         this.indexer = new BuildIndex();
@@ -178,18 +178,17 @@ public class BuildPyramidIndex {
         Collections.sort(outputFiles);
         Calendar c = Calendar.getInstance();
         
-        PyramidWeek tempObj = new PyramidWeek();
+        PyramidMonth tempMonth = new PyramidMonth();
         boolean flag = false;
         for (File f : outputFiles) {
-            tempObj = new PyramidWeek(f.getName());
-            if (indexMonth.containsKey(tempObj.getMonth())) {
-                Integer key = tempObj.getMonth();
-                tempObj = indexMonth.get(key);
-                tempObj.addNewFile(f);
-                indexMonth.put(key, tempObj);
+            tempMonth = new PyramidMonth(f.getName().replace(".bz2", ""));
+            if (indexMonth.containsKey(tempMonth.getKey())) {
+            		tempMonth = indexMonth.get(tempMonth.getKey());
+            		tempMonth.addFile(f);
+            		indexMonth.put(tempMonth.getKey(), tempMonth);
             } else {
-                tempObj.addNewFile(f);
-                indexMonth.put(tempObj.getMonth(), tempObj);
+                tempMonth.addFile(f);
+                indexMonth.put(tempMonth.getKey(), tempMonth);
             }
 
         }
@@ -200,17 +199,17 @@ public class BuildPyramidIndex {
         while (it.hasNext()) {
             Map.Entry obj = (Map.Entry) it.next();
             System.out.println("*** " + obj.getKey() + " ***");
-            PyramidWeek week = (PyramidWeek) obj.getValue();
-            String folderName = week.getYear() + "-" + (week.getMonth() + 1);
+            PyramidMonth month = (PyramidMonth) obj.getValue();
+            String folderName = month.getYear() + "-" + (month.getMonth() + 1);
             System.out.println(folderName);
-            String indexedMonth = week.getYear() + "-" + (week.getMonth()+1);
+            String indexedMonth = month.getYear() + "-" + (month.getMonth()+1);
             //Create folder in hdfs with hadoopoutputFolder
             String Monthdir = config.getQueryInvertedIndex() + "tweets/Month/index." + folderName;
             File indexFolder = new File(Monthdir);
             if (!indexFolder.exists() && !currentMonth.equals(indexedMonth)) {
                 //build the index
                 KWIndexBuilder builder = new KWIndexBuilder();
-                boolean status = builder.buildIndex(week.getFiles(), Monthdir,KWIndexBuilder.dataType.tweets);
+                boolean status = builder.buildIndex(month.getFiles(), Monthdir,KWIndexBuilder.dataType.tweets);
                 System.out.println("status: "+status+" "+Monthdir);
                 MetaData md = new MetaData();
         		// create the meta data for the index
@@ -223,14 +222,14 @@ public class BuildPyramidIndex {
 
         }
     }
+/*
     
-    /**
      * This method create Months inverted index
      * @throws IOException
      * @throws InterruptedException
      * @throws ParseException 
      * @throws CompressorException 
-     */
+     
     private void createInvertedHashtagMonths() throws IOException, InterruptedException, ParseException, CompressorException {
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getHashtagFlushDir());
@@ -277,7 +276,8 @@ public class BuildPyramidIndex {
 
         }
     }
-
+*/
+    
     /**
      * This method create tweets indexMonth only
      */
@@ -423,15 +423,15 @@ public class BuildPyramidIndex {
         while (it.hasNext()) {
             Map.Entry obj = (Map.Entry) it.next();
             System.out.println("*** " + obj.getKey() + " ***");
-            PyramidWeek week = (PyramidWeek) obj.getValue();
-            String hadoopOutputFolder = week.getYear() + "-" + (week.getMonth() + 1);
+            PyramidMonth month = (PyramidMonth) obj.getValue();
+            String hadoopOutputFolder = month.getYear() + "-" + (month.getMonth() + 1);
             System.out.println(hadoopOutputFolder);
-            String indexedMonth = week.getYear() + "-" + (week.getMonth()+1);
+            String indexedMonth = month.getYear() + "-" + (month.getMonth()+1);
             //Create folder in hdfs with hadoopoutputFolder
             File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Month/index." + hadoopOutputFolder);
             if (!indexFolder.exists() && !currentMonth.equals(indexedMonth)) {
                 indexer.CreateHdfsFolder(hadoopOutputFolder);
-                for (File day : week.getFiles()) {
+                for (File day : month.getFiles()) {
                     indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath());
                 }
                 //build the index for tweets and copy to local
@@ -443,6 +443,7 @@ public class BuildPyramidIndex {
         }
     }
 
+    /*
     private void createRtreeHashtagMonths() throws IOException, InterruptedException, ParseException {
         System.out.println("Create Hashtags Months Index ");
         List<File> outputFiles = ListFiles(config.getHashtagFlushDir());
@@ -485,7 +486,7 @@ public class BuildPyramidIndex {
             }
         }
     }
-
+*/
     public static void main(String[] args) throws IOException, InterruptedException, ParseException, CompressorException {
         BuildPyramidIndex x = new BuildPyramidIndex();
         x.createRtreeTweetMonths();

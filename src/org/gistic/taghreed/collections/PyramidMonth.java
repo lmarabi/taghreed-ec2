@@ -20,7 +20,7 @@ public class PyramidMonth {
 	private List<File> files = new ArrayList<File>();
     private int year;
     private int month;
-    private String key;
+    private int key;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public PyramidMonth() {
@@ -32,10 +32,10 @@ public class PyramidMonth {
         c.setTime(day);
        this.year = c.get(Calendar.YEAR);
        this.month = c.get(Calendar.MONTH);
-       this.key = this.year+"-"+this.month;
+       this.key = this.year+this.month;
     }
     
-    public String getKey(){
+    public int getKey(){
     	return this.getKey();
     }
     
