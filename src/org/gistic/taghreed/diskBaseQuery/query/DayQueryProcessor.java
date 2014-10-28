@@ -5,6 +5,7 @@
 package org.gistic.taghreed.diskBaseQuery.query;
 
 import org.gistic.taghreed.collections.Partition;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,10 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.gistic.invertedIndex.KWIndexSearcher;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.collections.Hashtag;
+import org.gistic.taghreed.collections.PopularHashtags;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;

@@ -46,6 +46,7 @@ public class ServerRequest {
     private MBR mbr;
     private queryType type;
     private queryIndex index;
+    private List<PopularHashtags> popularHashtagsResult = new ArrayList<PopularHashtags>();
 
     public enum queryIndex {
 
@@ -196,6 +197,7 @@ public class ServerRequest {
             throws FileNotFoundException, UnsupportedEncodingException, IOException, ParseException {
         List<Tweet> tweet = new ArrayList<Tweet>();
         dayVolumes = new ArrayList<TweetVolumes>();
+        HashMap<String, PopularHashtags> popularHashtags = new HashMap<String, PopularHashtags>();
         this.type = queryType.tweet;
         this.index = index.rtree;
         DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
@@ -210,8 +212,23 @@ public class ServerRequest {
             String[] attr = temp.split(",");
             try {
                 tweet.add(new Tweet(attr[0], attr[1], attr[2], attr[3], attr[4], Integer.parseInt(attr[5]), attr[6], attr[7], attr[8], attr[9]));
+                try {
+                	if(attr[4].contains("#")){
+                	String[] hashtags = attr[4].split("#([a-zA-Z-0-9_])+");
+                	for(int i=0 ;i< hashtags.length;i++){
+                    if (popularHashtags.containsKey(hashtags[i])) {
+                        popularHashtags.get(hashtags[i]).hashtagCount++;
+                    } else {
+                        popularHashtags.put(hashtags[i], new PopularHashtags(hashtags[i], 1));
+                    }
+                	}
+                	}
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
+                
             } catch (ArrayIndexOutOfBoundsException e) {
             }
+            
         }
         return tweet;
     }
@@ -228,6 +245,7 @@ public class ServerRequest {
     public List<Tweet> getTweetsInvertedDay() throws UnsupportedEncodingException, FileNotFoundException, IOException, ParseException {
         List<Tweet> tweet = new ArrayList<Tweet>();
         dayVolumes = new ArrayList<TweetVolumes>();
+        HashMap<String, PopularHashtags> popularHashtags = new HashMap<String, PopularHashtags>();
         this.type = queryType.tweet;
         this.index = index.inverted;
         DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
@@ -242,6 +260,7 @@ public class ServerRequest {
             String[] attr = temp.split(",");
             try {
                 tweet.add(new Tweet(attr[0], attr[1], attr[2], attr[3], attr[4], Integer.parseInt(attr[5]), attr[6], attr[7], attr[8], attr[9]));
+                
             } catch (ArrayIndexOutOfBoundsException e) {
             }
         }
