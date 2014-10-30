@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
@@ -193,28 +194,18 @@ public class ServerRequest {
 	public void setOutputResult(String outputResult) {
 		this.outputResult = outputResult;
 	}
-
+	
 	/**
-	 * This method query Tweets from R+tree index using one only Day Level
-	 *
-	 * @return List<Tweet>
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
+	 * This method read the result from the output file and filter on the fly the 
+	 * Active users, popular users, and popular hashtags. 
+	 * @throws NumberFormatException
 	 * @throws IOException
-	 * @throws ParseException
 	 */
-	public List<Tweet> getTweetsRtreeDays() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException {
+	public List<Tweet> ReadTheoutputResult() throws NumberFormatException, IOException{
 		List<Tweet> tweet = new ArrayList<Tweet>();
-		dayVolumes = new ArrayList<TweetVolumes>();
 		HashMap<String, PopularHashtags> popularHashtags = new HashMap<String, PopularHashtags>();
 		HashMap<String, ActiveUsers> activePeople = new HashMap<String, ActiveUsers>();
 		HashMap<String, PopularUsers> popularPeople = new HashMap<String, PopularUsers>();
-		this.type = queryType.tweet;
-		this.index = index.rtree;
-		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
-		dayVolumes = queryProcessor.executeQuery();
-		// extractor.Queryoptimizer.main(args);
 		BufferedReader reader;
 		reader = new BufferedReader(new InputStreamReader(new FileInputStream(
 				outputResult), "UTF-8"));
@@ -276,6 +267,25 @@ public class ServerRequest {
 	}
 
 	/**
+	 * This method query Tweets from R+tree index using one only Day Level
+	 *
+	 * @return List<Tweet>
+	 * @throws FileNotFoundException
+	 * @throws UnsupportedEncodingException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public List<Tweet> getTweetsRtreeDays() throws FileNotFoundException,
+			UnsupportedEncodingException, IOException, ParseException {
+		dayVolumes = new ArrayList<TweetVolumes>();
+		this.type = queryType.tweet;
+		this.index = index.rtree;
+		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
+		dayVolumes = queryProcessor.executeQuery();
+		return ReadTheoutputResult();
+	}
+
+	/**
 	 * This method query tweets from InvertedIndex using only Day Level
 	 *
 	 * @return List<Tweet>
@@ -293,34 +303,10 @@ public class ServerRequest {
 		this.type = queryType.tweet;
 		this.index = index.inverted;
 		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
-		dayVolumes = queryProcessor.executeQuery();
-		// extractor.Queryoptimizer.main(args);
-		BufferedReader reader;
-		reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-				outputResult), "UTF-8"));
-		String temp;
-		while ((temp = reader.readLine()) != null) {
-			String[] attr = temp.split(",");
-			try {
-				tweet.add(new Tweet(attr[0], attr[1], attr[2], attr[3],
-						attr[4], Integer.parseInt(attr[5]), attr[6], attr[7],
-						attr[8], attr[9]));
-
-			} catch (ArrayIndexOutOfBoundsException e) {
-			}
-		}
-		return tweet;
+		return ReadTheoutputResult();
 	}
-
-	/**
-	 * This method query the hashtags from R+tree index
-	 *
-	 * @return List<PopularHashtags>
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws ParseException
-	 */
+/*
+	
 	public List<PopularHashtags> getHashtagsRtreeDays()
 			throws FileNotFoundException, UnsupportedEncodingException,
 			IOException, ParseException {
@@ -352,15 +338,7 @@ public class ServerRequest {
 		return popularHashtagsResult;
 	}
 
-	/**
-	 * This method query hashtags from inverted index using only Day level
-	 *
-	 * @return List<PopularHashtags>
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws ParseException
-	 */
+	
 	public List<PopularHashtags> getHashtagsInvertedDays()
 			throws FileNotFoundException, UnsupportedEncodingException,
 			IOException, ParseException {
@@ -391,7 +369,7 @@ public class ServerRequest {
 		Collections.sort(popularHashtagsResult);
 		return popularHashtagsResult;
 	}
-
+*/
 	/**
 	 * This method query Tweets from several level {Day,Week,Month}
 	 *
@@ -409,32 +387,10 @@ public class ServerRequest {
 		this.index = index.rtree;
 		Queryoptimizer queryoptimizer = new Queryoptimizer(this);
 		dayVolumes = queryoptimizer.executeQuery();
-		// extractor.Queryoptimizer.main(args);
-		BufferedReader reader;
-		reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-				outputResult), "UTF-8"));
-		String temp;
-		while ((temp = reader.readLine()) != null) {
-			String[] attr = temp.split(",");
-			try {
-				tweet.add(new Tweet(attr[0], attr[1], attr[2], attr[3],
-						attr[4], Integer.parseInt(attr[5]), attr[6], attr[7],
-						attr[8], attr[9]));
-			} catch (ArrayIndexOutOfBoundsException e) {
-			}
-		}
-		return tweet;
+		return ReadTheoutputResult();
 	}
 
-	/**
-	 * This method query hashtags from levels [Day,Week,Month]
-	 *
-	 * @return
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws ParseException
-	 */
+/*	
 	public List<PopularHashtags> getHashtagsRtreePyramid()
 			throws FileNotFoundException, UnsupportedEncodingException,
 			IOException, ParseException {
@@ -466,7 +422,7 @@ public class ServerRequest {
 		Collections.sort(popularHashtagsResult);
 		return popularHashtagsResult;
 	}
-
+*/
 	/**
 	 * This method query tweets from severals level [day,week,month] using
 	 * inverted index
@@ -485,32 +441,10 @@ public class ServerRequest {
 		this.index = index.inverted;
 		Queryoptimizer queryoptimizer = new Queryoptimizer(this);
 		dayVolumes = queryoptimizer.executeQuery();
-		// extractor.Queryoptimizer.main(args);
-		BufferedReader reader;
-		reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-				outputResult), "UTF-8"));
-		String temp;
-		while ((temp = reader.readLine()) != null) {
-			String[] attr = temp.split(",");
-			try {
-				tweet.add(new Tweet(attr[0], attr[1], attr[2], attr[3],
-						attr[4], Integer.parseInt(attr[5]), attr[6], attr[7],
-						attr[8], attr[9]));
-			} catch (ArrayIndexOutOfBoundsException e) {
-			}
-		}
-		return tweet;
+		return ReadTheoutputResult();
 	}
 
-	/**
-	 * This method query hashtags from inverted index from [Day,Week,Month]
-	 * 
-	 * @return List<PopularHashtags>
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws ParseException
-	 */
+/*
 	public List<PopularHashtags> getHashtagsInvertedPyramid()
 			throws FileNotFoundException, UnsupportedEncodingException,
 			IOException, ParseException {
@@ -594,7 +528,7 @@ public class ServerRequest {
 		}
 		return tweetWithKeyword;
 	}
-	
+*/	
 	public List<PopularHashtags> getHashtags(){
 		return popularHashtagsResult;
 	}
@@ -617,6 +551,7 @@ public class ServerRequest {
 		return popularPeopleResult;
 	}
 
+/*
 	public List<TweetVolumes> getTweetVolumesFast(List<Tweet> tweets)
 			throws ParseException {
 		System.out.println("Getting Tweet Volumes .......");
@@ -635,7 +570,7 @@ public class ServerRequest {
 		Collections.sort(dayVolumeResult);
 		return dayVolumeResult;
 	}
-
+*/
 	List<Tweet> getTopKtweets(int topkInt, List<Tweet> tweetsResult) {
 		List<Tweet> result = new ArrayList<Tweet>();
 		try {

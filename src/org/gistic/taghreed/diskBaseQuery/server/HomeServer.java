@@ -102,13 +102,7 @@ public class HomeServer extends AbstractHandler {
 
                 startTime = System.currentTimeMillis();
                 List<PopularHashtags> popularHashtags;
-                if(index.equals("Day")){
-                    //Query Days only
-                    popularHashtags = req.getHashtagsRtreeDays();
-                }else{
-                    //Query pyramid
-                    popularHashtags = req.getHashtagsRtreePyramid();
-                }
+               popularHashtags = req.getHashtags();
                 
                 
 

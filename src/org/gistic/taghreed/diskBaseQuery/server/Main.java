@@ -58,57 +58,57 @@ public class Main {
 		System.out.println("Active user size= "+ req.getActiveUser().size());
 		System.out.println("popular users size= "+ req.getPopularUsers().size());
 		
-		for(PopularUsers user : req.getPopularUsers()){
-			System.out.println(user.toString());
-		}
+//		for(PopularUsers user : req.getPopularUsers()){
+//			System.out.println(user.toString());
+//		}
 
 	}
 
 	private void testCall() throws FileNotFoundException, IOException,
 			ParseException {
-		ServerRequest req = new ServerRequest();
-		String maxlat = "90";
-		String maxlon = "180";
-		String minlat = "-90";
-		String minlon = "-180";
-		req.setMBR(maxlat, maxlon, minlat, minlon);
-		req.setStartDate("2014-01-06");
-		req.setEndDate("2014-01-06");
-		req.setQuery("adsf");
-		String index = "invereted";
-		String level = "pyramid";
-		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
-		List<Tweet> tweets = new ArrayList<Tweet>();
+//		ServerRequest req = new ServerRequest();
+//		String maxlat = "90";
+//		String maxlon = "180";
+//		String minlat = "-90";
+//		String minlon = "-180";
+//		req.setMBR(maxlat, maxlon, minlat, minlon);
+//		req.setStartDate("2014-01-06");
+//		req.setEndDate("2014-01-06");
+//		req.setQuery("adsf");
+//		String index = "invereted";
+//		String level = "pyramid";
+//		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
+//		List<Tweet> tweets = new ArrayList<Tweet>();
 
-		if (level.equals("day")) {
-			if (index.equals("rtree")) {
-				tweets = req.getTweetsRtreeDays();
-			} else {
-				tweets = req.getTweetsInvertedDay();
-				popularHashtags = req.getHashtagsInvertedDays();
-			}
-
-		} else {
-			if (index.equals("rtree")) {
-				tweets = req.getTweetsRtreePyramid();
-				popularHashtags = req.getHashtagsRtreePyramid();
-			} else {
-				// query from inverted index
-				tweets = req.getTweetsInvertedPyramid();
-				// popularHashtags = req.getHashtagsInvertedPyramid();
-			}
-
-		}
-
-		for (Tweet t : tweets) {
-			System.out.println(t.toString());
-		}
-		for (PopularHashtags hash : popularHashtags) {
-			System.out.println(hash.toString());
-		}
-
-		System.out.println("Tweets Size:" + tweets.size());
-		System.out.println("Hashtags Size = " + popularHashtags.size());
+//		if (level.equals("day")) {
+//			if (index.equals("rtree")) {
+//				tweets = req.getTweetsRtreeDays();
+//			} else {
+//				tweets = req.getTweetsInvertedDay();
+//				popularHashtags = req.getHashtagsInvertedDays();
+//			}
+//
+//		} else {
+//			if (index.equals("rtree")) {
+//				tweets = req.getTweetsRtreePyramid();
+//				popularHashtags = req.getHashtagsRtreePyramid();
+//			} else {
+//				// query from inverted index
+//				tweets = req.getTweetsInvertedPyramid();
+//				// popularHashtags = req.getHashtagsInvertedPyramid();
+//			}
+//
+//		}
+//
+//		for (Tweet t : tweets) {
+//			System.out.println(t.toString());
+//		}
+//		for (PopularHashtags hash : popularHashtags) {
+//			System.out.println(hash.toString());
+//		}
+//
+//		System.out.println("Tweets Size:" + tweets.size());
+//		System.out.println("Hashtags Size = " + popularHashtags.size());
 	}
 	
 	private void statistics_DeleteMe() throws IOException, ParseException{
