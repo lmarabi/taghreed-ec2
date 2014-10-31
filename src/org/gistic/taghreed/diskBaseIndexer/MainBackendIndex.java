@@ -83,8 +83,8 @@ public class MainBackendIndex {
     public static void main(String[] args) throws IOException, InterruptedException, CompressorException{
     	System.out.println("new version 2");
     	System.out.println(System.getProperty("user.dir"));
-        File logger = new File(System.getProperty("user.dir")+"/summary.txt");
-        OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(logger));
+    	
+        config = new Commons();
         System.out.println(config.getTweetFlushDir());
         File tweetsFile = new File(config.getTweetFlushDir());
         System.out.println(tweetsFile.getAbsolutePath());
@@ -124,14 +124,12 @@ public class MainBackendIndex {
 //                indexer.createInvertedTweetIndex();
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainBackendIndex.class.getName()).log(Level.SEVERE, null, ex);
-                out.write("Error in Building "+sortedtweetsFile.get(i));
             }
         }
         indexer.UpdatelookupTable(BuildIndex.Level.Day);
         MainBackendIndex index = new MainBackendIndex();
         index.setTweetsFile(sortedtweetsFile.get(0));
         index.run(args);
-        out.close();
         
         
     }
