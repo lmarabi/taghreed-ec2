@@ -27,7 +27,7 @@ import org.gistic.taghreed.Commons;
 public class MainBackendIndex {
 
     private String tweetsFile, hashtagsFile;
-    private Commons config;
+    private static Commons config;
     private BuildIndex indexer;
     private BuildPyramidIndex pyramidIndexer;
 
@@ -85,8 +85,9 @@ public class MainBackendIndex {
     	System.out.println(System.getProperty("user.dir"));
         File logger = new File(System.getProperty("user.dir")+"/summary.txt");
         OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(logger));
-        Commons config = new Commons();	
+        System.out.println(config.getTweetFlushDir());
         File tweetsFile = new File(config.getTweetFlushDir());
+        System.out.println(tweetsFile.getAbsolutePath());
         List<String> sortedtweetsFile;
         sortedtweetsFile = new ArrayList<String>();
         for(String file : tweetsFile.list()){

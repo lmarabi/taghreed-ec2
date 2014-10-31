@@ -5,6 +5,7 @@
 package org.gistic.taghreed.diskBaseQuery.server;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,8 +44,7 @@ public class ServerRequest {
 	private String startDate;
 	private String endDate;
 	private String query;
-	private String outputResult = System.getProperty("user.dir")
-			+ "/export/result.txt";
+	private String outputResult;
 	private MBR mbr;
 	private queryType type;
 	private queryIndex index;
@@ -62,14 +62,14 @@ public class ServerRequest {
 		tweet, hashtag
 	};
 
-	public ServerRequest() throws FileNotFoundException, IOException,
+	public ServerRequest(int requestCounter) throws FileNotFoundException, IOException,
 			ParseException {
 		Commons conf = new Commons();
 		this.rtreeDir = conf.getQueryRtreeIndex();
 		this.invertedDir = conf.getQueryInvertedIndex();
-		// org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer.lookup.loadLookupTableToArrayList(rtreeDir);
-		// org.gistic.taghreed.diskBaseQuery.query.DayQueryProcessor.lookup.loadLookupTableToArrayList(rtreeDir);
-		// System.out.append("****** rteedir: " + rtreeDir);
+		outputResult = System.getProperty("user.dir")
+				+ "/export/result"+requestCounter+".txt";
+		
 	}
 
 	public void setType(queryType type) {
@@ -263,6 +263,9 @@ public class ServerRequest {
 		popularPeopleResult = new ArrayList<PopularUsers>(
 				popularPeople.values());
 		Collections.sort(popularPeopleResult);
+		//Delete file after has been read
+		File f = new File(outputResult);
+		f.delete();
 		return tweet;
 	}
 

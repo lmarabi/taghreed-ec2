@@ -32,13 +32,14 @@ public class Main {
 		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
 		List<Tweet> tweets = new ArrayList<Tweet>();
 		
-		ServerRequest req =  new ServerRequest();
-		req.setStartDate("2014-10-20");
-		req.setEndDate(req.getStartDate());
-		String maxlat = "90";
-		String maxlon = "180";
-		String minlat = "-90";
-		String minlon = "-180";
+		ServerRequest req =  new ServerRequest(1);
+		req.setStartDate("2014-05-04");
+		req.setEndDate("2014-05-10");
+		//,) - (,
+		String maxlat = "45.07820702143926";
+		String maxlon = "-93.07519492158275";
+		String minlat = "44.98965000054537";
+		String minlon = "-93.207374181838";
 		req.setMBR(maxlat, maxlon, minlat, minlon);
 
 //		tweets = req.getTweetsRtreeDays();
@@ -53,11 +54,15 @@ public class Main {
 		
 		
 		
-		System.out.println("Tweets Size:" + req.getTweetsRtreeDays().size());
+		System.out.println("Tweets Size (pyramid):" + req.getTweetsRtreePyramid().size());
 		System.out.println("Hashtags Size = " + req.getHashtags().size());
 		System.out.println("Active user size= "+ req.getActiveUser().size());
 		System.out.println("popular users size= "+ req.getPopularUsers().size());
 		
+		System.out.println("Tweets Size:" + req.getTweetsRtreeDays().size());
+		System.out.println("Hashtags Size = " + req.getHashtags().size());
+		System.out.println("Active user size= "+ req.getActiveUser().size());
+		System.out.println("popular users size= "+ req.getPopularUsers().size());
 //		for(PopularUsers user : req.getPopularUsers()){
 //			System.out.println(user.toString());
 //		}
@@ -112,7 +117,7 @@ public class Main {
 	}
 	
 	private void statistics_DeleteMe() throws IOException, ParseException{
-		ServerRequest req = new ServerRequest();
+		ServerRequest req = new ServerRequest(1);
 		req.setStartDate("2014-05-02");
 		req.setEndDate("2014-05-02");
 		String resultPath = "/export/scratch/louai/test/index";

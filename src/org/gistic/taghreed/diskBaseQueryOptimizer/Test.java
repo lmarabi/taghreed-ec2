@@ -20,7 +20,7 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 public class Test {
 
     public static void main(String[] arg) throws IOException, FileNotFoundException, ParseException {
-        ServerRequest req = new ServerRequest();
+        ServerRequest req = new ServerRequest(1);
         String maxlat = "21.509878763366647";
         String maxlon = "39.206080107128436";
         String minlat = "21.473700876235167";

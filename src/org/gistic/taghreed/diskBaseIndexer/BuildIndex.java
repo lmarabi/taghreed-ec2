@@ -46,15 +46,14 @@ public class BuildIndex {
 	public BuildIndex() throws IOException {
 		this.config = new Commons();
 	}
-	
+
 	public void setHashtagFile(String hashtagFile) {
 		this.hashtagFile = hashtagFile;
 	}
-	
+
 	public void setTweetFile(String tweetFile) {
 		this.tweetFile = tweetFile;
 	}
-
 
 	/**
 	 * This method estimate the selectivity of the MBR
@@ -63,41 +62,40 @@ public class BuildIndex {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-//	public void AddSelectivityToMasterFile(String rtreeFolder)
-//			throws FileNotFoundException, IOException {
-//		// Read the master file outputed from spatial hadoop
-//		String path = rtreeFolder;
-//		BufferedReader reader = new BufferedReader(new FileReader(new File(path
-//				+ "/_master.str+")));
-//		List<String> metaData = new ArrayList<String>();
-//		String line = null;
-//		while ((line = reader.readLine()) != null) {
-//			String[] temp = line.split(",");
-//			File f = new File(path + "/" + temp[7]);
-//			BufferedReader partitionReader = new BufferedReader(new FileReader(
-//					f));
-//			String tweets = null;
-//			int count = 0;
-//			while ((tweets = partitionReader.readLine()) != null) {
-//				count++;
-//			}
-//			partitionReader.close();
-//			metaData.add(line + "," + count + "\n");
-//		}
-//		reader.close();
-//		// rewrite the master file with the number of data in each partition
-//		File f = new File(path + "/_master.str+");
-//		f.delete();
-//		f.createNewFile();
-//		FileWriter fileWriter = new FileWriter(f);
-//		Iterator it = metaData.iterator();
-//		while (it.hasNext()) {
-//			fileWriter.write(it.next().toString());
-//		}
-//		fileWriter.close();
-//
-//	}
-	
+	// public void AddSelectivityToMasterFile(String rtreeFolder)
+	// throws FileNotFoundException, IOException {
+	// // Read the master file outputed from spatial hadoop
+	// String path = rtreeFolder;
+	// BufferedReader reader = new BufferedReader(new FileReader(new File(path
+	// + "/_master.str+")));
+	// List<String> metaData = new ArrayList<String>();
+	// String line = null;
+	// while ((line = reader.readLine()) != null) {
+	// String[] temp = line.split(",");
+	// File f = new File(path + "/" + temp[7]);
+	// BufferedReader partitionReader = new BufferedReader(new FileReader(
+	// f));
+	// String tweets = null;
+	// int count = 0;
+	// while ((tweets = partitionReader.readLine()) != null) {
+	// count++;
+	// }
+	// partitionReader.close();
+	// metaData.add(line + "," + count + "\n");
+	// }
+	// reader.close();
+	// // rewrite the master file with the number of data in each partition
+	// File f = new File(path + "/_master.str+");
+	// f.delete();
+	// f.createNewFile();
+	// FileWriter fileWriter = new FileWriter(f);
+	// Iterator it = metaData.iterator();
+	// while (it.hasNext()) {
+	// fileWriter.write(it.next().toString());
+	// }
+	// fileWriter.close();
+	//
+	// }
 
 	/**
 	 * This method get the Threshold of MBR in R+tree index
@@ -117,8 +115,8 @@ public class BuildIndex {
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			String[] temp = line.split(",");
-			//Get the minimum number of partition
-			if(Integer.parseInt(temp[5]) < threshold){
+			// Get the minimum number of partition
+			if (Integer.parseInt(temp[5]) < threshold) {
 				threshold = Integer.parseInt(temp[5]);
 			}
 		}
@@ -151,20 +149,17 @@ public class BuildIndex {
 		// Build index
 		command = config.getHadoopDir()
 				+ "hadoop jar "
-//				+ config.getHadoopDir()
-//				+ "/"
+				// + config.getHadoopDir()
+				// + "/"
 				+ config.getShadoopJar()
-				+ " index "
-				+ "-libjars "
-//				+ config.getHadoopDir()
-//				+ "/"
-				+ config.getLibJars()
-				+" "
-				+ config.getHadoopHDFSPath()
-				+ file.getName()
+				+ " index -D dfs.block.size="
+				+ (50 * 1024 * 1024)
 				+ " "
-				+ config.getHadoopHDFSPath()
-				+ "index."
+				+ "-libjars "
+				// + config.getHadoopDir()
+				// + "/"
+				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
+				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
 				+ file.getName().replace(".bz2", "")
 				+ " -overwrite  sindex:str+ shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
@@ -173,8 +168,10 @@ public class BuildIndex {
 		commandExecuter(command);
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
-				+ config.getHadoopHDFSPath() + "index." + file.getName().replace(".bz2", "") + " "
-				+ config.getQueryRtreeIndex() + "tweets/Day/"+ "index." + file.getName().replace(".bz2", "") + "/";
+				+ config.getHadoopHDFSPath() + "index."
+				+ file.getName().replace(".bz2", "") + " "
+				+ config.getQueryRtreeIndex() + "tweets/Day/" + "index."
+				+ file.getName().replace(".bz2", "") + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -183,10 +180,11 @@ public class BuildIndex {
 
 		commandExecuter(command);
 		command = config.getHadoopDir() + "hadoop fs -rmr "
-				+ config.getHadoopHDFSPath() + "index." + file.getName().replace(".bz2", "");
+				+ config.getHadoopHDFSPath() + "index."
+				+ file.getName().replace(".bz2", "");
 
 		commandExecuter(command);
-		
+
 	}
 
 	/**
@@ -215,30 +213,28 @@ public class BuildIndex {
 		// Build index
 		command = config.getHadoopDir()
 				+ "hadoop jar "
-//				+ config.getHadoopDir()
-//				+ "/"
+				// + config.getHadoopDir()
+				// + "/"
 				+ config.getShadoopJar()
-				+ " index "
-				+ "-libjars "
-//				+ config.getHadoopDir()
-//				+ "/"
-				+ config.getLibJars()
-				+" "
-				+ config.getHadoopHDFSPath()
-				+ file.getName()
+				+ " index -D dfs.block.size="
+				+ (50 * 1024 * 1024)
 				+ " "
-				+ config.getHadoopHDFSPath()
-				+ "index."
+				+ "-libjars "
+				// + config.getHadoopDir()
+				// + "/"
+				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
+				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
 				+ file.getName().replace(".bz2", "")
 				+ " -overwrite  sindex:str+ "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags "
-				+ "blocksize:12.mb -no-local";
+				+ " -no-local";
 
 		commandExecuter(command);
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + file.getName() + " "
-				+ config.getQueryRtreeIndex() + "hashtags/Day/"+ "index." + file.getName().replace(".bz2", "") + "/";
+				+ config.getQueryRtreeIndex() + "hashtags/Day/" + "index."
+				+ file.getName().replace(".bz2", "") + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -247,7 +243,8 @@ public class BuildIndex {
 
 		commandExecuter(command);
 		command = config.getHadoopDir() + "hadoop fs -rmr "
-				+ config.getHadoopHDFSPath() + "index." + file.getName().replace(".bz2", "");
+				+ config.getHadoopHDFSPath() + "index."
+				+ file.getName().replace(".bz2", "");
 
 		commandExecuter(command);
 
@@ -277,9 +274,8 @@ public class BuildIndex {
 	 */
 	public void CopytoHdfsFolder(String folderName, String fileDir)
 			throws IOException, InterruptedException {
-		command = config.getHadoopDir() + "hadoop fs -copyFromLocal "
-				+ fileDir + " " + config.getHadoopHDFSPath() + folderName
-				+ "/";
+		command = config.getHadoopDir() + "hadoop fs -copyFromLocal " + fileDir
+				+ " " + config.getHadoopHDFSPath() + folderName + "/";
 		commandExecuter(command);
 	}
 
@@ -301,29 +297,26 @@ public class BuildIndex {
 		// Build index
 		command = config.getHadoopDir()
 				+ "hadoop jar "
-//				+ config.getHadoopDir()
-//				+ "/"
+				// + config.getHadoopDir()
+				// + "/"
 				+ config.getShadoopJar()
-				+ " index "
-				+ "-libjars "
-//				+ config.getHadoopDir()
-//				+ "/"
-				+ config.getLibJars()
-				+" "
-				+ config.getHadoopHDFSPath()
-				+ folderName
+				+ " index -D dfs.block.size="
+				+ (50 * 1024 * 1024)
 				+ " "
-				+ config.getHadoopHDFSPath()
-				+ "index."
-				+ folderName
-				+ " -overwrite  sindex:str+ "
+				+ "-libjars "
+				// + config.getHadoopDir()
+				// + "/"
+				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
+				+ folderName + " " + config.getHadoopHDFSPath() + "index."
+				+ folderName + " -overwrite  sindex:str+ "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags"
 				+ " blocksize:12.mb -no-local";
 		commandExecuter(command);
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + folderName + " "
-				+ config.getQueryRtreeIndex() + "hashtags/" + level + "/"+ "index." + folderName + "/";
+				+ config.getQueryRtreeIndex() + "hashtags/" + level + "/"
+				+ "index." + folderName + "/";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -335,7 +328,7 @@ public class BuildIndex {
 				+ config.getHadoopHDFSPath() + "index." + folderName;
 
 		commandExecuter(command);
-		
+
 	}
 
 	/**
@@ -355,22 +348,18 @@ public class BuildIndex {
 		// Build index
 		command = config.getHadoopDir()
 				+ "hadoop jar "
-//				+ config.getHadoopDir()
-//				+ "/"
+				// + config.getHadoopDir()
+				// + "/"
 				+ config.getShadoopJar()
-				+ " index "
-				+ "-libjars "
-//				+ config.getHadoopDir()
-//				+ "/"
-				+ config.getLibJars()
-				+" "
-				+ config.getHadoopHDFSPath()
-				+ folderName
+				+ " index -D dfs.block.size="
+				+ (50 * 1024 * 1024)
 				+ " "
-				+ config.getHadoopHDFSPath()
-				+ "index."
-				+ folderName
-				+ " -overwrite  sindex:str+ shape:"
+				+ "-libjars "
+				// + config.getHadoopDir()
+				// + "/"
+				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
+				+ folderName + " " + config.getHadoopHDFSPath() + "index."
+				+ folderName + " -overwrite  sindex:str+ shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
 				+ " blocksize:12.mb -no-local";
 
@@ -378,7 +367,8 @@ public class BuildIndex {
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + folderName + " "
-				+ config.getQueryRtreeIndex() + "tweets/" + level + "/"+ "index." + folderName + " ";
+				+ config.getQueryRtreeIndex() + "tweets/" + level + "/"
+				+ "index." + folderName + " ";
 
 		commandExecuter(command);
 		// remove from hdfs
@@ -390,7 +380,7 @@ public class BuildIndex {
 				+ config.getHadoopHDFSPath() + "index." + folderName;
 
 		commandExecuter(command);
-		
+
 	}
 
 	/**
@@ -402,9 +392,9 @@ public class BuildIndex {
 	 */
 	public void UpdatelookupTable(Level level) throws IOException {
 		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex());
-//		UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
-//		UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
-//		UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
+		// UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
+		// UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
+		// UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
 
 	}
 
@@ -420,7 +410,7 @@ public class BuildIndex {
 			lookupTweet.delete();
 		}
 		File dir = new File(lookupTweet.getParent());
-		if(!dir.exists()){
+		if (!dir.exists()) {
 			dir.mkdirs();
 		}
 		lookupTweet.createNewFile();
@@ -442,7 +432,8 @@ public class BuildIndex {
 
 	}
 
-	public void createInvertedTweetIndex() throws IOException, CompressorException {
+	public void createInvertedTweetIndex() throws IOException,
+			CompressorException {
 		List<File> file = new ArrayList<File>();
 		File tweetFolder = new File(config.getQueryInvertedIndex()
 				+ "/tweets/Day/");
@@ -458,19 +449,21 @@ public class BuildIndex {
 		}
 		KWIndexBuilder indexbuilder = new KWIndexBuilder();
 		String indexfolder = config.getQueryInvertedIndex()
-				+ "/tweets/Day/index." + tweetsFile.getName().replaceAll(".bz2", "");
+				+ "/tweets/Day/index."
+				+ tweetsFile.getName().replaceAll(".bz2", "");
 		indexbuilder.buildIndex(file, indexfolder,
 				KWIndexBuilder.dataType.tweets);
 		MetaData md = new MetaData();
 		// create the meta data for the index
 		md.buildMetaData(config.getQueryInvertedIndex() + "/tweets/Day/index."
-				+ tweetsFile.getName().replaceAll(".bz2", ""), config.getQueryInvertedIndex(),
+				+ tweetsFile.getName().replaceAll(".bz2", ""), config
+				.getQueryInvertedIndex(),
 				tweetsFile.getName().replaceAll(".bz2", ""),
-				getThreshold(config.getQueryRtreeIndex()+ "/tweets/Day/index."
+				getThreshold(config.getQueryRtreeIndex() + "/tweets/Day/index."
 						+ tweetsFile.getName().replaceAll(".bz2", "")));
 	}
 
-	public void createInvertedHashtagIndex() throws CompressorException{
+	public void createInvertedHashtagIndex() throws CompressorException {
 		List<File> file = new ArrayList<File>();
 		File tweetFolder = new File(config.getQueryInvertedIndex()
 				+ "/hashtags/Day/");
@@ -496,19 +489,19 @@ public class BuildIndex {
 		System.out.println(command);
 		Process myProcess = Runtime.getRuntime().exec(command);
 		myProcess.waitFor();
-		 BufferedReader in = new BufferedReader(
-		 new InputStreamReader(myProcess.getInputStream()));
-		 String line = null;
-		 while ((line = in.readLine()) != null) {
-		 System.out.println(line);
-		 }
-		 in = new BufferedReader(
-		 new InputStreamReader(myProcess.getErrorStream()));
-		 line = null;
-		 while ((line = in.readLine()) != null) {
-		 System.out.println(line);
-		 }
-		 in.close();
+		BufferedReader in = new BufferedReader(new InputStreamReader(
+				myProcess.getInputStream()));
+		String line = null;
+		while ((line = in.readLine()) != null) {
+			System.out.println(line);
+		}
+		in = new BufferedReader(new InputStreamReader(
+				myProcess.getErrorStream()));
+		line = null;
+		while ((line = in.readLine()) != null) {
+			System.out.println(line);
+		}
+		in.close();
 
 	}
 
@@ -527,7 +520,7 @@ public class BuildIndex {
 		// BuildIndex index = new BuildIndex(config.getHadoopDir(), tweetFile,
 		// hashtagFile, config.getQueryRtreeIndex(), invertedindex);
 		// index.UpdatelookupTable(BuildIndex.Level.Day);
-//		BuildIndex in = new BuildIndex();
-//		in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/");
+		// BuildIndex in = new BuildIndex();
+		// in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/");
 	}
 }
