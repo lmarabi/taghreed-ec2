@@ -163,7 +163,7 @@ public class BuildIndex {
 				+ file.getName().replace(".bz2", "")
 				+ " -overwrite  sindex:str+ shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
-				+ " blocksize:12.mb -no-local";
+				+ "  -no-local";
 
 		commandExecuter(command);
 		// Copy to local
@@ -310,7 +310,7 @@ public class BuildIndex {
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
 				+ folderName + " -overwrite  sindex:str+ "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags"
-				+ " blocksize:12.mb -no-local";
+				+ "  -no-local";
 		commandExecuter(command);
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
@@ -361,7 +361,7 @@ public class BuildIndex {
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
 				+ folderName + " -overwrite  sindex:str+ shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
-				+ " blocksize:12.mb -no-local";
+				+ "  -no-local";
 
 		commandExecuter(command);
 		// Copy to local
