@@ -24,6 +24,15 @@ import org.gistic.taghreed.collections.Tweet;
 /**
  *
  * @author turtle
+ * 
+ * To support reading rtree index do the following 
+ * Fs.open stream 
+ * Rtree r = new Rtree();
+ * setstokOjbect(Shape of the Tweet "new Tweets)
+ * read Fileds(fs.open obj)
+ * search(Rectagnle , Collection<output> )
+ * result will return in the output 
+ * 
  */
 public class Main {
 

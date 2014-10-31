@@ -6,10 +6,7 @@ package org.gistic.taghreed.diskBaseIndexer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,7 +80,6 @@ public class MainBackendIndex {
     public static void main(String[] args) throws IOException, InterruptedException, CompressorException{
     	System.out.println("new version 2");
     	System.out.println(System.getProperty("user.dir"));
-    	
         config = new Commons();
         System.out.println(config.getTweetFlushDir());
         File tweetsFile = new File(config.getTweetFlushDir());

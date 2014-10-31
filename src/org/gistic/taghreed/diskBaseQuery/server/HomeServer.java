@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.util.thread.ThreadPool;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.gistic.taghreed.collections.ActiveUsers;
 import org.gistic.taghreed.collections.PopularHashtags;
 import org.gistic.taghreed.collections.PopularUsers;
@@ -640,16 +639,44 @@ try {
 	private static ExecutorService executor = Executors.newFixedThreadPool(10000);
 
 	public static void main(String[] args) throws Exception {
-//		BuildIndex indexer = new BuildIndex();
-//		indexer.UpdatelookupTable(BuildIndex.Level.Week);
-//		indexer.UpdatelookupTable(BuildIndex.Level.Day);
-//		indexer.UpdatelookupTable(BuildIndex.Level.Month);
-//		
+//		Server server = new Server();
+// 
+//        SelectChannelConnector connector0 = new SelectChannelConnector();
+//        connector0.setPort(8080);
+//        connector0.setMaxIdleTime(30000);
+//        connector0.setRequestHeaderSize(8192);
+// 
+//        SelectChannelConnector connector1 = new SelectChannelConnector();
+//        connector1.setHost("127.0.0.1");
+//        connector1.setPort(8888);
+//        connector1.setThreadPool(new QueuedThreadPool(20));
+//        connector1.setName("admin");
+// 
+//        SslSelectChannelConnector ssl_connector = new SslSelectChannelConnector();
+//        String jetty_home = 
+//          System.getProperty("jetty.home","../jetty-distribution/target/distribution");
+//        System.setProperty("jetty.home",jetty_home);
+//        ssl_connector.setPort(8085);
+//        
+//        org.eclipse.jetty.util.ssl.SslContextFactory cf =  ssl_connector.getSslContextFactory();
+//        cf.setKeyStore(jetty_home + "/etc/keystore");
+//        cf.setKeyStorePassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+//        cf.setKeyManagerPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
+//        
+//        server.setConnectors(new Connector[]
+//        		{ connector0, connector1, ssl_connector });
+// 
+//        server.setHandler(new HomeServer());
+// 
+//        server.start();
+//        server.join();
 		Server server = new Server(8085);
 		server.setHandler(new HomeServer());
+		
 		reportWriter = new OutputStreamWriter(new FileOutputStream(file, true),
 				"UTF-8");
 		server.start();
+		server.setThreadPool(new QueuedThreadPool(30));
 		server.join();
 	}
 	

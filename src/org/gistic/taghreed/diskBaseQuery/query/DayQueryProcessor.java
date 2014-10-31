@@ -99,15 +99,17 @@ public class DayQueryProcessor {
         dataPath += "/";
         if (serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)) {
             // Get the set of Files that intersect with the area.
-            logStart("start reading the master files");
+            
             List<Partition> files = ReadMaster(dataPath);
-            logEnd("end reading master file and selected (" + files.size() + ")");
+            logEnd("selected (" + files.size() + ")");
             //read eachfile and output the result.
-            logStart("start reading from selected files");
             for (Partition f : files) {
                 System.out.println("Start Reading file " + f.getPartition().getName());
-                count += smartQuery(f, outwriter);
-                System.out.println("End reading file " + f.getPartition().getName());
+                int partitionCount = smartQuery(f, outwriter); 
+                count +=  partitionCount;
+                System.out.println("Select "+partitionCount+" out of "
+                		+f.getCardinality()+" Selectivity is: "
+                		+(double)(((double)partitionCount/(double)f.getCardinality())*100)+" %");
             }
         }else{
              count += GetDocumentsInvertedIndex(dataPath);

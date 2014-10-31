@@ -5,6 +5,7 @@
 package org.gistic.taghreed.diskBaseQuery.query;
 
 import org.gistic.taghreed.collections.Partition;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.gistic.invertedIndex.KWIndexSearcher;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
@@ -79,15 +81,15 @@ public class PyramidQueryProcessor {
         dataPath += "/";
         if (serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)) {
             // Get the set of Files that intersect with the area.
-            logStart("start reading the master files");
             List<Partition> files = ReadMaster(dataPath);
-            logEnd("end reading master file and selected (" + files.size() + ")");
+            logEnd("selected (" + files.size() + ")");
             //read eachfile and output the result.
-            logStart("start reading from selected files");
             for (Partition f : files) {
                 System.out.println("Start Reading file " + f.getPartition().getName());
-                smartQuery(f, outwriter);
-                System.out.println("End reading file " + f.getPartition().getName());
+                int partitionCount = smartQuery(f, outwriter);
+                System.out.println("Select "+partitionCount+" out of "
+                		+f.getCardinality()+" Selectivity is: "
+                		+(double)(((double)partitionCount/(double)f.getCardinality())*100)+" %");
             }
         }else{
             GetDocumentsInvertedIndex(dataPath);
@@ -159,7 +161,7 @@ public class PyramidQueryProcessor {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public void smartQuery(Partition part, OutputStreamWriter output)
+    public int smartQuery(Partition part, OutputStreamWriter output)
             throws FileNotFoundException, IOException, ParseException {
         BufferedReader reader;
 //    FileInputStream fin = new FileInputStream(part.getPartition());
@@ -170,6 +172,7 @@ public class PyramidQueryProcessor {
                 new InputStreamReader(
                         new FileInputStream(part.getPartition()), "UTF-8"));
         String line;
+        int count = 0;
         //get the range file
         while ((line = reader.readLine()) != null) {
             //Here rather than wrting to local storage you can pass it 
@@ -188,6 +191,7 @@ public class PyramidQueryProcessor {
 
                                 weekVolume.put(date, 1);
                             }
+                            count++;
                             output.write(line);
                             output.write("\n");
                         }
@@ -198,6 +202,7 @@ public class PyramidQueryProcessor {
                         } else {
                             weekVolume.put(date, 1);
                         }
+                        count++;
                         output.write(line);
                         output.write("\n");
                     }
@@ -222,6 +227,7 @@ public class PyramidQueryProcessor {
 
         }
         reader.close();
+        return count;
     }
 
     /**
