@@ -42,13 +42,13 @@ public class Main {
 		List<Tweet> tweets = new ArrayList<Tweet>();
 		
 		ServerRequest req =  new ServerRequest(1);
-		req.setStartDate("2014-05-04");
-		req.setEndDate("2014-05-10");
+		req.setStartDate("2014-10-20");
+		req.setEndDate("2014-10-20");
 		//,) - (,
-		String maxlat = "45.07820702143926";
-		String maxlon = "-93.07519492158275";
-		String minlat = "44.98965000054537";
-		String minlon = "-93.207374181838";
+		String maxlat = "90";//"45.07820702143926";
+		String maxlon = "180";//"-93.07519492158275";
+		String minlat = "-90";//"44.98965000054537";
+		String minlon = "-180";//"-93.207374181838";
 		req.setMBR(maxlat, maxlon, minlat, minlon);
 
 //		tweets = req.getTweetsRtreeDays();

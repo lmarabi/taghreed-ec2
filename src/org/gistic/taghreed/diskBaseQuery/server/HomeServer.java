@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -19,10 +20,32 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.deploy.DeploymentManager;
+import org.eclipse.jetty.deploy.PropertiesConfigurationManager;
+import org.eclipse.jetty.deploy.providers.WebAppProvider;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.LowResourceMonitor;
+import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
+import org.eclipse.jetty.server.handler.StatisticsHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.eclipse.jetty.webapp.Configuration;
 import org.gistic.taghreed.collections.ActiveUsers;
 import org.gistic.taghreed.collections.PopularHashtags;
 import org.gistic.taghreed.collections.PopularUsers;
@@ -636,48 +659,44 @@ try {
 
 	private static String file = System.getProperty("user.dir") + "/report.csv";
 	private static OutputStreamWriter reportWriter = null;
-	private static ExecutorService executor = Executors.newFixedThreadPool(10000);
-
 	public static void main(String[] args) throws Exception {
-//		Server server = new Server();
-// 
-//        SelectChannelConnector connector0 = new SelectChannelConnector();
-//        connector0.setPort(8080);
-//        connector0.setMaxIdleTime(30000);
-//        connector0.setRequestHeaderSize(8192);
-// 
-//        SelectChannelConnector connector1 = new SelectChannelConnector();
-//        connector1.setHost("127.0.0.1");
-//        connector1.setPort(8888);
-//        connector1.setThreadPool(new QueuedThreadPool(20));
-//        connector1.setName("admin");
-// 
-//        SslSelectChannelConnector ssl_connector = new SslSelectChannelConnector();
-//        String jetty_home = 
-//          System.getProperty("jetty.home","../jetty-distribution/target/distribution");
-//        System.setProperty("jetty.home",jetty_home);
-//        ssl_connector.setPort(8085);
-//        
-//        org.eclipse.jetty.util.ssl.SslContextFactory cf =  ssl_connector.getSslContextFactory();
-//        cf.setKeyStore(jetty_home + "/etc/keystore");
-//        cf.setKeyStorePassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-//        cf.setKeyManagerPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-//        
-//        server.setConnectors(new Connector[]
-//        		{ connector0, connector1, ssl_connector });
-// 
-//        server.setHandler(new HomeServer());
-// 
-//        server.start();
-//        server.join();
-		Server server = new Server(8085);
-		server.setHandler(new HomeServer());
-		
+
 		reportWriter = new OutputStreamWriter(new FileOutputStream(file, true),
 				"UTF-8");
-		server.start();
-		server.setThreadPool(new QueuedThreadPool(30));
-		server.join();
+ 
+        // === jetty.xml ===
+        // Setup Threadpool
+        QueuedThreadPool threadPool = new QueuedThreadPool();
+        threadPool.setMaxThreads(500);
+ 
+        // Server
+        Server server = new Server(threadPool);
+     // HTTP connector
+        ServerConnector http = new ServerConnector(server);
+        http.setHost("localhost");
+        http.setPort(8085);
+//        http.setIdleTimeout(30000);
+         
+        // Set the connector
+        server.addConnector(http);
+ 
+        // Set a handler
+        server.setHandler(new HomeServer());
+ 
+        // Start the server
+        server.start();
+        server.join();
+ 
+       
+//		QueuedThreadPool threadpool = new QueuedThreadPool(500);
+//		Server server = new Server(8085);
+//		server.setThreadPool(threadpool);
+//		server.setHandler(new HomeServer());
+//		
+		
+//		server.start();
+//		server.setThreadPool(new QueuedThreadPool(30));
+//		server.join();
 	}
 	
 	

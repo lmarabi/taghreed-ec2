@@ -153,7 +153,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (50 * 1024 * 1024)
+				+ (15 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -217,7 +217,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (50 * 1024 * 1024)
+				+ (15 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -301,7 +301,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (50 * 1024 * 1024)
+				+ (15 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -352,7 +352,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (50 * 1024 * 1024)
+				+ (15 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
