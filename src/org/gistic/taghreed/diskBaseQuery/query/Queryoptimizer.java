@@ -61,7 +61,7 @@ public class Queryoptimizer {
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             System.out.println("#Start Reading index of " + entry.getKey().toString());
-            dayrequest.GetSmartOutput(entry.getValue().toString());
+            dayrequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
         }
         //Copy TweetVolume and check weeks
         pyramidRequest.setWeekVolume(dayrequest.getTweetsVolume());
@@ -85,7 +85,7 @@ public class Queryoptimizer {
                 Map.Entry entry = (Map.Entry) it.next();
                 Week week = (Week) entry.getKey();
                 System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
-                pyramidRequest.GetSmartOutput(entry.getValue().toString());
+                pyramidRequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
             }
             //Query missing days in head week
             pyramidRequest.parseStreamer(dayrequest.getStreamer());
@@ -94,7 +94,7 @@ public class Queryoptimizer {
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 System.out.println("#Start Reading index of " + entry.getKey().toString());
-                dayrequest.GetSmartOutput(entry.getValue().toString());
+                dayrequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
             }
         } else {
 //                //If there is no week and only days
@@ -121,7 +121,7 @@ public class Queryoptimizer {
                     Map.Entry entry = (Map.Entry) it.next();
                     Week week = (Week) entry.getKey();
                     System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
-                    pyramidRequest.GetSmartOutput(entry.getValue().toString());
+                    pyramidRequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
                 }
                 //Query missing days in head week
                 pyramidRequest.parseStreamer(dayrequest.getStreamer());
@@ -130,7 +130,7 @@ public class Queryoptimizer {
                 while (it.hasNext()) {
                     Map.Entry entry = (Map.Entry) it.next();
                     System.out.println("#Start Reading index of " + entry.getKey().toString());
-                    dayrequest.GetSmartOutput(entry.getValue().toString());
+                    dayrequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
                 }
             }
         }

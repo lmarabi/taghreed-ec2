@@ -91,7 +91,7 @@ public class DayQueryProcessor {
      * @throws IOException
      * @throws CompressorException
      */
-    public  int GetSmartOutput(String dataPath)
+    public  int GetSmartOutput(String day, String dataPath)
             throws FileNotFoundException,
             UnsupportedEncodingException, IOException, ParseException {
         int count = 0;
@@ -100,7 +100,7 @@ public class DayQueryProcessor {
         if (serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)) {
             // Get the set of Files that intersect with the area.
             
-            List<Partition> files = ReadMaster(dataPath);
+            List<Partition> files = ReadMaster(day,dataPath);
             logEnd("selected (" + files.size() + ")");
             //read eachfile and output the result.
             for (Partition f : files) {
@@ -133,13 +133,13 @@ public class DayQueryProcessor {
      * @throws IOException
      * @throws CompressorException
      */
-    public void GetSmartOutputCheckTemporal(String dataPath)
+    public void GetSmartOutputCheckTemporal(String day,String dataPath)
             throws FileNotFoundException,
             UnsupportedEncodingException, IOException, ParseException {
         dataPath += "/";
         // Get the set of Files that intersect with the area.
         logStart("start reading the master files");
-        List<Partition> files = ReadMaster(dataPath);
+        List<Partition> files = ReadMaster(day,dataPath);
         logEnd("end reading master file and selected (" + files.size() + ")");
         //read eachfile and output the result.
         logStart("start reading from selected files");
@@ -303,7 +303,7 @@ public class DayQueryProcessor {
      * @param path
      * @return
      */
-    private static List<Partition> ReadMaster(String path)
+    private static List<Partition> ReadMaster(String day,String path)
             throws FileNotFoundException, IOException {
         File master;
         List<Partition> result = new ArrayList<Partition>();
@@ -321,7 +321,7 @@ public class DayQueryProcessor {
             // #filenumber,minLat,minLon,maxLat,maxLon
             //0,minLon,MinLat,MaxLon,MaxLat,Filename
             if (temp.length == 8) {
-                Partition part = new Partition(line,path);
+                Partition part = new Partition(line,path,day);
                 if (serverRequest.getMbr().Intersect(
                         part.getArea().getMax(), part.getArea().getMain())) {
                     result.add(part);
@@ -411,7 +411,7 @@ public class DayQueryProcessor {
             Map.Entry entry = (Map.Entry) it.next();
             System.out.println("#Start Reading index of " + entry.getKey().toString());
             int count = 0;
-            count = GetSmartOutput(entry.getValue().toString());
+            count = GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
 
             dayVolume.add(new TweetVolumes((Date) entry.getKey(), count));
 
@@ -423,6 +423,38 @@ public class DayQueryProcessor {
 
         return dayVolume;
 
+    }
+    
+    public long readMastersFile() throws UnsupportedEncodingException, FileNotFoundException, IOException, ParseException{
+    	
+         Map<Date, String> index = getIndexArmy();
+         System.out.println("#number of dates found: " + index.size());
+         Iterator it = index.entrySet().iterator();
+         long count = 0;
+         while (it.hasNext()) {
+             Map.Entry entry = (Map.Entry) it.next();
+             System.out.println("#Start Reading index of " + entry.getKey().toString());
+             
+//             String path = System.getProperty("user.dir")+"/Masters/"+entry.getKey().toString().replace(" ", "-")+".WKT";
+//             File f = new File(path);
+//             if(!f.exists()){
+//                 File dir = new File(f.getParent());
+//                 if(!dir.exists()){
+//                     dir.mkdirs();
+//                 }
+//                 f.createNewFile();
+//             }
+//             OutputStreamWriter mastertwriter = new OutputStreamWriter(new FileOutputStream(
+//            		 path), "UTF-8");
+             List<Partition> file = ReadMaster(entry.getKey().toString(),entry.getValue().toString()+"/");
+             for(Partition p : file){
+            	 count += p.getCardinality();
+//            	 mastertwriter.write(p.partitionToWKT()+"\n");
+             }
+//             mastertwriter.close();
+
+         }
+         return count;
     }
 
     /**

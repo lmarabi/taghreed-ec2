@@ -21,31 +21,31 @@ public class Test {
 
     public static void main(String[] arg) throws IOException, FileNotFoundException, ParseException {
         ServerRequest req = new ServerRequest(1);
-        String maxlat = "21.509878763366647";
-        String maxlon = "39.206080107128436";
-        String minlat = "21.473700876235167";
-        String minlon = "39.15913072053149";
+        String maxlat = "90";
+        String maxlon = "180";
+        String minlat = "-90";
+        String minlon = "-180";
         req.setMBR(maxlat, maxlon, minlat, minlon);
-        req.setStartDate("2014-01-06");
-        req.setEndDate("2014-01-06");
-        req.setQuery("اجمل");
-        List<Tweet> tweetsResult;
-        
-        long starttime = System.currentTimeMillis();
+        req.setStartDate("2014-05-01");
+        req.setEndDate("2014-05-30");
+//        req.setQuery("اجمل");
+//        List<Tweet> tweetsResult;
+//        
+//        long starttime = System.currentTimeMillis();
         
 //        tweetsResult = req.getTweetsInvertedDay();
-        tweetsResult = req.getTweetsRtreeDays();
+        req.getMasterRtreeDays();
         
-        
-        long endtime = System.currentTimeMillis();
-        System.out.println("*******************************");
-        Iterator it = tweetsResult.iterator();
-        while(it.hasNext()){
-            Tweet t = (Tweet)it.next();
-            System.out.println(t.toString());
-        }
-        System.err.println("Execution time in milliSecond :"+ (endtime-starttime));
-        System.out.println(tweetsResult.size());
+//        
+//        long endtime = System.currentTimeMillis();
+//        System.out.println("*******************************");
+//        Iterator it = tweetsResult.iterator();
+//        while(it.hasNext()){
+//            Tweet t = (Tweet)it.next();
+//            System.out.println(t.toString());
+//        }
+//        System.err.println("Execution time in milliSecond :"+ (endtime-starttime));
+//        System.out.println(tweetsResult.size());
     }
 
 }

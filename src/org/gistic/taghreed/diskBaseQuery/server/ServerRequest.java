@@ -287,6 +287,13 @@ public class ServerRequest {
 		dayVolumes = queryProcessor.executeQuery();
 		return ReadTheoutputResult();
 	}
+	
+	public long getMasterRtreeDays() throws FileNotFoundException, IOException, ParseException{
+		this.type = queryType.tweet;
+		this.index = index.rtree;
+		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
+		return queryProcessor.readMastersFile();
+	}
 
 	/**
 	 * This method query tweets from InvertedIndex using only Day Level

@@ -75,13 +75,13 @@ public class PyramidQueryProcessor {
      * @throws IOException
      * @throws CompressorException
      */
-    public void GetSmartOutput(String dataPath)
+    public void GetSmartOutput(String day,String dataPath)
             throws FileNotFoundException,
             UnsupportedEncodingException, IOException, ParseException {
         dataPath += "/";
         if (serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)) {
             // Get the set of Files that intersect with the area.
-            List<Partition> files = ReadMaster(dataPath);
+            List<Partition> files = ReadMaster(day,dataPath);
             logEnd("selected (" + files.size() + ")");
             //read eachfile and output the result.
             for (Partition f : files) {
@@ -262,7 +262,7 @@ public class PyramidQueryProcessor {
      * @param path
      * @return
      */
-    private List<Partition> ReadMaster(String path)
+    private List<Partition> ReadMaster(String day,String path)
             throws FileNotFoundException, IOException {
         File master;
         List<Partition> result = new ArrayList<Partition>();
@@ -280,7 +280,7 @@ public class PyramidQueryProcessor {
             // #filenumber,minLat,minLon,maxLat,maxLon
             //0,minLon,MinLat,MaxLon,MaxLat,Filename
             if (temp.length == 8) {
-                Partition part = new Partition(line,path);
+                Partition part = new Partition(line,path,day);
                 if (serverRequest.getMbr().Intersect(
                         part.getArea().getMax(), part.getArea().getMain())) {
                     result.add(part);

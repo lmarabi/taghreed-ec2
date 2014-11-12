@@ -27,14 +27,15 @@ public class Partition {
 //        this.area = area;
 //    }
     
-    public Partition(String line,String path){
+    public Partition(String line,String path, String day){
         String[] temp = line.split(",");
         if (temp.length == 8) {
                 Point pointMax = new Point(temp[3], temp[4]);
                 Point pointMin = new Point(temp[1], temp[2]);
                 this.area = new MBR(pointMax, pointMin);
                 this.partition = new File(path +temp[7]);
-                this.cardinality = Long.parseLong(temp[5]);  
+                this.cardinality = Long.parseLong(temp[5]);
+                this.Day = day;
             }
     }
 
@@ -65,6 +66,16 @@ public class Partition {
     public long getCardinality() {
         return cardinality;
     }
+    
+    public String partitionToWKT(){
+		return this.Day + "\tPOLYGON (("
+    +this.area.getMax().getLon() + " "+ this.area.getMin().getLat() 
+    +", "+ this.area.getMax().getLon() + " "+ this.area.getMax().getLat()
+    +", "+ this.area.getMin().getLon() + " "+ this.area.getMax().getLat()
+    +", "+ this.area.getMin().getLon() + " "+ this.area.getMin().getLat()
+    +", "+ this.area.getMax().getLon() + " "+ this.area.getMin().getLat()
+    + "))\t" + this.cardinality;
+	}
     
     
     
