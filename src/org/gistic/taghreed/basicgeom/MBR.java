@@ -10,6 +10,12 @@ public class MBR {
 
     public MBR() {
     }
+    
+    public MBR(String parsString){
+    	String[] token = parsString.split(" ");
+    	this.max = new Point(token[3], token[1]);
+    	this.min = new Point(token[7], token[5]);
+    }
 
     public MBR(Point max, Point min) {
         this.max = max;
@@ -79,8 +85,8 @@ public class MBR {
     @Override
     public String toString() {
     	// TODO Auto-generated method stub
-    	return "max lon "+ this.max.getLon()+ " max lat " + this.max.getLat()+
-    			" min lon "+ this.min.getLon()+ " min lat " + this.min.getLat();
+    	return "maxlon "+ this.max.getLon()+ " maxlat " + this.max.getLat()+
+    			" minlon "+ this.min.getLon()+ " minlat " + this.min.getLat();
     }
 
 }

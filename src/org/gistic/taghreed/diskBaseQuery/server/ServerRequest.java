@@ -27,6 +27,7 @@ import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.query.DayQueryProcessor;
 import org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer;
+import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 
 /**
  *
@@ -288,7 +289,7 @@ public class ServerRequest {
 		return ReadTheoutputResult();
 	}
 	
-	public long getMasterRtreeDays() throws FileNotFoundException, IOException, ParseException{
+	public GridCell getMasterRtreeDays() throws FileNotFoundException, IOException, ParseException{
 		this.type = queryType.tweet;
 		this.index = index.rtree;
 		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);

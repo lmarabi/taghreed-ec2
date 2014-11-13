@@ -67,6 +67,10 @@ public class Partition {
         return cardinality;
     }
     
+    public String getDay() {
+		return Day;
+	}
+    
     public String partitionToWKT(){
 		return this.Day + "\tPOLYGON (("
     +this.area.getMax().getLon() + " "+ this.area.getMin().getLat() 

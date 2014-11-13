@@ -36,6 +36,7 @@ import org.gistic.taghreed.collections.PopularHashtags;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
+import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 
 /**
  *
@@ -425,36 +426,23 @@ public class DayQueryProcessor {
 
     }
     
-    public long readMastersFile() throws UnsupportedEncodingException, FileNotFoundException, IOException, ParseException{
+    public GridCell readMastersFile() throws UnsupportedEncodingException, FileNotFoundException, IOException, ParseException{
     	
          Map<Date, String> index = getIndexArmy();
          System.out.println("#number of dates found: " + index.size());
          Iterator it = index.entrySet().iterator();
          long count = 0;
+         GridCell cell = new GridCell(this.serverRequest.getMbr());
          while (it.hasNext()) {
              Map.Entry entry = (Map.Entry) it.next();
              System.out.println("#Start Reading index of " + entry.getKey().toString());
-             
-//             String path = System.getProperty("user.dir")+"/Masters/"+entry.getKey().toString().replace(" ", "-")+".WKT";
-//             File f = new File(path);
-//             if(!f.exists()){
-//                 File dir = new File(f.getParent());
-//                 if(!dir.exists()){
-//                     dir.mkdirs();
-//                 }
-//                 f.createNewFile();
-//             }
-//             OutputStreamWriter mastertwriter = new OutputStreamWriter(new FileOutputStream(
-//            		 path), "UTF-8");
              List<Partition> file = ReadMaster(entry.getKey().toString(),entry.getValue().toString()+"/");
              for(Partition p : file){
-            	 count += p.getCardinality();
-//            	 mastertwriter.write(p.partitionToWKT()+"\n");
+            	 cell.add(p.getDay(), p.getCardinality());
              }
-//             mastertwriter.close();
 
          }
-         return count;
+         return cell;
     }
 
     /**
