@@ -45,7 +45,7 @@ import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 public class DayQueryProcessor {
 
 	// Global lookup
-	public static Lookup lookup = new Lookup();
+	private static Lookup lookup = new Lookup();
 	public static List<TweetVolumes> dayVolume;
 	private static OutputStreamWriter outwriter;
 	private static double startTime;
@@ -65,13 +65,7 @@ public class DayQueryProcessor {
 			FileNotFoundException, ParseException {
 		this.serverRequest = request;
 		this.dayVolume = new ArrayList<TweetVolumes>();
-		// Load lookuptabe
-		if (serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)) {
-			lookup.loadLookupTableToArrayList(this.serverRequest.getRtreeDir());
-		} else {
-			lookup.loadLookupTableToArrayList(this.serverRequest
-					.getInvertedDir());
-		}
+		this.lookup = request.getLookup();
 	}
 
 	public DayQueryProcessor(String startDate, String endDate)

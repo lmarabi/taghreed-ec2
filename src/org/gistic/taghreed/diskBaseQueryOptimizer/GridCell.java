@@ -1,6 +1,5 @@
 package org.gistic.taghreed.diskBaseQueryOptimizer;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -10,7 +9,7 @@ import org.gistic.taghreed.basicgeom.MBR;
 
 public class GridCell {
 	MBR mbr; 
-	HashMap<Date, Long> daysCardinality = new HashMap<Date, Long>();
+	HashMap<String, Long> daysCardinality = new HashMap<String, Long>();
 	double average;
 	double deviation;
 	
@@ -23,7 +22,7 @@ public class GridCell {
 		this.mbr = new MBR(token[0]);
 		for(int i=1;i<token.length;i++){
 			String[] dayinfo = token[i].split("-");
-			this.daysCardinality.put(new Date(dayinfo[0]), Long.parseLong(dayinfo[1]));
+			this.daysCardinality.put(dayinfo[0], Long.parseLong(dayinfo[1]));
 		}
 	}
 	
@@ -38,20 +37,20 @@ public class GridCell {
 	 * @param cardinality
 	 */
 	public void add(String day,Long cardinality){
-		if(this.dayExist(new Date(day))){
+		if(this.dayExist(day)){
    		 long newcardinality = this.getCardinality(day) + cardinality;
-   		 this.daysCardinality.put(new Date(day), newcardinality);
+   		 this.daysCardinality.put(day, newcardinality);
    	 }else{
-   		this.daysCardinality.put(new Date(day), cardinality);
+   		this.daysCardinality.put(day, cardinality);
    	 }
 	}
 	
-	private boolean dayExist(Date day){
+	private boolean dayExist(String day){
 		return this.daysCardinality.containsKey(day);
 	}
 	
 	public long getCardinality(String day){
-		return this.daysCardinality.get(new Date(day));
+		return this.daysCardinality.get(day);
 	}
 	
 	/**
@@ -63,7 +62,7 @@ public class GridCell {
 		this.average = 0;
 		while(it.hasNext()){
 			Map.Entry entry = (Map.Entry) it.next();
-			this.average += Integer.parseInt(entry.getValue().toString());
+			this.average += Long.parseLong(entry.getValue().toString());
 		}
 		return (average/this.daysCardinality.size());
 	}
@@ -81,7 +80,7 @@ public class GridCell {
 		this.deviation = 0;
 		int  squaredDifferences = 0; 
 		while(it.hasNext()){
-			Map.Entry<Date,Long> entry = (Map.Entry) it.next();
+			Map.Entry<String,Long> entry = (Map.Entry) it.next();
 			this.deviation += Math.pow((entry.getValue()-this.average), 2);
 		}
 		return deviation;
@@ -112,7 +111,7 @@ public class GridCell {
 		String result = "";
 		Iterator it = this.daysCardinality.entrySet().iterator();
 		while(it.hasNext()){
-			Map.Entry<Date, Long> entry = (Entry<Date, Long>) it.next();
+			Map.Entry<String, Long> entry = (Entry<String, Long>) it.next();
 			System.out.println(entry.getKey()+"-"+entry.getValue());
 		}
 		return  result;

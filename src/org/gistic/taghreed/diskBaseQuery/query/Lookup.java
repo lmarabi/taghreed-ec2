@@ -84,7 +84,6 @@ public class Lookup {
         //************************ Week lookup tables
         tweetsLookup = path + "/tweets/Week/lookupTable.txt";
 //        hashtagLookup = path + "/hashtags/Week/lookupTable.txt";
-        System.out.println("Load lookup tables into memory");
         reader = new BufferedReader(new FileReader(tweetsLookup));
         line = null;
         while ((line = reader.readLine()) != null) {
@@ -112,7 +111,6 @@ public class Lookup {
         //********** Load lookup for Months 
         tweetsLookup = path + "/tweets/Month/lookupTable.txt";
 //        hashtagLookup = path + "/hashtags/Month/lookupTable.txt";
-        System.out.println("Load lookup tables into memory");
         reader = new BufferedReader(new FileReader(tweetsLookup));
         line = null;
         while ((line = reader.readLine()) != null) {

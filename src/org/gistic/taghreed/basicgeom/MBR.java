@@ -16,6 +16,19 @@ public class MBR {
     	this.max = new Point(token[3], token[1]);
     	this.min = new Point(token[7], token[5]);
     }
+    
+    /**
+     * This method take MBR.toString() and convert it to MBR object
+     * @param stringValue
+     * @return
+     */
+    public MBR parse(String stringValue){
+    	MBR temp = new MBR();
+    	String[] token = stringValue.split(" ");
+    	temp.max = new Point(token[3], token[1]);
+    	temp.min = new Point(token[7], token[5]);
+    	return temp;
+    }
 
     public MBR(Point max, Point min) {
         this.max = max;
@@ -82,6 +95,10 @@ public class MBR {
         }
     }
     
+    /**
+     * This method convert the MBR object into WKT format as string object. 
+     * @return
+     */
     public String toWKT(){
     	return "POLYGON (("
     		    +this.max.getLon() + " "+ this.min.getLat() 

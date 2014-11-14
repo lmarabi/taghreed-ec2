@@ -67,6 +67,11 @@ public class Week {
         return false;
     }
     
+    @Override
+    public String toString() {
+    	return dateFormat.format(this.start)+"&"+dateFormat.format(this.end);
+    }
+    
     
     
 }

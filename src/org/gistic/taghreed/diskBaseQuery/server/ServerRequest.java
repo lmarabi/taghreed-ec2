@@ -26,6 +26,7 @@ import org.gistic.taghreed.collections.PopularUsers;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.query.DayQueryProcessor;
+import org.gistic.taghreed.diskBaseQuery.query.Lookup;
 import org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer;
 import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 
@@ -52,6 +53,7 @@ public class ServerRequest {
 	private List<PopularHashtags> popularHashtagsResult = new ArrayList<PopularHashtags>();
 	private List<ActiveUsers> activePeopleResult;
 	private List<PopularUsers> popularPeopleResult;
+	private static Lookup lookup = new Lookup();
 
 	public enum queryIndex {
 
@@ -76,6 +78,10 @@ public class ServerRequest {
 		outputResult = System.getProperty("user.dir")
 				+ "/export/result"+requestCounter+".txt";
 		
+	}
+	
+	public static Lookup getLookup() {
+		return lookup;
 	}
 
 	public void setType(queryType type) {
@@ -289,9 +295,19 @@ public class ServerRequest {
 		dayVolumes = new ArrayList<TweetVolumes>();
 		this.type = queryType.tweet;
 		this.index = index.rtree;
+		this.loadLookupTables();
 		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
 		dayVolumes = queryProcessor.executeQuery();
 		return ReadTheoutputResult();
+	}
+	
+	private void loadLookupTables() throws FileNotFoundException, IOException, ParseException{
+		//Load lookuptabe
+        if(this.index.equals(queryIndex.rtree)){
+            lookup.loadLookupTableToArrayList(this.rtreeDir);
+        }else{
+            lookup.loadLookupTableToArrayList(this.invertedDir);
+        }
 	}
 	
 	/**
@@ -307,11 +323,13 @@ public class ServerRequest {
 		if(level.equals(queryLevel.Day)){
 			this.type = queryType.tweet;
 			this.index = index.rtree;
+			this.loadLookupTables();
 			DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
 			return queryProcessor.readMastersFile();
 		}else {
 			this.type = type.tweet;
 			this.index = index.rtree;
+			this.loadLookupTables();
 			Queryoptimizer queryoptimizer = new Queryoptimizer(this);
 			return queryoptimizer.readMastersFile(level);
 		}

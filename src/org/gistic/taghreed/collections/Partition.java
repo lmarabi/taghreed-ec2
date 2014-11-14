@@ -5,6 +5,9 @@
 package org.gistic.taghreed.collections;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
 
@@ -17,6 +20,7 @@ public class Partition {
     private MBR area;
     private long cardinality;
     private String Day;
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     
 
     public Partition() {
@@ -68,7 +72,8 @@ public class Partition {
     }
     
     public String getDay() {
-		return Day;
+    	Date temp = new Date(this.Day);
+		return sdf.format(temp);
 	}
     
     public String partitionToWKT(){

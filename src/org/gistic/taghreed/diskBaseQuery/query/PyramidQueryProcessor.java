@@ -109,16 +109,16 @@ public class PyramidQueryProcessor {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public GridCell readMasterFile(String day,String dataPath) throws FileNotFoundException, IOException{
+    public long readMasterFile(String day,String dataPath) throws FileNotFoundException, IOException{
     	dataPath += "/";
-    	GridCell cell = new GridCell(serverRequest.getMbr());
+    	long cardinality = 0;
     	// Get the set of Files that intersect with the area.
         List<Partition> files = ReadMaster(day,dataPath);
         //Get the partitions information and put it in a cell. 
         for (Partition p : files) {
-			cell.add(p.getDay(), p.getCardinality());
+        	cardinality += p.getCardinality();
 		}
-        return cell;
+        return cardinality;
     }
 
     /**

@@ -25,8 +25,7 @@ import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
  */
 public class Queryoptimizer {
     //Global lookup
-
-    public static Lookup lookup = new Lookup();
+    private static Lookup lookup = new Lookup();
     public static PyramidQueryProcessor pyramidRequest;
     public static DayQueryProcessor dayrequest;
     public static List<TweetVolumes> dayVolume;
@@ -37,12 +36,7 @@ public class Queryoptimizer {
         this.serverRequest = serverRequest;
         pyramidRequest = new PyramidQueryProcessor(serverRequest);
         dayrequest = new DayQueryProcessor(serverRequest);
-        //Load lookuptabe
-        if(serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)){
-            lookup.loadLookupTableToArrayList(this.serverRequest.getRtreeDir());
-        }else{
-            lookup.loadLookupTableToArrayList(this.serverRequest.getInvertedDir());
-        }
+        lookup = serverRequest.getLookup();
 
     }
 
@@ -162,8 +156,8 @@ public class Queryoptimizer {
             while (it.hasNext()) {
                 Map.Entry<Week,String> entry = (Map.Entry) it.next();
                 Week week = entry.getKey();
-                System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
-                cell = pyramidRequest.readMasterFile(entry.getKey().toString(),entry.getValue().toString());
+//                System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
+                cell.add(week.toString(), pyramidRequest.readMasterFile(week.toString(),entry.getValue().toString())) ;
             }
     	}else{
     		 Map<String, String> indexMonths = getMonthTree();
@@ -171,8 +165,8 @@ public class Queryoptimizer {
     	        Iterator it = indexMonths.entrySet().iterator();
     	        while (it.hasNext()) {
     	            Map.Entry entry = (Map.Entry) it.next();
-    	            System.out.println("#Start Reading index of " + entry.getKey().toString());
-    	            cell = pyramidRequest.readMasterFile(entry.getKey().toString(),entry.getValue().toString());
+//    	            System.out.println("#Start Reading index of " + entry.getKey().toString());
+    	            cell.add(entry.getKey().toString(), pyramidRequest.readMasterFile(entry.getKey().toString(),entry.getValue().toString()));
     	        }
     	}
     	
