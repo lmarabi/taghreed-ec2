@@ -33,6 +33,8 @@ import org.gistic.taghreed.collections.Hashtag;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
+import org.gistic.taghreed.diskBaseQueryOptimizer.Grid;
+import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 
 /**
  *
@@ -97,6 +99,26 @@ public class PyramidQueryProcessor {
 
         logEnd("end reading files");
 
+    }
+    
+    /**
+     * This method read the Grid cell from the Masters Files. 
+     * @param day
+     * @param dataPath
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public GridCell readMasterFile(String day,String dataPath) throws FileNotFoundException, IOException{
+    	dataPath += "/";
+    	GridCell cell = new GridCell(serverRequest.getMbr());
+    	// Get the set of Files that intersect with the area.
+        List<Partition> files = ReadMaster(day,dataPath);
+        //Get the partitions information and put it in a cell. 
+        for (Partition p : files) {
+			cell.add(p.getDay(), p.getCardinality());
+		}
+        return cell;
     }
 
     /**

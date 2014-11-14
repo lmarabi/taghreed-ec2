@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.gistic.taghreed.basicgeom.MBR;
 
@@ -24,6 +25,10 @@ public class GridCell {
 			String[] dayinfo = token[i].split("-");
 			this.daysCardinality.put(new Date(dayinfo[0]), Long.parseLong(dayinfo[1]));
 		}
+	}
+	
+	public MBR getMbr() {
+		return mbr;
 	}
 	
 	/**
@@ -58,9 +63,9 @@ public class GridCell {
 		this.average = 0;
 		while(it.hasNext()){
 			Map.Entry entry = (Map.Entry) it.next();
-			this.average += Double.parseDouble(entry.getValue().toString());
+			this.average += Integer.parseInt(entry.getValue().toString());
 		}
-		return average/this.daysCardinality.size();
+		return (average/this.daysCardinality.size());
 	}
 	
 	/**
@@ -70,21 +75,55 @@ public class GridCell {
 	 * A high standard deviation indicates that the data points are spread out over a large range of values
 	 * @return
 	 */
-	public double getDeviation() {
+	private double getDeviation() {
 		Iterator it = this.daysCardinality.entrySet().iterator();
 		this.average = this.getAverage();
+		this.deviation = 0;
 		int  squaredDifferences = 0; 
 		while(it.hasNext()){
-			Map.Entry entry = (Map.Entry) it.next();
-			squaredDifferences += Math.pow((Double.parseDouble(entry.getValue().toString())-this.average), 2);
+			Map.Entry<Date,Long> entry = (Map.Entry) it.next();
+			this.deviation += Math.pow((entry.getValue()-this.average), 2);
 		}
-		this.deviation = Math.sqrt(squaredDifferences/this.daysCardinality.size());
 		return deviation;
 	}
 	
-	public MBR getMbr() {
-		return mbr;
+	/**
+	 * This method return the standard deviation:
+	 * standard deviation of the sample is the degree to which individuals within the sample differ from the sample mean
+	 * @return
+	 */
+	public double getStandardDeviation(){
+		double  x = Math.sqrt(this.deviation/(this.daysCardinality.size()-1)); 
+		double y = x/this.average;
+		y *= 100;
+		return y;
 	}
+	
+	/**
+	 * This method return the Standard error:
+	 * standard error of the sample is an estimate of how far the sample mean is likely to be from the population mean
+	 * @return
+	 */
+	public double getStandardError(){
+		return ((this.deviation/(Math.sqrt(this.daysCardinality.size())))/this.average)*100;
+	}
+	
+	public String getSimilarDays(){
+		String result = "";
+		Iterator it = this.daysCardinality.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<Date, Long> entry = (Entry<Date, Long>) it.next();
+			System.out.println(entry.getKey()+"-"+entry.getValue());
+		}
+		return  result;
+	}
+	
+	public int getSampleSize(){
+		return this.daysCardinality.size();
+	}
+	
+	
+	
 	
 	
 	

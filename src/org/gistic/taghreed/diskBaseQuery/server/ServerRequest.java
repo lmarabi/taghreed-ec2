@@ -62,6 +62,11 @@ public class ServerRequest {
 
 		tweet, hashtag
 	};
+	
+	public enum queryLevel {
+
+		Day,Week,Month
+	};
 
 	public ServerRequest(int requestCounter) throws FileNotFoundException, IOException,
 			ParseException {
@@ -289,12 +294,33 @@ public class ServerRequest {
 		return ReadTheoutputResult();
 	}
 	
-	public GridCell getMasterRtreeDays() throws FileNotFoundException, IOException, ParseException{
-		this.type = queryType.tweet;
-		this.index = index.rtree;
-		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
-		return queryProcessor.readMastersFile();
+	/**
+	 * This method return the Grid Cell used by the query optimizers 
+	 * @return GridCell
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public GridCell getMasterRtreeDays(queryLevel level) throws FileNotFoundException, IOException, ParseException{
+		//If the building grid cell for days otherwise use the else to build 
+		// gird cell for weeks or month query level.
+		if(level.equals(queryLevel.Day)){
+			this.type = queryType.tweet;
+			this.index = index.rtree;
+			DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
+			return queryProcessor.readMastersFile();
+		}else {
+			this.type = type.tweet;
+			this.index = index.rtree;
+			Queryoptimizer queryoptimizer = new Queryoptimizer(this);
+			return queryoptimizer.readMastersFile(level);
+		}
+		
 	}
+	
+	
+	
+	
 
 	/**
 	 * This method query tweets from InvertedIndex using only Day Level

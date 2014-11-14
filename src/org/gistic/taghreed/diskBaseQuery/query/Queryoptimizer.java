@@ -16,6 +16,8 @@ import java.util.Map;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.collections.Week;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
+import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 
 /**
  *
@@ -33,6 +35,8 @@ public class Queryoptimizer {
 
     public Queryoptimizer(ServerRequest serverRequest) throws IOException, FileNotFoundException, ParseException {
         this.serverRequest = serverRequest;
+        pyramidRequest = new PyramidQueryProcessor(serverRequest);
+        dayrequest = new DayQueryProcessor(serverRequest);
         //Load lookuptabe
         if(serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)){
             lookup.loadLookupTableToArrayList(this.serverRequest.getRtreeDir());
@@ -49,8 +53,6 @@ public class Queryoptimizer {
             UnsupportedEncodingException, IOException, ParseException {
 
         boolean queryTail = false;
-        pyramidRequest = new PyramidQueryProcessor(serverRequest);
-        dayrequest = new DayQueryProcessor(serverRequest);
         double startTime = System.currentTimeMillis();
         dayrequest.createStreamer();
 //        pyramidRequest.createStreamer();
@@ -141,6 +143,41 @@ public class Queryoptimizer {
         pyramidRequest.closeStreamer();
         return pyramidRequest.getTweetVolume();
 
+    }
+    
+    /***
+     * This method read the master file and return the grid cells 
+     * @return
+     * @throws ParseException 
+     * @throws IOException 
+     * @throws UnsupportedEncodingException 
+     * @throws FileNotFoundException 
+     */
+    public GridCell readMastersFile(queryLevel level) throws FileNotFoundException, UnsupportedEncodingException, IOException, ParseException{
+    	GridCell cell = new GridCell(this.serverRequest.getMbr());
+    	
+    	if(level.equals(queryLevel.Week)){
+    		Map<Week, String> index = getWeekTree(this.serverRequest.getStartDate(),this.serverRequest.getEndDate());
+    		Iterator it = index.entrySet().iterator(); 
+            while (it.hasNext()) {
+                Map.Entry<Week,String> entry = (Map.Entry) it.next();
+                Week week = entry.getKey();
+                System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
+                cell = pyramidRequest.readMasterFile(entry.getKey().toString(),entry.getValue().toString());
+            }
+    	}else{
+    		 Map<String, String> indexMonths = getMonthTree();
+    	        System.out.println("#number of Months found: " + indexMonths.size());
+    	        Iterator it = indexMonths.entrySet().iterator();
+    	        while (it.hasNext()) {
+    	            Map.Entry entry = (Map.Entry) it.next();
+    	            System.out.println("#Start Reading index of " + entry.getKey().toString());
+    	            cell = pyramidRequest.readMasterFile(entry.getKey().toString(),entry.getValue().toString());
+    	        }
+    	}
+    	
+    	 
+    	return cell;
     }
 
     /**

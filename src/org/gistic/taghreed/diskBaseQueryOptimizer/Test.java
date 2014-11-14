@@ -34,7 +34,6 @@ public class Test {
 //        long starttime = System.currentTimeMillis();
         
 //        tweetsResult = req.getTweetsInvertedDay();
-        req.getMasterRtreeDays();
         
 //        
 //        long endtime = System.currentTimeMillis();

@@ -82,6 +82,16 @@ public class MBR {
         }
     }
     
+    public String toWKT(){
+    	return "POLYGON (("
+    		    +this.max.getLon() + " "+ this.min.getLat() 
+    		    +", "+ this.max.getLon() + " "+ this.max.getLat()
+    		    +", "+ this.min.getLon() + " "+ this.max.getLat()
+    		    +", "+ this.min.getLon() + " "+ this.min.getLat()
+    		    +", "+ this.max.getLon() + " "+ this.min.getLat()
+    		    + "))";
+    }
+    
     @Override
     public String toString() {
     	// TODO Auto-generated method stub
