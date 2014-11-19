@@ -457,8 +457,9 @@ public class DayQueryProcessor {
 			Map.Entry entry = (Map.Entry) it.next();
 //			System.out.println("#Start Reading index of "
 //					+ entry.getKey().toString());
-			if(!lookup.isDayComplete((entry.getKey().toString())))
-					continue;
+			if(lookup.isDayFromMissingDay((entry.getKey().toString()))){
+				continue;
+			}
 			List<Partition> file = ReadMaster(entry.getKey().toString(), entry
 					.getValue().toString() + "/");
 			for (Partition p : file) {

@@ -623,9 +623,9 @@ public class Lookup {
      * and False if the day miss some data
      * @throws ParseException 
      */
-    public boolean isDayComplete(String day) throws ParseException{
+    public boolean isDayFromMissingDay(String day) throws ParseException{
     	Date temp = new Date(day);
-    	return !missingDays.contains(dateFormat.format(temp));
+    	return missingDays.contains(temp);
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException, ParseException {
