@@ -92,10 +92,29 @@ public class GridCell {
 	 * @return
 	 */
 	public double getStandardDeviation(){
-		double  x = Math.sqrt(this.deviation/(this.daysCardinality.size()-1)); 
-		double y = x/this.average;
-		y *= 100;
-		return y;
+		double result = 0;
+		try{
+		 result = (Math.sqrt(this.getDeviation()/(this.daysCardinality.size()-1))); 
+		
+		}catch(Exception e){
+			result = 0;
+		}
+		return result;
+	}
+	
+	/**
+	 * This method return the standard relative deviation
+	 * @return
+	 */
+	public double getStandardRelativeDeviation(){
+		double result = 0;
+		try{
+		 result = (this.getStandardDeviation()/this.average)*100; 
+		
+		}catch(Exception e){
+			result = 0;
+		}
+		return result;
 	}
 	
 	/**
@@ -104,7 +123,29 @@ public class GridCell {
 	 * @return
 	 */
 	public double getStandardError(){
-		return ((this.deviation/(Math.sqrt(this.daysCardinality.size())))/this.average)*100;
+		double result = 0;
+		try{
+			return (this.getStandardDeviation()/(Math.sqrt(this.daysCardinality.size())));
+		}catch(Exception e){
+			result = 0;
+		}
+		return result;
+		
+	}
+	
+	/**
+	 * This method return the standard relative error. 
+	 * @return
+	 */
+	public double getStandardRelativeError(){
+		double result = 0;
+		try{
+		 result = (this.getStandardError()/this.average)*100; 
+		
+		}catch(Exception e){
+			result = 0;
+		}
+		return result;
 	}
 	
 	public String getSimilarDays(){

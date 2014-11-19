@@ -7,6 +7,7 @@ package org.gistic.taghreed.diskBaseQuery.query;
 import org.gistic.taghreed.collections.Week;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,6 +48,7 @@ public class Lookup {
     private Map<String, String> dayLookupHashtag = new HashMap<String, String>();
     private Map<String, String> weekLookupTweet = new HashMap<String, String>();
     private Map<String, String> weekLookupHashtag = new HashMap<String, String>();
+    private List<Date> missingDays = new ArrayList<Date>();
 
     public Lookup() {
     }
@@ -59,8 +61,20 @@ public class Lookup {
      * @throws IOException
      */
     public void loadLookupTableToArrayList(String path) throws FileNotFoundException, IOException, ParseException {
-        String tweetsLookup = path + "/tweets/Day/lookupTable.txt";
-        String hashtagLookup = path + "/hashtags/Day/lookupTable.txt";
+    	//************************ Load missing days
+    	String missing_Day_file = path + "/tweets/Day/_missing_Days.txt";
+        System.out.println("Load missing days into memory");
+        if(new File(missing_Day_file).exists()){
+        	BufferedReader reader = new BufferedReader(new FileReader(missing_Day_file));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+            	missingDays.add(dateFormat.parse(line));
+
+            }
+            reader.close();
+        }
+    	//************************ Day lookup tables
+    	String tweetsLookup = path + "/tweets/Day/lookupTable.txt";
         System.out.println("Load lookup tables into memory");
         BufferedReader reader = new BufferedReader(new FileReader(tweetsLookup));
         String line = null;
@@ -71,19 +85,8 @@ public class Lookup {
         }
         reader.close();
 
-        // Read The lookupTable for hashtags
-//        reader = new BufferedReader(new FileReader(hashtagLookup));
-//        line = null;
-//        while ((line = reader.readLine()) != null) {
-//            dayDatesHashtag.add(dateFormat.parse(line));
-//            dayPathsHashtag.add(path + "/hashtags/Day/index."+line);
-//        }
-//        reader.close();
-
-
         //************************ Week lookup tables
         tweetsLookup = path + "/tweets/Week/lookupTable.txt";
-//        hashtagLookup = path + "/hashtags/Week/lookupTable.txt";
         reader = new BufferedReader(new FileReader(tweetsLookup));
         line = null;
         while ((line = reader.readLine()) != null) {
@@ -96,21 +99,8 @@ public class Lookup {
         }
         reader.close();
 
-        // Read The lookupTable for hashtags
-//        reader = new BufferedReader(new FileReader(hashtagLookup));
-//        line = null;
-//        while ((line = reader.readLine()) != null) {
-//            String[] temp = line.split(",");
-//            String[] range = temp[0].split("&");
-//            weekDatesHashtag.add(new Week(dateFormat.parse(range[0]),
-//                    dateFormat.parse(range[1])));
-//            weekPathsHashtag.add(path + "/hashtags/Week/index."+line);
-//        }
-//        reader.close();
-
         //********** Load lookup for Months 
         tweetsLookup = path + "/tweets/Month/lookupTable.txt";
-//        hashtagLookup = path + "/hashtags/Month/lookupTable.txt";
         reader = new BufferedReader(new FileReader(tweetsLookup));
         line = null;
         while ((line = reader.readLine()) != null) {
@@ -120,14 +110,7 @@ public class Lookup {
         }
         reader.close();
 
-        // Read The lookupTable for hashtags
-//        reader = new BufferedReader(new FileReader(hashtagLookup));
-//        line = null;
-//        while ((line = reader.readLine()) != null) {
-//            monthDatesHashtag.add(line);
-//            monthPathsHashtag.add(path + "/hashtags/Month/index."+line);
-//        }
-//        reader.close();
+
     }
 
     /**
@@ -631,6 +614,18 @@ public class Lookup {
             return true;
         }
         return false;
+    }
+    
+    /***
+     * This method check if day exist in the missing day list or not
+     * @param day
+     * @return true if the day has complete dataset 
+     * and False if the day miss some data
+     * @throws ParseException 
+     */
+    public boolean isDayComplete(String day) throws ParseException{
+    	Date temp = new Date(day);
+    	return !missingDays.contains(dateFormat.format(temp));
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException, ParseException {

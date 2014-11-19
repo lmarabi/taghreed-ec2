@@ -11,7 +11,9 @@ import java.text.ParseException;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 /**
  * This grid preprocessed to create the final grids for Day, week , Months
@@ -42,6 +44,7 @@ public class Grid {
 
 	public void BuildGrid() throws FileNotFoundException, IOException,
 			ParseException {
+		System.out.println("Start building "+level.toString()+" ... ");
 		double startTime = System.currentTimeMillis();
 		//init writers 
 		OutputStreamWriter writer = new OutputStreamWriter(
@@ -50,24 +53,33 @@ public class Grid {
 		OutputStreamWriter WKTwriter = new OutputStreamWriter(
 				new FileOutputStream(System.getProperty("user.dir")
 						+ "/_Grid_"+level.toString()+".WKT", false), "UTF-8");
-		WKTwriter.write("id\tpolygonShape\tAverage\tStandard Deviation\tStandard Error\n");
+		OutputStreamWriter writerNotfound = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir")
+						+ "/_Grid_"+level.toString()+".miss", false), "UTF-8");
+		writerNotfound.write("Start building "+level.toString()+" ... ");
+		WKTwriter.write("id\tpolygonShape\tAverage\tStandard Deviation\tRelative Deviation\tStandard Error\tRelative Error\n");
 		int counter =1;
 		//iterate the grid index
 		ServerRequest req = new ServerRequest(1);
+		req.setIndex(queryIndex.rtree);
+		req.setType(queryType.tweet);
+		req.setStartDate(startDay);
+		req.setEndDate(endDay);
+		GridCell cell;
+		MBR mbr;
+		Point min;
+		Point max;
 		for (int lat = 0; lat < LatDomain; lat++) {
 			for (int lon = 0; lon < LonDomain; lon++) {
-				Point min = new Point((lat - 90), (lon - 180));
-				Point max = new Point((lat - 90+1), (lon - 180+1));
-				MBR mbr = new MBR(max, min);
-				System.out.println(mbr.toString());
-				GridCell cell = new GridCell(mbr);
+				min = new Point((lat - 90), (lon - 180));
+				max = new Point((lat - 90+1), (lon - 180+1));
+				mbr = new MBR(max, min);
+				cell = new GridCell(mbr);
 				System.out.println(mbr.toString());
 				req.setMBR(String.valueOf(max.getLat()),
 						String.valueOf(max.getLon()),
 						String.valueOf(min.getLat()),
 						String.valueOf(min.getLon()));
-				req.setStartDate(startDay);
-				req.setEndDate(endDay);
 				//cells[lon][lat] = req.getMasterRtreeDays(this.level);
 				cell = req.getMasterRtreeDays(this.level);
 				//write the result only if the cell is not empty
@@ -79,8 +91,13 @@ public class Grid {
 					WKTwriter.write(counter + "\t" + cell.getMbr().toWKT()
 							+ "\t" + cell.getAverage() + "\t"
 							+ cell.getStandardDeviation() + "\t"
-							+ cell.getStandardError() + "\n");
+							+ cell.getStandardRelativeDeviation() + "\t"
+							+ cell.getStandardError() + "\t"
+							+ cell.getStandardRelativeError() + "\n");
 					counter++;
+				}else{
+					System.err.println("mbr not found"+mbr.toString());
+					writerNotfound.write(mbr.toString());
 				}
 				
 				
@@ -88,6 +105,11 @@ public class Grid {
 		}
 		double endTime = System.currentTimeMillis();
 		System.out.println("Time to Build: "+(endTime-startTime)+" Millis");
+		writerNotfound.write("Time to Build: "+(endTime-startTime)+" Millis");
+		writer.close();
+		WKTwriter.close();
+		writerNotfound.close();
+		
 
 	}
 
@@ -150,8 +172,8 @@ public class Grid {
 	public static void main(String[] args) throws FileNotFoundException,
 			IOException, ParseException {
 		for(queryLevel q : queryLevel.values()){
-//			if(q.equals(queryLevel.Day) || q.equals(queryLevel.Week))
-//				continue;
+			if(q.equals(queryLevel.Month) || q.equals(queryLevel.Week))
+				continue;
 			System.out.println("************"+q.toString()+"****************");
 			Grid grid = new Grid("2013-01-01", "2014-10-30",q);
 			System.out.println("Building Grid for "+q.toString());

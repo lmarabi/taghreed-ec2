@@ -420,7 +420,13 @@ public class BuildPyramidIndex {
             Map.Entry obj = (Map.Entry) it.next();
             System.out.println("*** " + obj.getKey() + " ***");
             PyramidMonth month = (PyramidMonth) obj.getValue();
-            String hadoopOutputFolder = month.getYear() + "-" + (month.getMonth() + 1);
+            String monthName = "";
+            if((month.getMonth() + 1) <10){
+            	monthName = "0"+ (month.getMonth() + 1);
+            }else{
+            	monthName = String.valueOf((month.getMonth() + 1));
+            }
+            String hadoopOutputFolder = month.getYear() + "-" + monthName;
             //Create folder in hdfs with hadoopoutputFolder
             File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Month/index." + hadoopOutputFolder);
             if (!indexFolder.exists() && !currentMonth.equals(hadoopOutputFolder)) {

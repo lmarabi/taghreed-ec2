@@ -449,14 +449,16 @@ public class DayQueryProcessor {
 			FileNotFoundException, IOException, ParseException {
 		
 		Map<Date, String> index = getIndexArmy();
-		System.out.println("#number of dates found: " + index.size());
+//		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
 		long count = 0;
 		GridCell cell = new GridCell(this.serverRequest.getMbr());
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
-			System.out.println("#Start Reading index of "
-					+ entry.getKey().toString());
+//			System.out.println("#Start Reading index of "
+//					+ entry.getKey().toString());
+			if(!lookup.isDayComplete((entry.getKey().toString())))
+					continue;
 			List<Partition> file = ReadMaster(entry.getKey().toString(), entry
 					.getValue().toString() + "/");
 			for (Partition p : file) {

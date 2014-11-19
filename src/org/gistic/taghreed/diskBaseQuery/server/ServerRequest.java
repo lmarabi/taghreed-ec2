@@ -88,8 +88,9 @@ public class ServerRequest {
 		this.type = type;
 	}
 
-	public void setIndex(queryIndex index) {
+	public void setIndex(queryIndex index) throws FileNotFoundException, IOException, ParseException {
 		this.index = index;
+		this.loadLookupTables();
 	}
 
 	public queryIndex getIndex() {
@@ -321,15 +322,9 @@ public class ServerRequest {
 		//If the building grid cell for days otherwise use the else to build 
 		// gird cell for weeks or month query level.
 		if(level.equals(queryLevel.Day)){
-			this.type = queryType.tweet;
-			this.index = index.rtree;
-			this.loadLookupTables();
 			DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
 			return queryProcessor.readMastersFile();
 		}else {
-			this.type = type.tweet;
-			this.index = index.rtree;
-			this.loadLookupTables();
 			Queryoptimizer queryoptimizer = new Queryoptimizer(this);
 			return queryoptimizer.readMastersFile(level);
 		}
