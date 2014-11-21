@@ -16,10 +16,11 @@ import org.gistic.taghreed.diskBaseQuery.query.Lookup;
 public class GridCell {
 	private static Lookup lookup;
 	MBR mbr; 
-	HashMap<String, Long> daysCardinality = new HashMap<String, Long>();
+	HashMap<String, Integer> daysCardinality = new HashMap<String, Integer>();
 	private int sampleCounter;
 	double average;
 	double deviation;
+	private List<Cluster> cluster;
 	
 	public GridCell(MBR mbr,Lookup lookup) {
 		this.mbr = mbr;
@@ -31,7 +32,7 @@ public class GridCell {
 		this.mbr = new MBR(token[0]);
 		for(int i=1;i<token.length;i++){
 			String[] dayinfo = token[i].split("_");
-			this.daysCardinality.put(dayinfo[0], Long.parseLong(dayinfo[1]));
+			this.daysCardinality.put(dayinfo[0], Integer.parseInt(dayinfo[1]));
 		}
 		this.lookup = lookup;
 	}
@@ -47,9 +48,9 @@ public class GridCell {
 	 * @param day
 	 * @param cardinality
 	 */
-	public void add(String day,Long cardinality){
+	public void add(String day,int cardinality){
 		if(this.dayExist(day)){
-   		 long newcardinality = this.getCardinality(day) + cardinality;
+   		 int newcardinality = this.getCardinality(day) + cardinality;
    		 this.daysCardinality.put(day, newcardinality);
    	 }else{
    		this.daysCardinality.put(day, cardinality);
@@ -60,7 +61,7 @@ public class GridCell {
 		return this.daysCardinality.containsKey(day);
 	}
 	
-	public long getCardinality(String day){
+	public int getCardinality(String day){
 		return this.daysCardinality.get(day);
 	}
 	
@@ -79,7 +80,7 @@ public class GridCell {
 				this.sampleCounter--;
 				continue;
 			}
-			this.average += Long.parseLong(entry.getValue().toString());
+			this.average += Integer.parseInt(entry.getValue().toString());
 		}
 		this.average /= this.sampleCounter;
 		return average;
@@ -98,7 +99,7 @@ public class GridCell {
 		this.average = (this.average == 0) ? this.getAverage() : this.average; 
 		this.deviation = 0;
 		while(it.hasNext()){
-			Map.Entry<String,Long> entry = (Map.Entry) it.next();
+			Map.Entry<String,Integer> entry = (Map.Entry) it.next();
 			if(lookup.isDayFromMissingDay((entry.getKey().toString()))){
 				continue;
 			}
@@ -171,13 +172,17 @@ public class GridCell {
 		return result;
 	}
 	
-	public void getSimilarDays() throws ParseException{
+	/**
+	 * This method cluster the data in the grid cell. 
+	 * @return number of group clusters created in the this Grid cell 
+	 * @throws ParseException
+	 */
+	public int initCluster() throws ParseException{
 		System.out.println("Sample with removing all missing days");
 		List<DayCardinality> days = new ArrayList();
-		
 		Iterator it = this.daysCardinality.entrySet().iterator();
 		while(it.hasNext()){
-			Map.Entry<String, Long> entry = (Entry<String, Long>) it.next();
+			Map.Entry<String, Integer> entry = (Entry<String, Integer>) it.next();
 			if(lookup.isDayFromMissingDay(entry.getKey()))
 				continue;
 			System.out.println(entry.getKey()+"-"+entry.getValue());
@@ -187,32 +192,80 @@ public class GridCell {
 		System.out.println("median: "+this.getAverage()
 				+"\nRelative Standard Deviation: "+this.getStandardRelativeDeviation()
 				+"\nSample size:"+this.getSampleSize());
+		if(this.getStandardRelativeDeviation() > 5){
+			return 0;
+		}
+		//Sort the list of days
 		Collections.sort(days);
-		List<DayCardinality> cluster1 =  new ArrayList<DayCardinality>();
-		List<DayCardinality> cluster2 =  new ArrayList<DayCardinality>();
-		List<DayCardinality> outliers =  new ArrayList<DayCardinality>();
-		int seed  = days.size()/4;
-		System.out.println("init seed = "+seed);
-		int seedcluster1 = selectRightSeed(seed, days);
-		System.out.println("cluster one seed = "+ seedcluster1);
-	   System.out.println("****** Cluster one **********");
-		for(int i=0;i<seedcluster1;i++){
-			System.out.println(days.get(i));
+		// Create the cluster
+		return createClusts(days);
+	}
+	
+	/***
+	 * This method take a list of days in the histogram cell and return it clustered based on their Cardinality 
+	 * Each group in cluster the standard relative deviation is less than or equal to 4.0% 
+	 * @param list
+	 * @return number of group clusters created 
+	 */
+	private int createClusts(List<DayCardinality> list){
+		List<Integer> seeds = new ArrayList<Integer>();
+		this.cluster = new ArrayList<Cluster>();
+		int previous = 0;
+		for(int i=0 ; i < list.size()-1 ; i++){
+			
+			//( | V1 - V2 | / ((V1 + V2)/2) ) * 100 
+			int V1 = list.get(i).getCardinality();
+			int V2 = list.get(i+1).getCardinality();
+			int preValue = list.get(previous).getCardinality();
+			double gapInc = calculateGapPercentage(V1, V2); 
+			double gapPrevious = calculateGapPercentage(preValue, V2);
+			if(gapInc > 15 || gapPrevious >15){
+				seeds.add(i+1);
+				previous = i+1;
+			}
 		}
 		
-		seed += seed;
-		int seedCluster2 = selectRightSeed(seed, days);
-		System.out.println("cluster two seed = "+ seedcluster1);
-		System.out.println("****** Cluster two **********");
-		for(int i=(seedcluster1+1);i<seedCluster2;i++){
-			System.out.println(days.get(i));
+		System.out.println("Number of clusters found: "+seeds.size());
+		//Add the first clusters to the list. 
+		Cluster clusterobject = new Cluster();
+		for(int i= 0 ; i < seeds.get(0) ; i++){
+			clusterobject.addToCluster(list.get(i));
+		}
+		//add the cluster object to the list of clusters.
+		this.cluster.add(clusterobject);
+		// Add the intermediate clusters objects. 
+		for(int seed =0 ; seed < seeds.size()-1; seed++){
+			clusterobject = new Cluster();
+			for(int i= seeds.get(seed) ; i< seeds.get(seed+1) ; i++){
+				clusterobject.addToCluster(list.get(i));
+			}
+			this.cluster.add(clusterobject);
 		}
 		
-		System.out.println("****** cluster 3 **********");
-		for(int i= (seedCluster2+1); i< days.size();i++){
-			System.out.println(days.get(i));
+		//Add the last cluster to the list
+		clusterobject = new Cluster();
+		for(int i= seeds.get(seeds.size()-1) ; i < list.size() ; i++){
+			clusterobject.addToCluster(list.get(i));
 		}
+		this.cluster.add(clusterobject);
 		
+		return this.cluster.size();
+	}
+	
+	/***
+	 * This method calculate the percentage gap between two number 
+	 * @param value1
+	 * @param value2
+	 * @return double % if it is greater than 15% it mean that the standard relative deviation is grater than 4.0% 
+	 */
+	private double calculateGapPercentage(int value1, int value2){
+		int x =  Math.abs((value1 - value2));
+		double y = (value1 + value2);
+		y /= 2;
+		double gap = x /y ;
+		gap *= 100;
+		System.out.println("v1:"+value1+" v2:"+value2+" gap:"+gap);
+		return gap;
 	}
 	
 	public int getSampleSize() throws ParseException{

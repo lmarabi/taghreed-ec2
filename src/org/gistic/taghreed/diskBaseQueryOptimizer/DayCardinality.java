@@ -6,12 +6,16 @@ import java.util.Date;
 
 public class DayCardinality implements Comparable<DayCardinality>{
 	private String day;
-	private long cardinality;
+	private int cardinality;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
-	public DayCardinality(String day, long cardinality) {
+	public DayCardinality(String day, int cardinality) {
 		this.day = day;
 		this.cardinality = cardinality;
+	}
+	
+	public int getCardinality() {
+		return cardinality;
 	}
 	
 	@Override

@@ -188,7 +188,7 @@ public class Grid {
 			for (int lat = 0; lat < LatDomain; lat++) {
 				System.out.println(lon + "," + lat);
 				if(cells[lon][lat].getStandardRelativeDeviation() > 50){
-					cells[lon][lat].getSimilarDays();
+					cells[lon][lat].initCluster();
 					stop = true;
 					break;
 				}
