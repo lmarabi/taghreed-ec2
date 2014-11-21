@@ -10,10 +10,13 @@ import java.text.ParseException;
 
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
+import org.gistic.taghreed.diskBaseQuery.query.Lookup;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
+
+import sun.font.CreatedFontTracker;
 
 /**
  * This grid preprocessed to create the final grids for Day, week , Months
@@ -74,7 +77,7 @@ public class Grid {
 				min = new Point((lat - 90), (lon - 180));
 				max = new Point((lat - 90+1), (lon - 180+1));
 				mbr = new MBR(max, min);
-				cell = new GridCell(mbr);
+				cell = new GridCell(mbr,req.getLookup());
 				System.out.println(mbr.toString());
 				req.setMBR(String.valueOf(max.getLat()),
 						String.valueOf(max.getLon()),
@@ -135,8 +138,9 @@ public class Grid {
 	/**
 	 * This methdo write the grid in Well Known Text (WKT) format
 	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	public void writeGridToKWT() throws IOException{
+	public void writeGridToKWT() throws IOException, ParseException{
 		OutputStreamWriter writer = new OutputStreamWriter(
 				new FileOutputStream(System.getProperty("user.dir")
 						+ "/_Grid_"+level.toString()+".WKT", false), "UTF-8");
@@ -154,19 +158,45 @@ public class Grid {
 		writer.close();
 	}
 
-	public void readGridFromDisk() throws IOException {
+	/**
+	 * This method will read the stored Grid from the disk 
+	 * @throws IOException
+	 * @throws ParseException 
+	 */
+	public void readGridFromDisk() throws IOException, ParseException {
 		BufferedReader reader = new BufferedReader(new FileReader(
 				System.getProperty("user.dir") + "/_Grid_"+this.level.toString()+".txt"));
+		ServerRequest req = new ServerRequest(1);
+		req.setIndex(queryIndex.rtree);
+		req.setType(queryType.tweet);
 		String line;
 		int lon, lat;
 		while ((line = reader.readLine()) != null) {
 			String[] token = line.split(",");
 			lon = Integer.parseInt(token[0]);
 			lat = Integer.parseInt(token[1]);
-			GridCell temp = new GridCell(token[2]);
+			GridCell temp = new GridCell(token[2],req.getLookup());
 			this.cells[lon][lat] = temp;
 		}
 		reader.close();
+	}
+	
+	
+	public void createClusters() throws ParseException, FileNotFoundException, IOException{
+		boolean stop = false;
+		for (int lon = 0; lon < LonDomain; lon++) {
+			for (int lat = 0; lat < LatDomain; lat++) {
+				System.out.println(lon + "," + lat);
+				if(cells[lon][lat].getStandardRelativeDeviation() > 50){
+					cells[lon][lat].getSimilarDays();
+					stop = true;
+					break;
+				}
+				
+			}
+			if(stop)
+				break;
+		}
 	}
 
 	public static void main(String[] args) throws FileNotFoundException,
@@ -177,10 +207,11 @@ public class Grid {
 			System.out.println("************"+q.toString()+"****************");
 			Grid grid = new Grid("2013-01-01", "2014-10-30",q);
 			System.out.println("Building Grid for "+q.toString());
-			grid.BuildGrid();
+//			grid.BuildGrid();
 //			System.out.println("Writing Grid to Disk");
 //			grid.writeGridToDisk();
-//			grid.readGridFromDisk();
+			grid.readGridFromDisk();
+			grid.createClusters();
 //			System.out.println("Writing WKT to Disk");
 ////			grid.writeGridToKWT();
 		}

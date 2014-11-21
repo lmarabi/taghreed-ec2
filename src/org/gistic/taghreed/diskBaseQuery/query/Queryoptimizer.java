@@ -148,7 +148,7 @@ public class Queryoptimizer {
      * @throws FileNotFoundException 
      */
     public GridCell readMastersFile(queryLevel level) throws FileNotFoundException, UnsupportedEncodingException, IOException, ParseException{
-    	GridCell cell = new GridCell(this.serverRequest.getMbr());
+    	GridCell cell = new GridCell(this.serverRequest.getMbr(),lookup);
     	
     	if(level.equals(queryLevel.Week)){
     		Map<Week, String> index = getWeekTree(this.serverRequest.getStartDate(),this.serverRequest.getEndDate());

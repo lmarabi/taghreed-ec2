@@ -296,7 +296,7 @@ public class ServerRequest {
 		dayVolumes = new ArrayList<TweetVolumes>();
 		this.type = queryType.tweet;
 		this.index = index.rtree;
-		this.loadLookupTables();
+//		this.loadLookupTables();
 		DayQueryProcessor queryProcessor = new DayQueryProcessor(this);
 		dayVolumes = queryProcessor.executeQuery();
 		return ReadTheoutputResult();

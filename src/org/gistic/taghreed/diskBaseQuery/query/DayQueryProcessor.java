@@ -452,14 +452,14 @@ public class DayQueryProcessor {
 //		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
 		long count = 0;
-		GridCell cell = new GridCell(this.serverRequest.getMbr());
+		GridCell cell = new GridCell(this.serverRequest.getMbr(),lookup);
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 //			System.out.println("#Start Reading index of "
 //					+ entry.getKey().toString());
-			if(lookup.isDayFromMissingDay((entry.getKey().toString()))){
-				continue;
-			}
+//			if(lookup.isDayFromMissingDay((entry.getKey().toString()))){
+//				continue;
+//			}
 			List<Partition> file = ReadMaster(entry.getKey().toString(), entry
 					.getValue().toString() + "/");
 			for (Partition p : file) {

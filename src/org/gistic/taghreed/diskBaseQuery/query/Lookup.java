@@ -27,7 +27,7 @@ import org.joda.time.Months;
 
 /**
  *
- * @author turtle
+ * @author louai
  */
 public class Lookup {
 
@@ -624,7 +624,10 @@ public class Lookup {
      * @throws ParseException 
      */
     public boolean isDayFromMissingDay(String day) throws ParseException{
-    	Date temp = new Date(day);
+    	if(!day.matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]")){
+    		return false;
+    	}
+    	Date temp = dateFormat.parse(day);
     	return missingDays.contains(temp);
     }
 
