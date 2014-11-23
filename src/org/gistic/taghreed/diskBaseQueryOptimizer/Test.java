@@ -87,26 +87,48 @@ public class Test {
 				previous = i+1;
 			}
 		}
-		
+		//init cluster statistics
+		List<Integer> cluster = new ArrayList<Integer>();
+		double avg; 
+		double deviation;
+		double SD;
+		double SE;
 		System.out.println("Number of clusters found: "+seeds.size());
 		//print the fist cluster 
 		System.out.println("\nCluster ( 1 ) index:0");
 		for(int i= 0 ; i < seeds.get(0) ; i++){
 			System.out.print(list[i]+",");
+			cluster.add(list[i]);
 		}
+		System.out.println("\nMean: "+getAvrage(cluster)+ "Sample Size: "+cluster.size());
+		System.out.println("SD: "+getStandardDeviation(cluster)+" - RelativeSD: "+getratioStandardDeviation(cluster));
+		System.out.println("SE: "+getStandardError(cluster)+" - RelativeSE: "+getRelativeStandardError(cluster));
+		cluster.clear();
 		
 		for(int seed =0 ; seed < seeds.size()-1; seed++){
 			System.out.println("\nCluster ( " +  (seed)+" ) index:"+ seeds.get(seed));
 			for(int i= seeds.get(seed) ; i< seeds.get(seed+1) ; i++){
 				System.out.print(list[i]+",");
+				cluster.add(list[i]);
 			}
+			System.out.println("\nMean: "+getAvrage(cluster)+ "Sample Size: "+cluster.size());
+			System.out.println("SD: "+getStandardDeviation(cluster)+" - RelativeSD: "+getratioStandardDeviation(cluster));
+			System.out.println("SE: "+getStandardError(cluster)+" - RelativeSE: "+getRelativeStandardError(cluster));
+			cluster.clear();
 		}
+		
+		
 		//print the last cluster 
 		System.out.println("\nCluster ( last )");
 		for(int i= seeds.get(seeds.size()-1) ; i < list.length ; i++){
 			System.out.print(list[i]+",");
+			cluster.add(list[i]);
 		}
-
+		System.out.println("\nMean: "+getAvrage(cluster)+ "Sample Size: "+cluster.size());
+		System.out.println("SD: "+getStandardDeviation(cluster)+" - RelativeSD: "+getratioStandardDeviation(cluster));
+		System.out.println("SE: "+getStandardError(cluster)+" - RelativeSE: "+getRelativeStandardError(cluster));
+//		System.out.println("Confidence Interval: "+);
+		cluster.clear();
 	}
 	
 	private static double calculateGapPercentage(int value1, int value2){
@@ -117,6 +139,56 @@ public class Test {
 		gap *= 100;
 		System.out.println("v1:"+value1+" v2:"+value2+" gap:"+gap);
 		return gap;
+	}
+	
+	private static double getAvrage(List<Integer> list){
+		int sum = 0;
+		for(Integer i : list){
+			sum += i;
+		}
+		return sum/list.size();
+	}
+	
+	private static double getDeviation(List<Integer> list){
+		double deviation = 0;
+		double avg = getAvrage(list);
+		for(Integer i : list){
+			deviation += Math.pow((i-avg), 2);
+		}
+		return deviation;
+	}
+	
+	private static double getStandardDeviation(List<Integer> list){
+		 double deviation = getDeviation(list);
+		 double result = (Math.sqrt(deviation/(list.size()-1))); 
+		 return result;
+	}
+	
+	private static double getStandardError(List<Integer> list){
+		return (getStandardDeviation(list)/(Math.sqrt(list.size())));
+	}
+	
+	private static double getratioStandardDeviation(List<Integer> list){
+		double avg = getAvrage(list);
+		double result = (getStandardDeviation(list)/avg)*100;
+		return result;
+	}
+	
+	private static double getRelativeStandardError(List<Integer> list){
+		double avg = getAvrage(list);
+		return (getStandardError(list)/avg)*100;
+	}
+	
+	private static double getUpperConfidenceInterval(List<Integer> list){
+		double ci = getAvrage(list);
+		ci += (1.96*getStandardError(list));
+		return ci;
+	}
+	
+	private static double getLowerConfidenceInterval(List<Integer> list){
+		double ci = getAvrage(list);
+		ci -= (1.96*getStandardError(list));
+		return ci;
 	}
 
 }

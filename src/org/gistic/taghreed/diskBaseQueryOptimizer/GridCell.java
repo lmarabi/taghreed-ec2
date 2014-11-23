@@ -16,7 +16,7 @@ import org.gistic.taghreed.diskBaseQuery.query.Lookup;
 public class GridCell {
 	private static Lookup lookup;
 	MBR mbr; 
-	HashMap<String, Integer> daysCardinality = new HashMap<String, Integer>();
+	HashMap<String, Long> daysCardinality = new HashMap<String, Long>();
 	private int sampleCounter;
 	double average;
 	double deviation;
@@ -32,7 +32,7 @@ public class GridCell {
 		this.mbr = new MBR(token[0]);
 		for(int i=1;i<token.length;i++){
 			String[] dayinfo = token[i].split("_");
-			this.daysCardinality.put(dayinfo[0], Integer.parseInt(dayinfo[1]));
+			this.daysCardinality.put(dayinfo[0], Long.parseLong(dayinfo[1]));
 		}
 		this.lookup = lookup;
 	}
@@ -48,9 +48,9 @@ public class GridCell {
 	 * @param day
 	 * @param cardinality
 	 */
-	public void add(String day,int cardinality){
+	public void add(String day,long cardinality){
 		if(this.dayExist(day)){
-   		 int newcardinality = this.getCardinality(day) + cardinality;
+   		 long newcardinality = this.getCardinality(day) + cardinality;
    		 this.daysCardinality.put(day, newcardinality);
    	 }else{
    		this.daysCardinality.put(day, cardinality);
@@ -61,7 +61,7 @@ public class GridCell {
 		return this.daysCardinality.containsKey(day);
 	}
 	
-	public int getCardinality(String day){
+	public long getCardinality(String day){
 		return this.daysCardinality.get(day);
 	}
 	
