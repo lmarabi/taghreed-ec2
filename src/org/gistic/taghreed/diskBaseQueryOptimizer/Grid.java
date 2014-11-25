@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 
 import org.gistic.taghreed.basicgeom.MBR;
@@ -198,6 +199,72 @@ public class Grid {
 				break;
 		}
 	}
+	
+	private void buildWholeSpace() throws IOException, ParseException{
+		System.out.println("Start building "+level.toString()+" ... ");
+		double startTime = System.currentTimeMillis();
+		//init writers 
+		OutputStreamWriter writer = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir")
+						+ "/_Grid_"+this.level.toString()+".txt", false), "UTF-8");
+		OutputStreamWriter WKTwriter = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir")
+						+ "/_Grid_"+level.toString()+".WKT", false), "UTF-8");
+		OutputStreamWriter writerNotfound = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir")
+						+ "/_Grid_"+level.toString()+".miss", false), "UTF-8");
+		writerNotfound.write("Start building "+level.toString()+" ... ");
+		WKTwriter.write("id\tpolygonShape\tAverage\tStandard Deviation\tRelative Deviation\tStandard Error\tRelative Error\n");
+		int counter =1;
+		//iterate the grid index
+		ServerRequest req = new ServerRequest(1);
+		req.setIndex(queryIndex.rtree);
+		req.setType(queryType.tweet);
+		req.setStartDate(startDay);
+		req.setEndDate(endDay);
+		GridCell cell;
+		MBR mbr;
+		Point min;
+		Point max;
+				min = new Point(-90, -180);
+				max = new Point(90, 180);
+				mbr = new MBR(max, min);
+				cell = new GridCell(mbr,req.getLookup());
+				System.out.println(mbr.toString());
+				req.setMBR(String.valueOf(max.getLat()),
+						String.valueOf(max.getLon()),
+						String.valueOf(min.getLat()),
+						String.valueOf(min.getLon()));
+				//cells[lon][lat] = req.getMasterRtreeDays(this.level);
+				cell = req.getMasterRtreeDays(this.level);
+				//write the result only if the cell is not empty
+				if(cell.getSampleSize() != 0){
+					//Write grid data.
+					writer.write(0 + "," + 0 + "," + cell.toString()
+							+ "\n");
+					//write WKT
+					WKTwriter.write(counter + "\t" + cell.getMbr().toWKT()
+							+ "\t" + cell.getAverage() + "\t"
+							+ cell.getStandardDeviation() + "\t"
+							+ cell.getStandardRelativeDeviation() + "\t"
+							+ cell.getStandardError() + "\t"
+							+ cell.getStandardRelativeError() + "\n");
+					counter++;
+				}else{
+					System.err.println("mbr not found"+mbr.toString());
+					writerNotfound.write(mbr.toString());
+				}
+				
+				
+			
+		
+		double endTime = System.currentTimeMillis();
+		System.out.println("Time to Build: "+(endTime-startTime)+" Millis");
+		writerNotfound.write("Time to Build: "+(endTime-startTime)+" Millis");
+		writer.close();
+		WKTwriter.close();
+		writerNotfound.close();
+	}
 
 	public static void main(String[] args) throws FileNotFoundException,
 			IOException, ParseException {
@@ -208,10 +275,11 @@ public class Grid {
 			Grid grid = new Grid("2013-01-01", "2014-10-30",q);
 			System.out.println("Building Grid for "+q.toString());
 //			grid.BuildGrid();
+			grid.buildWholeSpace();
 //			System.out.println("Writing Grid to Disk");
 //			grid.writeGridToDisk();
-			grid.readGridFromDisk();
-			grid.createClusters();
+//			grid.readGridFromDisk();
+//			grid.createClusters();
 //			System.out.println("Writing WKT to Disk");
 ////			grid.writeGridToKWT();
 		}

@@ -99,11 +99,12 @@ public class GridCell {
 		this.average = (this.average == 0) ? this.getAverage() : this.average; 
 		this.deviation = 0;
 		while(it.hasNext()){
-			Map.Entry<String,Integer> entry = (Map.Entry) it.next();
+			Map.Entry<String,Long> entry = (Map.Entry) it.next();
 			if(lookup.isDayFromMissingDay((entry.getKey().toString()))){
 				continue;
 			}
 			this.deviation += Math.pow((entry.getValue()-this.average), 2);
+			
 		}
 		return deviation;
 	}
