@@ -275,11 +275,11 @@ public class Grid {
 			Grid grid = new Grid("2013-01-01", "2014-10-30",q);
 			System.out.println("Building Grid for "+q.toString());
 //			grid.BuildGrid();
-			grid.buildWholeSpace();
+//			grid.buildWholeSpace();
 //			System.out.println("Writing Grid to Disk");
 //			grid.writeGridToDisk();
-//			grid.readGridFromDisk();
-//			grid.createClusters();
+			grid.readGridFromDisk();
+			grid.createClusters();
 //			System.out.println("Writing WKT to Disk");
 ////			grid.writeGridToKWT();
 		}

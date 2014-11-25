@@ -14,8 +14,8 @@ public class ConfidenceCoefficient {
 	private static int sampleSize;
 	
 	
-	public static double calcMeanCI(List<Integer> list,int ConfidenceLevel) {
-		confidenceLevel = confidenceLevel/100;
+	public static double calcMeanCI(List<Integer> list,int Confidence) {
+	    confidenceLevel = Confidence/100.0f;
 		sampleSize = list.size();
 		 SummaryStatistics stats = new SummaryStatistics();
 	        for (Integer val : list) {
@@ -28,11 +28,22 @@ public class ConfidenceCoefficient {
             // Calculate critical value
             double critVal = tDist.inverseCumulativeProbability(1.0 - (1 - confidenceLevel) / 2);
             // Calculate confidence interval
-            return critVal * stats.getStandardDeviation() / Math.sqrt(stats.getN());
+            double se = stats.getStandardDeviation() / Math.sqrt(stats.getN());
+            
+            critVal *= se;
+            return critVal;
         } catch (MathIllegalArgumentException e) {
             return Double.NaN;
         }
     }
+	
+	public static double getMean(List<Integer> list){
+		SummaryStatistics stats = new SummaryStatistics();
+        for (Integer val : list) {
+            stats.addValue(val);
+        }
+        return stats.getMean();
+	}
 	
 
 
