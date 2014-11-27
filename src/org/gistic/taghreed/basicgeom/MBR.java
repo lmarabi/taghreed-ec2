@@ -68,15 +68,31 @@ public class MBR {
         //return !(x2 < x3 || x1 > x2 || y2 > y3 || y1 < y4)
         //if (RectA.X1 < RectB.X2 && RectA.X2 > RectB.X1 &&
         //    RectA.Y1 < RectB.Y2 && RectA.Y2 > RectB.Y1) 
-        if (this.min.getLon() < pmax.getLon()
-                && this.max.getLon() > pmin.getLon()
-                && this.min.getLat() < pmax.getLat()
-                && this.max.getLat() > pmin.getLat()) {
+        if (this.min.getLon() <= pmax.getLon()
+                && this.max.getLon() >= pmin.getLon()
+                && this.min.getLat() <= pmax.getLat()
+                && this.max.getLat() >= pmin.getLat()) {
             return true;
         } else {
             return false;
         }
     }
+    
+    public boolean Intersect(MBR mbr) {
+    	//RectA1: this.main = x1,y1 ; this.max = x2,y2
+        //RectB2: pmin = x3,y3 ; pmax= x4,y4
+        //return !(x2 < x3 || x1 > x2 || y2 > y3 || y1 < y4)
+        //if (RectA.X1 < RectB.X2 && RectA.X2 > RectB.X1 &&
+        //    RectA.Y1 < RectB.Y2 && RectA.Y2 > RectB.Y1) 
+        if (this.min.getLon() <= mbr.getMax().getLon()
+                && this.max.getLon() >= mbr.getMin().getLon()
+                && this.min.getLat() <= mbr.getMax().getLat()
+                && this.max.getLat() >= mbr.getMin().getLat()) {
+            return true;
+        } else {
+            return false;
+        }
+	}
 
     /**
      * This method check whether the point inside the MBR or not
@@ -115,5 +131,7 @@ public class MBR {
     	return "maxlon "+ this.max.getLon()+ " maxlat " + this.max.getLat()+
     			" minlon "+ this.min.getLon()+ " minlat " + this.min.getLat();
     }
+
+	
 
 }

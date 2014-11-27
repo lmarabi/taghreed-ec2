@@ -10,11 +10,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-
-
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 /**
  *
@@ -22,7 +18,11 @@ import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
  */
 public class Test {
 	
+<<<<<<< HEAD
 	static int threashold = 90;
+=======
+	static double threashold = 0.02;
+>>>>>>> 9f1ccfe5e1fbe688aadc59f35e004edf95b1d2b6
 
 	public static void main(String[] arg) throws IOException,
 			FileNotFoundException, ParseException {
@@ -52,6 +52,11 @@ public class Test {
 		// System.err.println("Execution time in milliSecond :"+
 		// (endtime-starttime));
 		// System.out.println(tweetsResult.size());
+<<<<<<< HEAD
+=======
+
+		long[] list = {1,2,35656,400034000,55656,6,7,6568,15650,96665};
+>>>>>>> 9f1ccfe5e1fbe688aadc59f35e004edf95b1d2b6
 //		 int[] list = { 23745, 68498, 70423, 76777, 79024, 79632, 80447,
 //		 83454,
 //		 83531, 83856, 83892, 83948, 83977, 84208, 84556, 84694, 84769,
@@ -112,20 +117,28 @@ public class Test {
 				8045151, 7707394, 7925322, 7804915, 8541981, 9201191 };
 		Arrays.sort(list);
 		int clusterdDay= 0 ;
-		int count =0;
-		for(int i: list){
-			for(int j: list){
-				if(i ==j){
-					count++;
-				}if(i ==j && count > 1){
-					System.out.println("Match Found: "+ count);
-				}
-			}
-			count = 0;
-		}
 		List<Integer> seeds = new ArrayList<Integer>();
 		int previous = 0;
-		for (int i = 1; i < list.length; i++) {
+		int count =0;
+		int from,to = 0;
+		for(int outerloop = 0; outerloop < list.length;){
+			from = outerloop;
+			to = from;
+			for(int innerloop = outerloop+1; innerloop < list.length;innerloop++){
+				
+				if(isClusterExist(list, outerloop, innerloop)){
+					to = innerloop;
+				}
+				
+			}
+			seeds.add(from);
+			seeds.add(to);
+			outerloop = to+1;
+			
+		}
+		
+		/*
+		for (int i = 1; i < list.length-1; i++) {
 
 			// ( | V1 - V2 | / ((V1 + V2)/2) ) * 100
 //			int V1 = list[i];
@@ -138,19 +151,25 @@ public class Test {
 //			 previous = i+1;
 //			 }
 			 
-			if (isClusterExist(list, previous, i)) {
+			if (isClusterExist(list, previous, i+1)) {
 				seeds.add(previous);
 				seeds.add(i-1);
 				previous = i;
 			}
 		}
-		if(seeds.get(seeds.size()-1) != list.length){
-			seeds.add(previous);
+		if(seeds.size() == 0){
+			seeds.add(0);
 			seeds.add(list.length-1);
-//			seeds.set(seeds.size()-1, list.length-1);
+		}else{
+			if (seeds.get(seeds.size() - 1) != list.length) {
+				seeds.add(previous);
+				seeds.add(list.length - 1);
+				// seeds.set(seeds.size()-1, list.length-1);
+			}
 		}
+		*/
 		// init cluster statistics
-		List<Integer> cluster = new ArrayList<Integer>();
+		List<Long> cluster = new ArrayList<Long>();
 		double avg;
 		double deviation;
 		double SD;
@@ -164,42 +183,44 @@ public class Test {
 					+ seeds.get(seed)+" - To:"+seeds.get(seed+1));
 			cluster = copyToCluster(seeds.get(seed), seeds.get(seed+1), list);
 			clusterdDay += cluster.size();
-			for(Integer i : cluster)
+			for(Long i : cluster)
 				System.out.print(i+",");
-			System.out.println("\nMean: " + getAvrage(cluster)
-					+ "Sample Size: " + cluster.size());
+			System.out.println("\nMean: " + getAvrage(cluster) + " - mathMean: "+ConfidenceCoefficient.getMean(cluster)
+					+ " Sample Size: " + cluster.size());
 			System.out.println("SD: " + getStandardDeviation(cluster)
 					+ " - RelativeSD: %" + getratioStandardDeviation(cluster));
 			System.out.println("SE: " + getStandardError(cluster)
 					+ " - RelativeSE: %" + getRelativeStandardError(cluster));
-			System.out.println("Confidence: %"+getPersentofConfidenceInterval(cluster));
+			System.out.println("Confidence: %"+ConfidenceCoefficient.getConfidence(cluster));
 			cluster.clear();
 		}
 
 		System.out.println("Input day:"+list.length+" clusted day:"+ clusterdDay);
 	}
 	
-	private static List<Integer> copyToCluster(int from , int to, int[] list){
-		List<Integer> cluster = new ArrayList<Integer>();
+	private static List<Long> copyToCluster(int from , int to, long[] list){
+		List<Long> cluster = new ArrayList<Long>();
 		while( from <= to){
-			cluster.add(list[from]);
+			cluster.add((long) list[from]);
 			from++;
 		}
 		return cluster;
 	}
 
-	private static boolean isClusterExist(int[] array, int from, int to) {
-		List<Integer> list = new ArrayList<Integer>();
+	private static boolean isClusterExist(long[] array, int from, int to) {
+		List<Long> list = new ArrayList<Long>();
 		
 		while (from <= to) {
 			list.add(array[from]);
 			from++;
 		}
-		double confidence = getPersentofConfidenceInterval(list);
-		if(confidence > threashold)
-			return false;
-		else
+//		double confidence = getPersentofConfidenceInterval(list);
+		double confidence = ConfidenceCoefficient.getConfidence(list);
+
+		if(confidence >= threashold)
 			return true;
+		else
+			return false;
 	}
 
 	private static double calculateGapPercentage(int value1, int value2) {
@@ -212,70 +233,48 @@ public class Test {
 		return gap;
 	}
 
-	private static double getAvrage(List<Integer> list) {
+	private static double getAvrage(List<Long> cluster) {
 		int sum = 0;
-		for (Integer i : list) {
+		for (Long i : cluster) {
 			sum += i;
 		}
-		sum /= list.size();
+		sum /= cluster.size();
 		return sum;
 	}
 
-	private static double getDeviation(List<Integer> list) {
+	private static double getDeviation(List<Long> list) {
 		double deviation = 0;
 		double avg = getAvrage(list);
-		for (Integer i : list) {
+		for (Long i : list) {
 			deviation += Math.pow((i - avg), 2);
 		}
 		return deviation;
 	}
 
-	private static double getStandardDeviation(List<Integer> list) {
+	private static double getStandardDeviation(List<Long> list) {
 		double deviation = getDeviation(list);
 		double result = (Math.sqrt(deviation / (list.size() - 1)));
 		return result;
 	}
 
-	private static double getStandardError(List<Integer> list) {
+	private static double getStandardError(List<Long> list) {
 		return (getStandardDeviation(list) / (Math.sqrt(list.size())));
 	}
 
-	private static double getratioStandardDeviation(List<Integer> list) {
+	private static double getratioStandardDeviation(List<Long> list) {
 		double avg = getAvrage(list);
 		double result = (getStandardDeviation(list) / avg) * 100;
 		return result;
 	}
 
-	private static double getRelativeStandardError(List<Integer> list) {
+	private static double getRelativeStandardError(List<Long> list) {
 		double avg = getAvrage(list);
 		return (getStandardError(list) / avg) * 100;
 	}
 
-	private static double getPersentofConfidenceInterval(List<Integer> list) {
-		
-			int avg = (int) ConfidenceCoefficient.getMean(list);
-			int upperbound = 0;
-			int lowerbound = 0;
-			int max = list.get(list.size() - 1);
-			int min = list.get(0);
-			double z = 0;
-			if(list.size() == 41){
-				System.out.println("Here");
-			}
-			for (int i = 99; i > 0; i--) {
-				int ci = (int) ConfidenceCoefficient.calcMeanCI(list, i);
-				upperbound = avg + ci;
-				lowerbound = avg - ci;
-				if (upperbound >= max && lowerbound <= min) {
-					return i;
-				}
-			}
-		
-		return 0;
+	
 
-	}
-
-	private static double getLowerConfidenceInterval(List<Integer> list) {
+	private static double getLowerConfidenceInterval(List<Long> list) {
 		double ci = getAvrage(list);
 		ci -= (1.96 * getStandardError(list));
 		return ci;
