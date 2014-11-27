@@ -37,13 +37,107 @@ public class ConfidenceCoefficient {
         }
     }
 	
-	public static double getMean(List<Integer> list){
+	public static double getConfidence(List<Long> list){
+		double result =0 ;
+		double confidenceLevel =0;
+		sampleSize = list.size();
+		 SummaryStatistics stats = new SummaryStatistics();
+	        for (Long val : list) {
+	            stats.addValue(val);
+	        }
+	        if(stats.getN() == 1)
+	        	return 1.0;
+		
+        try {
+            // Create T Distribution with N-1 degrees of freedom
+            TDistribution tDist = new TDistribution(stats.getN() - 1);
+            // Calculate critical value
+			for (int i = 99; i > 0; i--) {
+				confidenceLevel = i/100.0f;
+				double alpha = 1- confidenceLevel;
+				alpha /= 2;
+				double z  = 1 - alpha;
+				double critVal = tDist
+						.inverseCumulativeProbability(z);
+
+				// Calculate confidence interval
+				double se = stats.getStandardDeviation()
+						/ Math.sqrt(stats.getN());
+
+				critVal *= se;
+				double maxValue = stats.getMax();
+				double minValue = stats.getMin();
+				double lowerBound = stats.getMean() - critVal;
+				double upperBound = stats.getMean() + critVal;
+				if(lowerBound <= minValue && upperBound >= maxValue){
+					result = i/100.0f;
+				}
+			}
+            return result;
+        } catch (MathIllegalArgumentException e) {
+            return result;
+        }
+	}
+	
+	public static double getMean(List<Long> list){
 		SummaryStatistics stats = new SummaryStatistics();
-        for (Integer val : list) {
+        for (Long val : list) {
             stats.addValue(val);
         }
         return stats.getMean();
 	}
+	
+	// The rest for Taghreed implementation
+	public static double getConfidenceOfCluster(Cluster cluster){
+		double result =0 ;
+		double confidenceLevel =0;
+		
+		 SummaryStatistics stats = new SummaryStatistics();
+	        for (DayCardinality val : cluster.getDays()) {
+	            stats.addValue(val.getCardinality());
+	        }
+	        if(stats.getN() == 1)
+	        	return 1.0;
+		
+        try {
+            // Create T Distribution with N-1 degrees of freedom
+            TDistribution tDist = new TDistribution(stats.getN() - 1);
+            // Calculate critical value
+			for (int i = 99; i > 0; i--) {
+				confidenceLevel = i/100.0f;
+				double alpha = 1- confidenceLevel;
+				alpha /= 2;
+				double z  = 1 - alpha;
+				double critVal = tDist
+						.inverseCumulativeProbability(z);
+
+				// Calculate confidence interval
+				double se = stats.getStandardDeviation()
+						/ Math.sqrt(stats.getN());
+
+				critVal *= se;
+				double maxValue = stats.getMax();
+				double minValue = stats.getMin();
+				double lowerBound = stats.getMean() - critVal;
+				double upperBound = stats.getMean() + critVal;
+				if(lowerBound <= minValue && upperBound >= maxValue){
+					result = i/100.0f;
+				}
+			}
+            return result;
+        } catch (MathIllegalArgumentException e) {
+            return result;
+        }
+	}
+	
+	public static double getMeanOfCluster(Cluster cluster){
+		SummaryStatistics stats = new SummaryStatistics();
+        for (DayCardinality val : cluster.getDays()) {
+            stats.addValue(val.getCardinality());
+        }
+        return stats.getMean();
+	}
+	
 	
 
 

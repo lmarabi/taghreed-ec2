@@ -245,6 +245,25 @@ public class Lookup {
         }
         return result;
     }
+    
+    public List<String> getTweetsMonth(String startDate,String endDate) throws ParseException{
+    	List<String> result = new ArrayList<String>();
+    	Date start = dateFormat.parse(startDate);
+        Date end = dateFormat.parse(endDate);
+        Calendar c = Calendar.getInstance();
+        c.setTime(start);
+        String month;
+        while(start.getYear() != end.getYear() || start.getMonth() != end.getMonth()){
+        	month = ((start.getMonth()+1) >= 10) ? String.valueOf(start.getMonth()+1) : "0"+String.valueOf(start.getMonth()+1);
+        	result.add(c.get(Calendar.YEAR)+"-"+month);
+        	c.add(Calendar.MONTH, 1);
+        	start = c.getTime();
+        	
+        }
+        month = ((start.getMonth()+1) >= 10) ? String.valueOf(start.getMonth()+1) : "0"+String.valueOf(start.getMonth()+1);
+        result.add(c.get(Calendar.YEAR)+"-"+month); 
+        return result;
+    }
 
     /**
      * This method return Full months between two dates

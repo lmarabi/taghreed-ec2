@@ -21,6 +21,7 @@ public class GridCell {
 	double average;
 	double deviation;
 	private List<Cluster> cluster;
+	static double threashold = 0.95; //theashold reflect the accuracy of the confidence level 0.0 - 1.0  
 	
 	public GridCell(MBR mbr,Lookup lookup) {
 		this.mbr = mbr;
@@ -175,31 +176,42 @@ public class GridCell {
 	
 	/**
 	 * This method cluster the data in the grid cell. 
+	 * @param confidenceThreshold 
 	 * @return number of group clusters created in the this Grid cell 
 	 * @throws ParseException
 	 */
-	public int initCluster() throws ParseException{
+	public int initCluster(double confidenceThreshold) throws ParseException{
+		this.threashold = confidenceThreshold;
 		System.out.println("Sample with removing all missing days");
 		List<DayCardinality> days = new ArrayList();
 		Iterator it = this.daysCardinality.entrySet().iterator();
 		while(it.hasNext()){
-			Map.Entry<String, Integer> entry = (Entry<String, Integer>) it.next();
-			if(lookup.isDayFromMissingDay(entry.getKey()))
-				continue;
-			System.out.println(entry.getKey()+"-"+entry.getValue());
+			Map.Entry<String, Long> entry = (Entry<String, Long>) it.next();
+//			if(lookup.isDayFromMissingDay(entry.getKey()))
+//				continue;
+//			System.out.println(entry.getKey()+"-"+entry.getValue());
 			days.add(new DayCardinality(entry.getKey(), entry.getValue()));
 			
-		}
-		System.out.println("median: "+this.getAverage()
-				+"\nRelative Standard Deviation: "+this.getStandardRelativeDeviation()
-				+"\nSample size:"+this.getSampleSize());
-		if(this.getStandardRelativeDeviation() > 5){
-			return 0;
 		}
 		//Sort the list of days
 		Collections.sort(days);
 		// Create the cluster
 		return createClusts(days);
+	}
+	
+	private static boolean isClusterExist(List<DayCardinality> array, int from, int to) {
+		List<Long> list = new ArrayList<Long>();
+		
+		while (from <= to) {
+			list.add(array.get(from).getCardinality());
+			from++;
+		}
+		double confidence = ConfidenceCoefficient.getConfidence(list);
+
+		if(confidence >= threashold)
+			return true;
+		else
+			return false;
 	}
 	
 	/***
@@ -210,47 +222,54 @@ public class GridCell {
 	 */
 	private int createClusts(List<DayCardinality> list){
 		List<Integer> seeds = new ArrayList<Integer>();
-		this.cluster = new ArrayList<Cluster>();
 		int previous = 0;
-		for(int i=0 ; i < list.size()-1 ; i++){
+		int count =0;
+		int from,to = 0;
+		for(int outerloop = 0; outerloop < list.size();){
+			from = outerloop;
+			to = from;
+			for(int innerloop = outerloop+1; innerloop < list.size();innerloop++){
+				
+				if(isClusterExist(list, outerloop, innerloop)){
+					to = innerloop;
+				}
+				
+			}
+			seeds.add(from);
+			seeds.add(to);
+			outerloop = to+1;
 			
-			//( | V1 - V2 | / ((V1 + V2)/2) ) * 100 
-			int V1 = list.get(i).getCardinality();
-			int V2 = list.get(i+1).getCardinality();
-			int preValue = list.get(previous).getCardinality();
-			double gapInc = calculateGapPercentage(V1, V2); 
-			double gapPrevious = calculateGapPercentage(preValue, V2);
-			if(gapInc > 15 || gapPrevious >15){
-				seeds.add(i+1);
-				previous = i+1;
-			}
 		}
-		
-		System.out.println("Number of clusters found: "+seeds.size());
-		//Add the first clusters to the list. 
+		System.out.println("Number of clusters found: "+((int)seeds.size()/2));
+		this.cluster = new ArrayList<Cluster>();
 		Cluster clusterobject = new Cluster();
-		for(int i= 0 ; i < seeds.get(0) ; i++){
-			clusterobject.addToCluster(list.get(i));
-		}
-		//add the cluster object to the list of clusters.
-		this.cluster.add(clusterobject);
-		// Add the intermediate clusters objects. 
-		for(int seed =0 ; seed < seeds.size()-1; seed++){
+
+		int counter =1;
+		int clusterdDay = 0;
+		for (int seed = 0; seed < seeds.size() - 1; seed = seed+2) {
+			System.out.println("\nCluster ( " + (counter++) + " ) from:"
+					+ seeds.get(seed)+" - To:"+seeds.get(seed+1));
 			clusterobject = new Cluster();
-			for(int i= seeds.get(seed) ; i< seeds.get(seed+1) ; i++){
-				clusterobject.addToCluster(list.get(i));
-			}
+			clusterobject = copyToCluster(seeds.get(seed), seeds.get(seed+1), list);
 			this.cluster.add(clusterobject);
+			clusterdDay += clusterobject.getDays().size();
+			for(DayCardinality i : clusterobject.getDays())
+				System.out.print(i.getDay()+"_"+i.getCardinality()+",");
+			System.out.println("\nMean: " + ConfidenceCoefficient.getMeanOfCluster(clusterobject)
+					+ " Sample Size: " + clusterobject.getDays().size());
+			System.out.println("Confidence: %"+ConfidenceCoefficient.getConfidenceOfCluster(clusterobject));
 		}
-		
-		//Add the last cluster to the list
-		clusterobject = new Cluster();
-		for(int i= seeds.get(seeds.size()-1) ; i < list.size() ; i++){
-			clusterobject.addToCluster(list.get(i));
-		}
-		this.cluster.add(clusterobject);
 		
 		return this.cluster.size();
+	}
+	
+	private static Cluster copyToCluster(int from , int to, List<DayCardinality> list){
+		Cluster cluster = new Cluster();
+		while( from <= to){
+			cluster.addToCluster(list.get(from));
+			from++;
+		}
+		return cluster;
 	}
 	
 	/***
@@ -288,7 +307,14 @@ public class GridCell {
 	}
 	
 	
-	
+	public String toStringHistogram(){
+		StringBuilder value = new StringBuilder();
+		value.append(this.mbr.toString());
+		for(Cluster group : this.cluster){
+			value.append(";"+group.toString());
+		}
+		return value.toString();
+	}
 	
 	
 	@Override
