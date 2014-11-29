@@ -297,11 +297,11 @@ public class Grid {
 					+ "****************");
 			Grid grid = new Grid("2012-01-01", "2015-10-30", q);
 			System.out.println("Building Grid for " + q.toString());
-			 grid.BuildGrid();
+//			 grid.BuildGrid();
 			// grid.buildWholeSpace();
 			// System.out.println("Writing Grid to Disk");
 			// grid.writeGridToDisk();
-			// grid.readGridFromDisk();
+			 grid.readGridFromDisk();
 			 grid.createClusters(0.90);
 			// System.out.println("Writing WKT to Disk");
 			// // grid.writeGridToKWT();

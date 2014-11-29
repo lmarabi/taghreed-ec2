@@ -20,6 +20,8 @@ import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.collections.PopularHashtags;
 import org.gistic.taghreed.collections.PopularUsers;
 import org.gistic.taghreed.collections.Tweet;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 /**
  *
@@ -44,6 +46,8 @@ public class Main {
 		ServerRequest req =  new ServerRequest(1);
 		req.setStartDate("2014-10-20");
 		req.setEndDate("2014-10-20");
+		req.setType(queryType.tweet);
+		req.setIndex(queryIndex.rtree);
 		//,) - (,
 		String maxlat = "90";//"45.07820702143926";
 		String maxlon = "180";//"-93.07519492158275";
@@ -63,15 +67,15 @@ public class Main {
 		
 		
 		
-		System.out.println("Tweets Size (pyramid):" + req.getTweetsRtreePyramid().size());
-		System.out.println("Hashtags Size = " + req.getHashtags().size());
-		System.out.println("Active user size= "+ req.getActiveUser().size());
-		System.out.println("popular users size= "+ req.getPopularUsers().size());
+//		System.out.println("Tweets Size (pyramid):" + req.getTweetsRtreePyramid().size());
+//		System.out.println("Hashtags Size = " + req.getHashtags().size());
+//		System.out.println("Active user size= "+ req.getActiveUser().size());
+//		System.out.println("popular users size= "+ req.getPopularUsers().size());
 		
 		System.out.println("Tweets Size:" + req.getTweetsRtreeDays().size());
-		System.out.println("Hashtags Size = " + req.getHashtags().size());
-		System.out.println("Active user size= "+ req.getActiveUser().size());
-		System.out.println("popular users size= "+ req.getPopularUsers().size());
+//		System.out.println("Hashtags Size = " + req.getHashtags().size());
+//		System.out.println("Active user size= "+ req.getActiveUser().size());
+//		System.out.println("popular users size= "+ req.getPopularUsers().size());
 //		for(PopularUsers user : req.getPopularUsers()){
 //			System.out.println(user.toString());
 //		}

@@ -83,8 +83,16 @@ public class QueryPlanner {
 	private double getIntersectCellsWeekHistogram(MBR mbr) throws ParseException {
 		double cost = 0;
 		int cell = 0;
-		for (int i = 0; i < this.LonDomain; i++) {
-			for (int j = 0; j < this.LatDomain; j++) {
+		int minlon = (int) Math.ceil(mbr.getMin().getLon()+180)- 1;
+		minlon = (minlon < 0 ) ? 0 : minlon;
+		int maxlon = (int) Math.ceil(mbr.getMax().getLon()+180) +1;
+		maxlon = (maxlon > 360) ? 360 : maxlon;
+		int minlat = (int) Math.ceil(mbr.getMin().getLat()+90) -1;
+		minlat = (minlat < 0 ) ? 0 : minlat;
+		int maxlat = (int) Math.ceil(mbr.getMax().getLat()+90) +1;
+		maxlat = (maxlat > 180) ? 180 : maxlat;
+		for (int i = minlon; i < maxlon; i++) {
+			for (int j = minlat; j < maxlat; j++) {
 				try {
 					if (mbr.Intersect(weekHistogram[i][j].mbr)) {
 //						System.out.println("cellid:" + j + "-" + i + "  "
@@ -105,12 +113,20 @@ public class QueryPlanner {
 	private double getIntersectCellsMonthHistogram(MBR mbr) throws ParseException {
 		double cost = 0;
 		int cell = 0;
-		for (int i = 0; i < this.LonDomain; i++) {
-			for (int j = 0; j < this.LatDomain; j++) {
+		int minlon = (int) Math.ceil(mbr.getMin().getLon()+180)- 1;
+		minlon = (minlon < 0 ) ? 0 : minlon;
+		int maxlon = (int) Math.ceil(mbr.getMax().getLon()+180) +1;
+		maxlon = (maxlon > 360) ? 360 : maxlon;
+		int minlat = (int) Math.ceil(mbr.getMin().getLat()+90) -1;
+		minlat = (minlat < 0 ) ? 0 : minlat;
+		int maxlat = (int) Math.ceil(mbr.getMax().getLat()+90) +1;
+		maxlat = (maxlat > 180) ? 180 : maxlat;
+		for (int i = minlon; i < maxlon; i++) {
+			for (int j = minlat; j < maxlat; j++) {
 				try {
 					if (mbr.Intersect(monthHistogram[i][j].mbr)) {
-//						System.out.println("cellid:" + j + "-" + i + "  "
-//								+ dayHistogram[i][j].getMbr().toString());
+						System.out.println("cellid:" + i + "-" + j + "  "
+								+ monthHistogram[i][j].getMbr().toString());
 						cell++;
 						cost += monthHistogram[i][j].getEsitimatedCostMonthHistogram(startDay,
 								endDay);
@@ -123,17 +139,31 @@ public class QueryPlanner {
 		System.out.println("Cost:"+cost+" intersected Cell:"+cell);
 		return cost;
 	}
+	
+	
 
 	
 	private double getIntersectCellsDayHistogram(MBR mbr) throws ParseException {
+//		double cost = 0;
+//		int cell = 0;
+//		for (int i = 0; i < this.LonDomain; i++) {
+//			for (int j = 0; j < this.LatDomain; j++) {
 		double cost = 0;
 		int cell = 0;
-		for (int i = 0; i < this.LonDomain; i++) {
-			for (int j = 0; j < this.LatDomain; j++) {
+		int minlon = (int) Math.ceil(mbr.getMin().getLon()+180)- 1;
+		minlon = (minlon < 0 ) ? 0 : minlon;
+		int maxlon = (int) Math.ceil(mbr.getMax().getLon()+180) +1;
+		maxlon = (maxlon > 360) ? 360 : maxlon;
+		int minlat = (int) Math.ceil(mbr.getMin().getLat()+90) -1;
+		minlat = (minlat < 0 ) ? 0 : minlat;
+		int maxlat = (int) Math.ceil(mbr.getMax().getLat()+90) +1;
+		maxlat = (maxlat > 180) ? 180 : maxlat;
+		for (int i = minlon; i < maxlon; i++) {
+			for (int j = minlat; j < maxlat; j++) {
 				try {
 					if (mbr.Intersect(dayHistogram[i][j].mbr)) {
-//						System.out.println("cellid:" + j + "-" + i + "  "
-//								+ dayHistogram[i][j].getMbr().toString());
+						System.out.println("cellid:" + i + "-" + j + "  "
+								+ dayHistogram[i][j].getMbr().toString());
 						cell++;
 						cost += dayHistogram[i][j].getEsitimatedCostDayHistogram(startDay,
 								endDay);
@@ -146,18 +176,49 @@ public class QueryPlanner {
 		System.out.println("Cost:"+cost+" intersected Cell:"+cell);
 		return cost;
 	}
+	
+//	private double getFastIntersectCell(MBR mbr) throws ParseException{
+//		double cost = 0;
+//		int cell = 0;
+//		int minlon = (int) Math.ceil(mbr.getMin().getLon()+180)- 1;
+//		minlon = (minlon < 0 ) ? 0 : minlon;
+//		int maxlon = (int) Math.ceil(mbr.getMax().getLon()+180) +1;
+//		maxlon = (maxlon > 360) ? 360 : maxlon;
+//		int minlat = (int) Math.ceil(mbr.getMin().getLat()+90) -1;
+//		minlat = (minlat < 0 ) ? 0 : minlat;
+//		int maxlat = (int) Math.ceil(mbr.getMax().getLat()+90) +1;
+//		maxlat = (maxlat > 180) ? 180 : maxlat;
+//		for (int i = minlon; i < maxlon; i++) {
+//			for (int j = minlat; j < maxlat; j++) {
+//				try {
+//					if (mbr.Intersect(dayHistogram[i][j].mbr)) {
+////						System.out.println("cellid:" + i + "-" + j + "  "
+////								+ dayHistogram[i][j].getMbr().toString());
+//						cell++;
+//						cost += dayHistogram[i][j].getEsitimatedCostDayHistogram(startDay,
+//								endDay);
+//					}
+//				} catch (NullPointerException e) {
+//
+//				}
+//			}
+//		}
+//		System.out.println("Cost:"+cost+" intersected Cell:"+cell);
+//		return cost;
+//	}
 
 	public static void main(String[] args) throws IOException, ParseException {
 
 //		MBR mbr = new MBR(new Point(90, 180), new Point(-90, -180));
 
-		 MBR mbr = new MBR(new Point(46.68419444691358,-73.67156982421847),new
-		 Point(39.61732577224177,-76.47308349609341));
+		MBR mbr = new MBR(new Point(40.694961541009995,118.07045041992582),new Point(38.98904106170265,114.92561399414794) );
+//		 MBR mbr = new MBR(new Point(46.68419444691358,-73.67156982421847),new
+//		 Point(39.61732577224177,-76.47308349609341));
 
 		for (queryLevel q : queryLevel.values()) {
 
-//			if (q.equals(queryLevel.Day) || q.equals(queryLevel.Month))
-//				continue;
+			if (q.equals(queryLevel.Month) || q.equals(queryLevel.Week))
+				continue;
 
 			QueryPlanner planner = new QueryPlanner("2014-01-01", "2014-05-30",
 					q);
@@ -166,6 +227,12 @@ public class QueryPlanner {
 			long starttime = System.currentTimeMillis();
 			double estimatedCardinality = planner.getIntersectCellHistogram(mbr);
 			long endtime = System.currentTimeMillis();
+			System.out.println("estimated cardinality "+q.toString()+" :"+ estimatedCardinality);
+			System.out.println("Time in Milliseconds: " + (endtime - starttime));
+			System.out.println("*************************");
+			starttime = System.currentTimeMillis();
+//			estimatedCardinality = planner.getFastIntersectCell(mbr);
+			endtime = System.currentTimeMillis();
 			System.out.println("estimated cardinality "+q.toString()+" :"+ estimatedCardinality);
 			System.out.println("Time in Milliseconds: " + (endtime - starttime));
 

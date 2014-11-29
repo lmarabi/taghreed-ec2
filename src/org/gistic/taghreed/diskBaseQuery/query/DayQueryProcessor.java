@@ -95,15 +95,21 @@ public class DayQueryProcessor {
 		int count = 0;
 		// Set the area of interest in the MBR
 		dataPath += "/";
+		Thread[] readThreads = null;
 		if (serverRequest.getIndex().equals(ServerRequest.queryIndex.rtree)) {
 			// Get the set of Files that intersect with the area.
 
 			List<Partition> files = ReadMaster(day, dataPath);
 			logEnd("selected (" + files.size() + ")");
+//			readThreads = new Thread[files.size()];
+			int index =0;
 			// read eachfile and output the result.
 			for (Partition f : files) {
 				System.out.println("Start Reading file "
 						+ f.getPartition().getName());
+//				readThreads[index] = new Thread(new smartQueryThread(f, outwriter));
+//				readThreads[index].start();
+//				index++;
 				int partitionCount = smartQuery(f, outwriter);
 				count += partitionCount;
 				System.out.println("Select "
@@ -118,6 +124,13 @@ public class DayQueryProcessor {
 			count += GetDocumentsInvertedIndex(dataPath);
 		}
 		logEnd("end reading files");
+		if (readThreads != null) {
+			for (int i = 0; i < readThreads.length; i++) {
+				while (readThreads[i].isAlive()) {
+
+				}
+			}
+		}
 		return count;
 	}
 
@@ -228,6 +241,107 @@ public class DayQueryProcessor {
 		}
 		reader.close();
 		return count;
+	}
+	
+	
+	public class smartQueryThread implements Runnable{
+		Partition p; 
+		OutputStreamWriter output;
+		public smartQueryThread(Partition p, OutputStreamWriter out) {
+			this.p = p;
+			this.output = out;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				smartQuery();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		
+		/**
+		 * This method Write the Final result .
+		 *
+		 * @param f
+		 * @param out
+		 *            Streamer
+		 * @throws FileNotFoundException
+		 * @throws IOException
+		 */
+		public int smartQuery()
+				throws FileNotFoundException, IOException, ParseException {
+			BufferedReader reader;
+			// FileInputStream fin = new FileInputStream(part.getPartition());
+			// BufferedInputStream bis = new BufferedInputStream(fin);
+			// CompressorInputStream input = new
+			// CompressorStreamFactory().createCompressorInputStream(bis);
+			// BufferedReader reader = new BufferedReader(new
+			// InputStreamReader(input,"UTF-8"));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+					this.p.getPartition()), "UTF-8"));
+			String tweet;
+			int count = 0;
+			// get the range file
+			while ((tweet = reader.readLine()) != null) {
+				// Here rather than wrting to local storage you can pass it
+				// right away to Visualization team.
+
+				Point node;
+				if (serverRequest.getType().equals(ServerRequest.queryType.tweet)) {
+					Tweet tweetObj = new Tweet(tweet);
+					node = new Point(tweetObj.lat, tweetObj.lon);
+					if (serverRequest.getMbr().insideMBR(node)) {
+						if (serverRequest.getQuery() != null) {
+							if (tweetObj.tweetText.contains(serverRequest
+									.getQuery())) {
+								output.write(tweet);
+								output.write("\n");
+								count++;
+								insertTweetsToVolume(tweetObj.created_at);
+							}
+						} else {
+							output.write(tweet);
+							output.write("\n");
+							count++;
+							insertTweetsToVolume(tweetObj.created_at);
+						}
+
+					}
+				} else {
+					Hashtag hashtag = new Hashtag(tweet);
+					node = new Point(hashtag.getLat(), hashtag.getLon());
+					if (serverRequest.getMbr().insideMBR(node)) {
+						if (serverRequest.getQuery() != null) {
+							if (hashtag.getHashtagText().contains(
+									serverRequest.getQuery())) {
+								output.write(tweet);
+								output.write("\n");
+								count++;
+							}
+						} else {
+							output.write(tweet);
+							output.write("\n");
+							count++;
+						}
+
+					}
+				}
+
+			}
+			reader.close();
+			return count;
+		}
 	}
 
 	/**
@@ -389,7 +503,7 @@ public class DayQueryProcessor {
 		outwriter.close();
 	}
 
-	private static void insertTweetsToVolume(String day) throws ParseException {
+	private synchronized static void insertTweetsToVolume(String day) throws ParseException {
 		if (tweetsVolume.containsKey(Tweet.parseTweetTimeToDate(day))) {
 			tweetsVolume.put(Tweet.parseTweetTimeToDate(day),
 					(tweetsVolume.get(Tweet.parseTweetTimeToDate(day)) + 1));
