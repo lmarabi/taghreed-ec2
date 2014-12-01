@@ -50,7 +50,12 @@ public class HomeServer extends AbstractHandler {
 //		Runnable reRunnabl = new RequestThread(counter, s, baseRequest, request, response);
 //		executor.execute(reRunnabl);
 //		while(!executor.isTerminated()){
-		executeRequest(counter,s, baseRequest, request, response);
+		try {
+			executeRequest(counter,s, baseRequest, request, response);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //			
 //		}
 		
@@ -61,7 +66,7 @@ public class HomeServer extends AbstractHandler {
 	public void executeRequest(int id, String s, Request baseRequest,
 			HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException, FileNotFoundException,
-	UnsupportedEncodingException {
+	UnsupportedEncodingException, InterruptedException {
 
 try {
 

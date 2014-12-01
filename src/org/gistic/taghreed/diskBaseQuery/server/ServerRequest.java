@@ -290,9 +290,10 @@ public class ServerRequest {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 * @throws ParseException
+	 * @throws InterruptedException 
 	 */
 	public List<Tweet> getTweetsRtreeDays() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException {
+			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
 		dayVolumes = new ArrayList<TweetVolumes>();
 		this.type = queryType.tweet;
 		this.index = index.rtree;
@@ -428,9 +429,10 @@ public class ServerRequest {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 * @throws ParseException
+	 * @throws InterruptedException 
 	 */
 	public List<Tweet> getTweetsRtreePyramid() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException {
+			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
 		List<Tweet> tweet = new ArrayList<Tweet>();
 		dayVolumes = new ArrayList<TweetVolumes>();
 		this.type = type.tweet;
@@ -482,9 +484,10 @@ public class ServerRequest {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 * @throws ParseException
+	 * @throws InterruptedException 
 	 */
 	public List<Tweet> getTweetsInvertedPyramid() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException {
+			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
 		List<Tweet> tweet = new ArrayList<Tweet>();
 		dayVolumes = new ArrayList<TweetVolumes>();
 		this.type = type.tweet;

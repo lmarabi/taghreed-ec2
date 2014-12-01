@@ -42,9 +42,10 @@ public class Queryoptimizer {
 
     /**
      * @param args the command line arguments
+     * @throws InterruptedException 
      */
     public List<TweetVolumes> executeQuery() throws FileNotFoundException,
-            UnsupportedEncodingException, IOException, ParseException {
+            UnsupportedEncodingException, IOException, ParseException, InterruptedException {
 
         boolean queryTail = false;
         double startTime = System.currentTimeMillis();

@@ -39,7 +39,7 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException {
+			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
 		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
 		List<Tweet> tweets = new ArrayList<Tweet>();
 		
@@ -129,7 +129,7 @@ public class Main {
 //		System.out.println("Hashtags Size = " + popularHashtags.size());
 	}
 	
-	private void statistics_DeleteMe() throws IOException, ParseException{
+	private void statistics_DeleteMe() throws IOException, ParseException, InterruptedException{
 		ServerRequest req = new ServerRequest(1);
 		req.setStartDate("2014-05-02");
 		req.setEndDate("2014-05-02");

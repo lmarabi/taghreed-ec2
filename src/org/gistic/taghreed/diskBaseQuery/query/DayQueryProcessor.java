@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -73,6 +74,8 @@ public class DayQueryProcessor {
 		this.startDate = dateFormat.parse(startDate);
 		this.endDate = dateFormat.parse(endDate);
 	}
+	
+	public static Collection<Tweet> resultTweet =  Collections.synchronizedCollection(new ArrayList<Tweet>());
 
 	/**
 	 * This metho will read from the nodes inside the R-tree index
@@ -87,11 +90,12 @@ public class DayQueryProcessor {
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 * @throws CompressorException
 	 */
 	public int GetSmartOutput(String day, String dataPath)
 			throws FileNotFoundException, UnsupportedEncodingException,
-			IOException, ParseException {
+			IOException, ParseException, InterruptedException {
 		int count = 0;
 		// Set the area of interest in the MBR
 		dataPath += "/";
@@ -101,24 +105,24 @@ public class DayQueryProcessor {
 
 			List<Partition> files = ReadMaster(day, dataPath);
 			logEnd("selected (" + files.size() + ")");
-//			readThreads = new Thread[files.size()];
+			readThreads = new Thread[files.size()];
 			int index =0;
 			// read eachfile and output the result.
 			for (Partition f : files) {
 				System.out.println("Start Reading file "
 						+ f.getPartition().getName());
-//				readThreads[index] = new Thread(new smartQueryThread(f, outwriter));
-//				readThreads[index].start();
-//				index++;
-				int partitionCount = smartQuery(f, outwriter);
-				count += partitionCount;
-				System.out.println("Select "
-						+ partitionCount
-						+ " out of "
-						+ f.getCardinality()
-						+ " Selectivity is: "
-						+ (double) (((double) partitionCount / (double) f
-								.getCardinality()) * 100) + " %");
+				readThreads[index] = new Thread(new smartQueryThread(f, outwriter));
+				readThreads[index].start();
+				index++;
+//				int partitionCount = smartQuery(f, outwriter);
+//				count += partitionCount;
+//				System.out.println("Select "
+//						+ partitionCount
+//						+ " out of "
+//						+ f.getCardinality()
+//						+ " Selectivity is: "
+//						+ (double) (((double) partitionCount / (double) f
+//								.getCardinality()) * 100) + " %");
 			}
 		} else {
 			count += GetDocumentsInvertedIndex(dataPath);
@@ -127,7 +131,7 @@ public class DayQueryProcessor {
 		if (readThreads != null) {
 			for (int i = 0; i < readThreads.length; i++) {
 				while (readThreads[i].isAlive()) {
-
+					//wait until thread finished reading files
 				}
 			}
 		}
@@ -179,7 +183,7 @@ public class DayQueryProcessor {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static int smartQuery(Partition part, OutputStreamWriter output)
+	public static synchronized int smartQuery(Partition part, OutputStreamWriter output)
 			throws FileNotFoundException, IOException, ParseException {
 		BufferedReader reader;
 		// FileInputStream fin = new FileInputStream(part.getPartition());
@@ -205,12 +209,14 @@ public class DayQueryProcessor {
 					if (serverRequest.getQuery() != null) {
 						if (tweetObj.tweetText.contains(serverRequest
 								.getQuery())) {
+							resultTweet.add(tweetObj);
 							output.write(tweet);
 							output.write("\n");
 							count++;
 							insertTweetsToVolume(tweetObj.created_at);
 						}
 					} else {
+						resultTweet.add(tweetObj);
 						output.write(tweet);
 						output.write("\n");
 						count++;
@@ -255,7 +261,7 @@ public class DayQueryProcessor {
 		@Override
 		public void run() {
 			try {
-				smartQuery();
+				smartQuery(p, output);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -270,78 +276,78 @@ public class DayQueryProcessor {
 		}
 		
 		
-		/**
-		 * This method Write the Final result .
-		 *
-		 * @param f
-		 * @param out
-		 *            Streamer
-		 * @throws FileNotFoundException
-		 * @throws IOException
-		 */
-		public int smartQuery()
-				throws FileNotFoundException, IOException, ParseException {
-			BufferedReader reader;
-			// FileInputStream fin = new FileInputStream(part.getPartition());
-			// BufferedInputStream bis = new BufferedInputStream(fin);
-			// CompressorInputStream input = new
-			// CompressorStreamFactory().createCompressorInputStream(bis);
-			// BufferedReader reader = new BufferedReader(new
-			// InputStreamReader(input,"UTF-8"));
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-					this.p.getPartition()), "UTF-8"));
-			String tweet;
-			int count = 0;
-			// get the range file
-			while ((tweet = reader.readLine()) != null) {
-				// Here rather than wrting to local storage you can pass it
-				// right away to Visualization team.
-
-				Point node;
-				if (serverRequest.getType().equals(ServerRequest.queryType.tweet)) {
-					Tweet tweetObj = new Tweet(tweet);
-					node = new Point(tweetObj.lat, tweetObj.lon);
-					if (serverRequest.getMbr().insideMBR(node)) {
-						if (serverRequest.getQuery() != null) {
-							if (tweetObj.tweetText.contains(serverRequest
-									.getQuery())) {
-								output.write(tweet);
-								output.write("\n");
-								count++;
-								insertTweetsToVolume(tweetObj.created_at);
-							}
-						} else {
-							output.write(tweet);
-							output.write("\n");
-							count++;
-							insertTweetsToVolume(tweetObj.created_at);
-						}
-
-					}
-				} else {
-					Hashtag hashtag = new Hashtag(tweet);
-					node = new Point(hashtag.getLat(), hashtag.getLon());
-					if (serverRequest.getMbr().insideMBR(node)) {
-						if (serverRequest.getQuery() != null) {
-							if (hashtag.getHashtagText().contains(
-									serverRequest.getQuery())) {
-								output.write(tweet);
-								output.write("\n");
-								count++;
-							}
-						} else {
-							output.write(tweet);
-							output.write("\n");
-							count++;
-						}
-
-					}
-				}
-
-			}
-			reader.close();
-			return count;
-		}
+//		/**
+//		 * This method Write the Final result .
+//		 *
+//		 * @param f
+//		 * @param out
+//		 *            Streamer
+//		 * @throws FileNotFoundException
+//		 * @throws IOException
+//		 */
+//		public synchronized int smartQuery()
+//				throws FileNotFoundException, IOException, ParseException {
+//			BufferedReader reader;
+//			// FileInputStream fin = new FileInputStream(part.getPartition());
+//			// BufferedInputStream bis = new BufferedInputStream(fin);
+//			// CompressorInputStream input = new
+//			// CompressorStreamFactory().createCompressorInputStream(bis);
+//			// BufferedReader reader = new BufferedReader(new
+//			// InputStreamReader(input,"UTF-8"));
+//			reader = new BufferedReader(new InputStreamReader(new FileInputStream(
+//					this.p.getPartition()), "UTF-8"));
+//			String tweet;
+//			int count = 0;
+//			// get the range file
+//			while ((tweet = reader.readLine()) != null) {
+//				// Here rather than wrting to local storage you can pass it
+//				// right away to Visualization team.
+//
+//				Point node;
+//				if (serverRequest.getType().equals(ServerRequest.queryType.tweet)) {
+//					Tweet tweetObj = new Tweet(tweet);
+//					node = new Point(tweetObj.lat, tweetObj.lon);
+//					if (serverRequest.getMbr().insideMBR(node)) {
+//						if (serverRequest.getQuery() != null) {
+//							if (tweetObj.tweetText.contains(serverRequest
+//									.getQuery())) {
+//								output.write(tweet);
+//								output.write("\n");
+//								count++;
+//								insertTweetsToVolume(tweetObj.created_at);
+//							}
+//						} else {
+//							output.write(tweet);
+//							output.write("\n");
+//							count++;
+//							insertTweetsToVolume(tweetObj.created_at);
+//						}
+//
+//					}
+//				} else {
+//					Hashtag hashtag = new Hashtag(tweet);
+//					node = new Point(hashtag.getLat(), hashtag.getLon());
+//					if (serverRequest.getMbr().insideMBR(node)) {
+//						if (serverRequest.getQuery() != null) {
+//							if (hashtag.getHashtagText().contains(
+//									serverRequest.getQuery())) {
+//								output.write(tweet);
+//								output.write("\n");
+//								count++;
+//							}
+//						} else {
+//							output.write(tweet);
+//							output.write("\n");
+//							count++;
+//						}
+//
+//					}
+//				}
+//
+//			}
+//			reader.close();
+//			return count;
+//		}
 	}
 
 	/**
@@ -531,9 +537,10 @@ public class DayQueryProcessor {
 	/**
 	 * @param args
 	 *            the command line arguments
+	 * @throws InterruptedException 
 	 */
 	public List<TweetVolumes> executeQuery() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException {
+			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
 		double startTime = System.currentTimeMillis();
 		createStreamer();
 		Map<Date, String> index = getIndexArmy();
