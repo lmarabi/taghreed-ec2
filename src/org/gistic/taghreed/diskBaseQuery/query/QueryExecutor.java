@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,48 +35,46 @@ import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.collections.Hashtag;
 import org.gistic.taghreed.collections.PopularHashtags;
+import org.gistic.taghreed.collections.TopTweetResult;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
+import org.gistic.taghreed.collections.Week;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
+
+import com.sun.corba.se.spi.orbutil.fsm.Guard.Result;
 
 /**
  *
  * @author turtle
  */
-public class DayQueryProcessor {
+public class QueryExecutor {
 
 	// Global lookup
 	private static Lookup lookup = new Lookup();
-	public static List<TweetVolumes> dayVolume;
-	private static OutputStreamWriter outwriter;
 	private static double startTime;
 	private static double endTime;
 	private Date startDate;
 	private Date endDate;
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	private int topK;
-	private static Map<Date, Integer> tweetsVolume = new HashMap<Date, Integer>();
 	private static ServerRequest serverRequest;
 
-	public OutputStreamWriter getStreamer() {
-		return outwriter;
-	}
+	public static TopTweetResult result = new TopTweetResult(5000);
 
-	public DayQueryProcessor(ServerRequest request) throws IOException,
+
+	public QueryExecutor(ServerRequest request) throws IOException,
 			FileNotFoundException, ParseException {
 		this.serverRequest = request;
-		this.dayVolume = new ArrayList<TweetVolumes>();
 		this.lookup = request.getLookup();
 	}
 
-	public DayQueryProcessor(String startDate, String endDate)
+	public QueryExecutor(String startDate, String endDate)
 			throws ParseException {
 		this.startDate = dateFormat.parse(startDate);
 		this.endDate = dateFormat.parse(endDate);
 	}
 	
-	public static Collection<Tweet> resultTweet =  Collections.synchronizedCollection(new ArrayList<Tweet>());
 
 	/**
 	 * This metho will read from the nodes inside the R-tree index
@@ -93,7 +92,7 @@ public class DayQueryProcessor {
 	 * @throws InterruptedException 
 	 * @throws CompressorException
 	 */
-	public int GetSmartOutput(String day, String dataPath)
+	public void GetSmartOutput(String day, String dataPath)
 			throws FileNotFoundException, UnsupportedEncodingException,
 			IOException, ParseException, InterruptedException {
 		int count = 0;
@@ -111,7 +110,7 @@ public class DayQueryProcessor {
 			for (Partition f : files) {
 				System.out.println("Start Reading file "
 						+ f.getPartition().getName());
-				readThreads[index] = new Thread(new smartQueryThread(f, outwriter));
+				readThreads[index] = new Thread(new smartQueryThread(f));
 				readThreads[index].start();
 				index++;
 //				int partitionCount = smartQuery(f, outwriter);
@@ -135,7 +134,6 @@ public class DayQueryProcessor {
 				}
 			}
 		}
-		return count;
 	}
 
 	/**
@@ -166,7 +164,7 @@ public class DayQueryProcessor {
 		for (Partition f : files) {
 			System.out.println("Start Reading file "
 					+ f.getPartition().getName());
-			smartQueryChechTemporal(f, outwriter);
+			smartQueryChechTemporal(f);
 			System.out
 					.println("End reading file " + f.getPartition().getName());
 		}
@@ -183,7 +181,7 @@ public class DayQueryProcessor {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static synchronized int smartQuery(Partition part, OutputStreamWriter output)
+	public static synchronized int smartQuery(Partition part)
 			throws FileNotFoundException, IOException, ParseException {
 		BufferedReader reader;
 		// FileInputStream fin = new FileInputStream(part.getPartition());
@@ -209,18 +207,18 @@ public class DayQueryProcessor {
 					if (serverRequest.getQuery() != null) {
 						if (tweetObj.tweetText.contains(serverRequest
 								.getQuery())) {
-							resultTweet.add(tweetObj);
-							output.write(tweet);
-							output.write("\n");
+							result.insert(tweetObj);
+//							output.write(tweet);
+//							output.write("\n");
 							count++;
-							insertTweetsToVolume(tweetObj.created_at);
+//							insertTweetsToVolume(tweetObj.created_at);
 						}
 					} else {
-						resultTweet.add(tweetObj);
-						output.write(tweet);
-						output.write("\n");
+						result.insert(tweetObj);
+//						output.write(tweet);
+//						output.write("\n");
 						count++;
-						insertTweetsToVolume(tweetObj.created_at);
+//						insertTweetsToVolume(tweetObj.created_at);
 					}
 
 				}
@@ -231,13 +229,13 @@ public class DayQueryProcessor {
 					if (serverRequest.getQuery() != null) {
 						if (hashtag.getHashtagText().contains(
 								serverRequest.getQuery())) {
-							output.write(tweet);
-							output.write("\n");
+//							output.write(tweet);
+//							output.write("\n");
 							count++;
 						}
 					} else {
-						output.write(tweet);
-						output.write("\n");
+//						output.write(tweet);
+//						output.write("\n");
 						count++;
 					}
 
@@ -252,16 +250,14 @@ public class DayQueryProcessor {
 	
 	public class smartQueryThread implements Runnable{
 		Partition p; 
-		OutputStreamWriter output;
-		public smartQueryThread(Partition p, OutputStreamWriter out) {
+		public smartQueryThread(Partition p) {
 			this.p = p;
-			this.output = out;
 		}
 		
 		@Override
 		public void run() {
 			try {
-				smartQuery(p, output);
+				smartQuery(p);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -359,8 +355,7 @@ public class DayQueryProcessor {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void smartQueryChechTemporal(Partition part,
-			OutputStreamWriter output) throws FileNotFoundException,
+	public void smartQueryChechTemporal(Partition part) throws FileNotFoundException,
 			IOException, ParseException {
 
 		BufferedReader reader;
@@ -390,14 +385,14 @@ public class DayQueryProcessor {
 					String[] datetemp = temp[0].split(" ");
 					Date date = dateFormat.parse(datetemp[0]);
 					if (org.gistic.taghreed.diskBaseQuery.query.Lookup
-							.insideDaysBoundry(this.startDate, this.endDate,
-									date)) {
-						output.write(tweet);
-						output.write("\n");
+							.insideDaysBoundry(dateFormat.format(this.startDate), dateFormat.format(this.endDate),
+									dateFormat.format(date))) {
+//						output.write(tweet);
+//						output.write("\n");
 					}
 				} else {
-					output.write(tweet);
-					output.write("\n");
+//					output.write(tweet);
+//					output.write("\n");
 				}
 
 			}
@@ -469,107 +464,57 @@ public class DayQueryProcessor {
 		return result;
 	}
 
-	/**
-	 * Create output Stream for result
-	 *
-	 * @param exportPath
-	 * @param id
-	 * @throws UnsupportedEncodingException
-	 * @throws FileNotFoundException
-	 */
-	public static void createStreamer() throws UnsupportedEncodingException,
-			FileNotFoundException, IOException {
-		File f = new File(serverRequest.getOutputResult());
-		if (!f.exists()) {
-			File dir = new File(f.getParent());
-			if (!dir.exists()) {
-				dir.mkdirs();
-			}
-			f.createNewFile();
-		}
-		outwriter = new OutputStreamWriter(new FileOutputStream(
-				serverRequest.getOutputResult()), "UTF-8");
-	}
+	
 
-	/**
-	 * This method assign the output writer to the given parameter
-	 *
-	 * @param writer
-	 */
-	public void parseStreamer(OutputStreamWriter writer) {
-		this.outwriter = writer;
-	}
 
-	/**
-	 * Close output streamer
-	 *
-	 * @throws IOException
-	 */
-	public static void closeStreamer() throws IOException {
-		outwriter.close();
-	}
-
-	private synchronized static void insertTweetsToVolume(String day) throws ParseException {
-		if (tweetsVolume.containsKey(Tweet.parseTweetTimeToDate(day))) {
-			tweetsVolume.put(Tweet.parseTweetTimeToDate(day),
-					(tweetsVolume.get(Tweet.parseTweetTimeToDate(day)) + 1));
-		} else {
-			tweetsVolume.put(Tweet.parseTweetTimeToDate(day), 1);
-		}
-	}
-
-	public List<TweetVolumes> getTweetsVolum() throws ParseException {
-		List<TweetVolumes> result = new ArrayList<TweetVolumes>();
-		Iterator it = tweetsVolume.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry obj = (Map.Entry) it.next();
-			result.add(new TweetVolumes((Date) obj.getKey(), (Integer) obj
-					.getValue()));
-		}
-		Collections.sort(result);
-		return result;
-	}
-
-	public Map<Date, Integer> getTweetsVolume() {
-		return tweetsVolume;
-	}
 
 	/**
 	 * @param args
 	 *            the command line arguments
 	 * @throws InterruptedException 
 	 */
-	public List<TweetVolumes> executeQuery() throws FileNotFoundException,
+	public TopTweetResult executeQuery() throws FileNotFoundException,
 			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
+		Map<String, String> index = null;
 		double startTime = System.currentTimeMillis();
-		createStreamer();
-		Map<Date, String> index = getIndexArmy();
+		if(this.serverRequest.getQueryResolution().equals(queryLevel.Day)){
+			index = getIndexArmy();
+		}else if(this.serverRequest.getQueryResolution().equals(queryLevel.Month)){
+			index = getMonthTree();
+		}else if(this.serverRequest.getQueryResolution().equals(queryLevel.Week)){
+			 index = getWeekTree();
+		}
+		
+		
 		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 			System.out.println("#Start Reading index of "
 					+ entry.getKey().toString());
-			int count = 0;
-			count = GetSmartOutput(entry.getKey().toString(), entry.getValue()
+//			int count = 0;
+//			count = GetSmartOutput(entry.getKey().toString(), entry.getValue()
+//					.toString());
+			GetSmartOutput(entry.getKey().toString(), entry.getValue()
 					.toString());
 
-			dayVolume.add(new TweetVolumes((Date) entry.getKey(), count));
+//			dayVolume.add(new TweetVolumes((Date) entry.getKey(), count));
 
 		}
 
 		double endTime = System.currentTimeMillis();
 		System.out.println("query time = " + (endTime - startTime) + " ms");
-		closeStreamer();
 
-		return dayVolume;
+
+		
+		return this.result;
 
 	}
 
 	public GridCell readMastersFile() throws UnsupportedEncodingException,
 			FileNotFoundException, IOException, ParseException {
 		
-		Map<Date, String> index = getIndexArmy();
+		Map<String, String> index = getIndexArmy();
 //		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
 		long count = 0;
@@ -590,6 +535,26 @@ public class DayQueryProcessor {
 		}
 		return cell;
 	}
+	
+	  /**
+     * This method read the Grid cell from the Masters Files. 
+     * @param day
+     * @param dataPath
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public long readMasterFile(String day,String dataPath) throws FileNotFoundException, IOException{
+    	dataPath += "/";
+    	long cardinality = 0;
+    	// Get the set of Files that intersect with the area.
+        List<Partition> files = ReadMaster(day,dataPath);
+        //Get the partitions information and put it in a cell. 
+        for (Partition p : files) {
+        	cardinality += p.getCardinality();
+		}
+        return cardinality;
+    }
 
 	/**
 	 * This method get documents based tweets/hashtags based on the
@@ -615,10 +580,10 @@ public class DayQueryProcessor {
 				Tweet tweet = new Tweet(doc);
 				if (serverRequest.getMbr().insideMBR(
 						new Point(tweet.lat, tweet.lon))) {
-					outwriter.write(doc);
-					outwriter.write("\n");
+//					outwriter.write(doc);
+//					outwriter.write("\n");
 					count++;
-					insertTweetsToVolume(tweet.created_at);
+					this.result.insert(tweet);
 				}
 			}
 		} else {
@@ -630,8 +595,8 @@ public class DayQueryProcessor {
 				Hashtag hashtag = new Hashtag(doc);
 				if (serverRequest.getMbr().insideMBR(
 						new Point(hashtag.getLat(), hashtag.getLon()))) {
-					outwriter.write(doc);
-					outwriter.write("\n");
+//					outwriter.write(doc);
+//					outwriter.write("\n");
 					count++;
 				}
 			}
@@ -649,16 +614,79 @@ public class DayQueryProcessor {
 	 * @return
 	 * @throws ParseException
 	 */
-	private static Map<Date, String> getIndexArmy() throws ParseException,
+	private static Map<String, String> getIndexArmy() throws ParseException,
 			IOException {
-		if (serverRequest.getType().equals(ServerRequest.queryType.tweet)) {
 			return lookup.getTweetsDayIndex(serverRequest.getStartDate(),
 					serverRequest.getEndDate());
-		} else {
-			return lookup.getHashtagDayIndex(serverRequest.getStartDate(),
-					serverRequest.getEndDate());
-		}
+		
 	}
+	
+	 /**
+     * This method check if the dayrequest for tweets or hashtags
+     *
+     * @param type
+     * @param start
+     * @param end
+     * @return
+     * @throws ParseException
+     */
+    private static Map<String, String> getWeekTree() throws ParseException {
+    	Map<String,String> result = new HashMap<String, String>();
+    	Map<Week,String> temp =  lookup.getTweetsWeekIndex(serverRequest.getStartDate(), serverRequest.getEndDate());
+    	Iterator<Entry<Week, String>> it = temp.entrySet().iterator();
+    	while(it.hasNext()){
+    		Entry<Week,String> obj = it.next();
+    		result.put(obj.getKey().toString(), obj.getValue());
+    	}
+    	return result;
+    }
+	
+	
+	private static Map<String,String> getMonthTree() throws ParseException, IOException {
+		List<String> months = lookup.getTweetsMonth(serverRequest.getStartDate(),
+                serverRequest.getEndDate());
+		Map<String,String> result = new HashMap<String, String>();
+		for(String month : months){
+			result.put(month, serverRequest.getRtreeDir()+"/tweets/Month/index."+month);
+		}
+            return result;
+       
+    }
+	
+	
+	 /***
+     * This method read the master file and return the grid cells 
+     * @return
+     * @throws ParseException 
+     * @throws IOException 
+     * @throws UnsupportedEncodingException 
+     * @throws FileNotFoundException 
+     */
+    public GridCell readMastersFile(queryLevel level) throws FileNotFoundException, UnsupportedEncodingException, IOException, ParseException{
+    	GridCell cell = new GridCell(this.serverRequest.getMbr(),lookup);
+    	
+    	if(level.equals(queryLevel.Week)){
+    		Map<String, String> index = getWeekTree();
+    		Iterator it = index.entrySet().iterator(); 
+            while (it.hasNext()) {
+                Map.Entry<String,String> entry = (Map.Entry) it.next();
+//                System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
+                cell.add(entry.getKey().toString(), readMasterFile(entry.getKey().toString(),entry.getValue().toString())) ;
+            }
+    	}else{
+    		 Map<String, String> indexMonths = getMonthTree();
+    	        System.out.println("#number of Months found: " + indexMonths.size());
+    	        Iterator it = indexMonths.entrySet().iterator();
+    	        while (it.hasNext()) {
+    	            Map.Entry entry = (Map.Entry) it.next();
+//    	            System.out.println("#Start Reading index of " + entry.getKey().toString());
+    	            cell.add(entry.getKey().toString(), readMasterFile(entry.getKey().toString(),entry.getValue().toString()));
+    	        }
+    	}
+    	
+    	 
+    	return cell;
+    }
 
 	public static void main(String[] args) throws FileNotFoundException,
 			IOException, ParseException {

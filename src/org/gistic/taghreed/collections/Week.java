@@ -24,17 +24,17 @@ public class Week {
         this.start = start;
         this.end = end;
     }
-
-    public Date getStart() {
-        return start;
+    
+    public String getStart() {
+        return dateFormat.format(this.start);
     }
 
     public void setStart(Date start) {
         this.start = start;
     }
 
-    public Date getEnd() {
-        return end;
+    public String getEnd() {
+        return dateFormat.format(this.end);
     }
 
     public void setEnd(Date end) {

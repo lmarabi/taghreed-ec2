@@ -39,8 +39,6 @@ public class Cluster {
 		for(DayCardinality d : this.days){
 			if(d.getDay().equals(day))
 				return true;
-			else
-				return false;
 		}
 		return false;
 	}

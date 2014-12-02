@@ -62,7 +62,7 @@ public class Grid {
 				.write("id\tpolygonShape\tAverage\tStandard Deviation\tRelative Deviation\tStandard Error\tRelative Error\n");
 		int counter = 1;
 		// iterate the grid index
-		ServerRequest req = new ServerRequest(1);
+		ServerRequest req = new ServerRequest();
 		req.setIndex(queryIndex.rtree);
 		req.setType(queryType.tweet);
 		req.setStartDate(startDay);
@@ -78,10 +78,7 @@ public class Grid {
 				mbr = new MBR(max, min);
 				cell = new GridCell(mbr, req.getLookup());
 				System.out.println(mbr.toString());
-				req.setMBR(String.valueOf(max.getLat()),
-						String.valueOf(max.getLon()),
-						String.valueOf(min.getLat()),
-						String.valueOf(min.getLon()));
+				req.setMBR(mbr);
 				// cells[lon][lat] = req.getMasterRtreeDays(this.level);
 
 				cell = req.getMasterRtreeDays(this.level);
@@ -169,7 +166,7 @@ public class Grid {
 		BufferedReader reader = new BufferedReader(new FileReader(
 				System.getProperty("user.dir") + "/_Grid_"
 						+ this.level.toString() + ".txt"));
-		ServerRequest req = new ServerRequest(1);
+		ServerRequest req = new ServerRequest();
 		req.setIndex(queryIndex.rtree);
 		req.setType(queryType.tweet);
 		String line;
@@ -244,7 +241,7 @@ public class Grid {
 				.write("id\tpolygonShape\tAverage\tStandard Deviation\tRelative Deviation\tStandard Error\tRelative Error\n");
 		int counter = 1;
 		// iterate the grid index
-		ServerRequest req = new ServerRequest(1);
+		ServerRequest req = new ServerRequest();
 		req.setIndex(queryIndex.rtree);
 		req.setType(queryType.tweet);
 		req.setStartDate(startDay);
@@ -258,8 +255,7 @@ public class Grid {
 		mbr = new MBR(max, min);
 		cell = new GridCell(mbr, req.getLookup());
 		System.out.println(mbr.toString());
-		req.setMBR(String.valueOf(max.getLat()), String.valueOf(max.getLon()),
-				String.valueOf(min.getLat()), String.valueOf(min.getLon()));
+		req.setMBR(mbr);
 		// cells[lon][lat] = req.getMasterRtreeDays(this.level);
 		cell = req.getMasterRtreeDays(this.level);
 		// write the result only if the cell is not empty

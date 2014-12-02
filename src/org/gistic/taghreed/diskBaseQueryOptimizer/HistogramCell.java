@@ -39,12 +39,12 @@ public class HistogramCell {
 	
 	public double getEsitimatedCostDayHistogram(String startDay,String endDay) throws ParseException{
 		double cardinality = 0;
-		Map<Date, String> days = this.lookup.getTweetsDayIndex(startDay,endDay);
+		Map<String, String> days = this.lookup.getTweetsDayIndex(startDay,endDay);
 		Iterator it = days.entrySet().iterator();
 		while(it.hasNext()){
-			Map.Entry<Date,String> obj = (Map.Entry) it.next();
+			Map.Entry<String,String> obj = (Map.Entry) it.next();
 			for(Cluster c : this.cluster){
-				if(c.contains(this.lookup.dateFormat.format(obj.getKey()))){
+				if(c.contains(obj.getKey())){
 					cardinality +=  c.getOverallMean();
 				}
 			}

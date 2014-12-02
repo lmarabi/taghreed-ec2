@@ -20,6 +20,7 @@ public class Tweet {
 	public String language;
 	public String osystem;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	private int priorityValue;
 
 	public Tweet(String created_at, String tweetID, String userID,
 			String screenName, String tweetText, int followersCount,
@@ -83,6 +84,14 @@ public class Tweet {
 	public static Date parseTweetTimeToDate(String expr) throws ParseException {
 		String[] datetemp = expr.split(" ");
 		return sdf.parse(datetemp[0]);
+	}
+	
+	public void setPriorityValue(int priorityValue) {
+		this.priorityValue = priorityValue;
+	}
+	
+	public int getPriorityValue() {
+		return priorityValue;
 	}
 
 	@Override

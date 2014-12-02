@@ -26,16 +26,16 @@ public class QueryPlanner {
 	HistogramCell[][] weekHistogram;
 	HistogramCell[][] monthHistogram;
 	queryLevel level;
-
-	public QueryPlanner(String startDay, String endDay, queryLevel queryLevel) {
-		this.startDay = startDay;
-		this.endDay = endDay;
+	
+	public QueryPlanner() throws IOException, ParseException {
 		this.LonDomain = 360;
 		this.LatDomain = 180;
 		this.dayHistogram = new HistogramCell[LonDomain][LatDomain];
 		this.weekHistogram = new HistogramCell[LonDomain][LatDomain];
 		this.monthHistogram = new HistogramCell[LonDomain][LatDomain];
-		this.level = queryLevel;
+		for (queryLevel q : queryLevel.values()) {
+			this.readHistogramFromDisk(q);
+		}
 	}
 
 	/**
@@ -44,11 +44,11 @@ public class QueryPlanner {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public void readHistogramFromDisk() throws IOException, ParseException {
+	public void readHistogramFromDisk(queryLevel q) throws IOException, ParseException {
 		BufferedReader reader = new BufferedReader(new FileReader(
 				System.getProperty("user.dir") + "/_Histogram_"
-						+ this.level.toString() + ".txt"));
-		ServerRequest req = new ServerRequest(1);
+						+ q.toString() + ".txt"));
+		ServerRequest req = new ServerRequest();
 		req.setIndex(queryIndex.rtree);
 		req.setType(queryType.tweet);
 		String line;
@@ -58,9 +58,9 @@ public class QueryPlanner {
 			lon = Integer.parseInt(token[0]);
 			lat = Integer.parseInt(token[1]);
 			HistogramCell temp = new HistogramCell(token[2], req.getLookup());
-			if(this.level.equals(queryLevel.Day)){
+			if(q.equals(queryLevel.Day)){
 				this.dayHistogram[lon][lat] = temp;
-			}else if(this.level.equals(queryLevel.Week)){
+			}else if(q.equals(queryLevel.Week)){
 				this.weekHistogram[lon][lat] = temp;
 			}else{
 				this.monthHistogram[lon][lat] = temp;
@@ -70,7 +70,10 @@ public class QueryPlanner {
 		reader.close();
 	}
 	
-	public double getIntersectCellHistogram(MBR mbr) throws ParseException{
+	private double getQueryCost(String startDay, String endDay, queryLevel queryLevel , MBR mbr) throws ParseException{
+		this.startDay = startDay;
+		this.endDay = endDay;
+		this.level = queryLevel;
 		if(this.level.equals(queryLevel.Day)){
 			return getIntersectCellsDayHistogram(mbr);
 		}else if(this.level.equals(queryLevel.Week)){
@@ -125,8 +128,8 @@ public class QueryPlanner {
 			for (int j = minlat; j < maxlat; j++) {
 				try {
 					if (mbr.Intersect(monthHistogram[i][j].mbr)) {
-						System.out.println("cellid:" + i + "-" + j + "  "
-								+ monthHistogram[i][j].getMbr().toString());
+//						System.out.println("cellid:" + i + "-" + j + "  "
+//								+ monthHistogram[i][j].getMbr().toString());
 						cell++;
 						cost += monthHistogram[i][j].getEsitimatedCostMonthHistogram(startDay,
 								endDay);
@@ -144,10 +147,6 @@ public class QueryPlanner {
 
 	
 	private double getIntersectCellsDayHistogram(MBR mbr) throws ParseException {
-//		double cost = 0;
-//		int cell = 0;
-//		for (int i = 0; i < this.LonDomain; i++) {
-//			for (int j = 0; j < this.LatDomain; j++) {
 		double cost = 0;
 		int cell = 0;
 		int minlon = (int) Math.ceil(mbr.getMin().getLon()+180)- 1;
@@ -162,8 +161,8 @@ public class QueryPlanner {
 			for (int j = minlat; j < maxlat; j++) {
 				try {
 					if (mbr.Intersect(dayHistogram[i][j].mbr)) {
-						System.out.println("cellid:" + i + "-" + j + "  "
-								+ dayHistogram[i][j].getMbr().toString());
+//						System.out.println("cellid:" + i + "-" + j + "  "
+//								+ dayHistogram[i][j].getMbr().toString());
 						cell++;
 						cost += dayHistogram[i][j].getEsitimatedCostDayHistogram(startDay,
 								endDay);
@@ -175,6 +174,28 @@ public class QueryPlanner {
 		}
 		System.out.println("Cost:"+cost+" intersected Cell:"+cell);
 		return cost;
+	}
+	
+	/**
+	 * This method gives the best query plan 
+	 * @param startDay
+	 * @param endDay
+	 * @param mbr
+	 * @return
+	 * @throws ParseException
+	 */
+	public queryLevel getQueryPlan(String startDay, String endDay, MBR mbr) throws ParseException{
+		queryLevel queryFrom = queryLevel.Day;
+		double minPlan = Double.MAX_VALUE;
+		for(queryLevel q : queryLevel.values()){
+			double plancost = this.getQueryCost(startDay, endDay, q, mbr);
+			System.out.println("Histogram Statistics: \n"+q.toString()+"\tCardinality Cost: "+plancost);
+			if(plancost <= minPlan && plancost != 0){
+				minPlan = plancost;
+				queryFrom = q;
+			}
+		}
+		return queryFrom;
 	}
 	
 //	private double getFastIntersectCell(MBR mbr) throws ParseException{
@@ -215,26 +236,18 @@ public class QueryPlanner {
 //		 MBR mbr = new MBR(new Point(46.68419444691358,-73.67156982421847),new
 //		 Point(39.61732577224177,-76.47308349609341));
 
+		QueryPlanner planner = new QueryPlanner();
 		for (queryLevel q : queryLevel.values()) {
 
-			if (q.equals(queryLevel.Month) || q.equals(queryLevel.Week))
-				continue;
-
-			QueryPlanner planner = new QueryPlanner("2014-01-01", "2014-05-30",
-					q);
-			System.out.println("Reading histogram " + q.toString());
-			planner.readHistogramFromDisk();
+//			if (q.equals(queryLevel.Month) || q.equals(queryLevel.Day))
+//				continue;
 			long starttime = System.currentTimeMillis();
-			double estimatedCardinality = planner.getIntersectCellHistogram(mbr);
+			double estimatedCardinality = planner.getQueryCost("2014-10-01", "2014-10-30",
+					q, mbr);
 			long endtime = System.currentTimeMillis();
 			System.out.println("estimated cardinality "+q.toString()+" :"+ estimatedCardinality);
 			System.out.println("Time in Milliseconds: " + (endtime - starttime));
 			System.out.println("*************************");
-			starttime = System.currentTimeMillis();
-//			estimatedCardinality = planner.getFastIntersectCell(mbr);
-			endtime = System.currentTimeMillis();
-			System.out.println("estimated cardinality "+q.toString()+" :"+ estimatedCardinality);
-			System.out.println("Time in Milliseconds: " + (endtime - starttime));
 
 		}
 		
