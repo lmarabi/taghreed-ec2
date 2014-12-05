@@ -66,7 +66,7 @@ public class HomeServer extends AbstractHandler {
 
 	}
 
-	public void executeRequest(String s, Request baseRequest,
+	public synchronized void  executeRequest(String s, Request baseRequest,
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException, FileNotFoundException,
 			UnsupportedEncodingException, InterruptedException {
@@ -105,7 +105,7 @@ public class HomeServer extends AbstractHandler {
 				req.setStartDate(startDate);
 				req.setEndDate(endDate);
 				List<Tweet> tweetsResult;
-				//select the query plan
+				
 				queryLevel plan = this.queryPlanner.getQueryPlan(startDate, endDate, mbr);
 				req.setQueryResolution(plan);
 				double startTime = System.currentTimeMillis();

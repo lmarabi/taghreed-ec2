@@ -311,7 +311,10 @@ public class GridCell {
 		StringBuilder value = new StringBuilder();
 		value.append(this.mbr.toString());
 		for(Cluster group : this.cluster){
-			value.append(";"+group.toString());
+			//remove all groups that are outliers 
+			if(group.getDays().size() > 1){
+				value.append(";"+group.toString());
+			}
 		}
 		return value.toString();
 	}

@@ -4,9 +4,16 @@
  */
 package org.gistic.taghreed.collections;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
@@ -86,7 +93,47 @@ public class Partition {
     + "))\t" + this.cardinality;
 	}
     
+    public static void main(String[] args) throws IOException{
+    	String[] index = {"str","quadtree","str+"};
+    	
+    	for(int i=1;i<7;i++){
+    		for(int j=0;j<index.length;j++){
+    			readpartitions(i,index[j]);
+    		}
+    	}
+    }
     
+    private static void readpartitions(int i,String indexType) throws IOException{
+    	File master;
+		List<Partition> result = new ArrayList<Partition>();
+		String fileString = System.getProperty("user.dir") + "/testbuildindex/_master_"+i+"."+indexType;
+		master = new File(fileString);
+		fileString = fileString+".WKT";
+		OutputStreamWriter writer = new OutputStreamWriter(
+				new FileOutputStream(fileString, false), "UTF-8");
+		BufferedReader reader = new BufferedReader(new FileReader(master));
+		// FileInputStream fin = new FileInputStream(master);
+		// BufferedInputStream bis = new BufferedInputStream(fin);
+		// CompressorInputStream input = new
+		// CompressorStreamFactory().createCompressorInputStream(bis);
+		// BufferedReader reader = new BufferedReader(new
+		// InputStreamReader(input, "UTF-8"));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			String[] temp = line.split(",");
+			// The file has the following format as Aggreed with the interface
+			// between hadoop and this program
+			// #filenumber,minLat,minLon,maxLat,maxLon
+			// 0,minLon,MinLat,MaxLon,MaxLat,Filename
+			if (temp.length == 8) {
+				Partition part = new Partition(line, System.getProperty("user.dir"), "2014-10-15");
+				writer.write(part.partitionToWKT()+"\n");
+				
+			}
+		}
+		reader.close();
+		writer.close();
+    }
     
     
     

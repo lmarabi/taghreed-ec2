@@ -116,6 +116,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		// Active people
 		activePeopleResult = new ArrayList<ActiveUsers>(activePeople.values());
 		Collections.sort(activePeopleResult);
+		this.activePeople.clear();
 		return activePeopleResult;
 	}
 
@@ -125,6 +126,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		popularHashtagsResult = new ArrayList<PopularHashtags>(
 				popularHashtags.values());
 		Collections.sort(popularHashtagsResult);
+		this.popularHashtags.clear();
 		return popularHashtagsResult;
 	}
 
@@ -134,6 +136,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		popularPeopleResult = new ArrayList<PopularUsers>(
 				popularPeople.values());
 		Collections.sort(popularPeopleResult);
+		this.popularPeople.clear();
 		return popularPeopleResult;
 	}
 	
@@ -145,6 +148,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 			result.add(new TweetVolumes((Date) obj.getKey(), (Integer) obj
 					.getValue()));
 		}
+		this.tweetsVolume.clear();
 		Collections.sort(result);
 		return result;
 	}
