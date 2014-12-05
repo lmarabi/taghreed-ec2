@@ -51,23 +51,25 @@ public class Main {
 		
 		
 		ServerRequest req =  new ServerRequest();
-		req.setStartDate("2014-09-01");
-		req.setEndDate("2014-09-01");
+		req.setStartDate("2014-07-21");
+		req.setEndDate("2014-07-21");
 		req.setType(queryType.tweet);
 		req.setIndex(queryIndex.rtree);
 		MBR mbr = new MBR(new Point(40.694961541009995,118.07045041992582),new Point(38.98904106170265,114.92561399414794) );
 		req.setMBR(mbr);
 		
-		queryLevel queryfrom = queryPlan.getQueryPlan(req.getStartDate(),req.getEndDate(), req.getMbr());
+//		queryLevel queryfrom = queryPlan.getQueryPlan(req.getStartDate(),req.getEndDate(), req.getMbr());
+		queryLevel queryfrom = queryLevel.Day;
 		req.setQueryResolution(queryfrom);
 		
-		
-
+		double starttime = System.currentTimeMillis();
 		req.getTweetsRtreeDays();
+		double endtime = System.currentTimeMillis();
 		System.out.println("Tweets Size:" + req.getTopKtweets().size());
 		System.out.println("Hashtags Size = " + req.getHashtags().size());
 		System.out.println("Active user size= "+ req.getActiveUser().size());
 		System.out.println("popular users size= "+ req.getPopularUsers().size());
+		System.out.println("Execcution Time:"+(endtime-starttime)+" Millis");
 
 
 	}

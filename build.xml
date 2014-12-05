@@ -8,7 +8,11 @@
 	<property name="docs.dir" location="docs" />
 	<property name="lib.dir" location="lib" />
 	<property name="version" value="2" />
-	
+        <!--
+        <property name="main.class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
+	-->
+        <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.Main" />
+
 	<!--
 	    Create a classpath container which can be later used in the ant task
 	  -->
@@ -60,7 +64,7 @@
    	 <jar jarfile="${dist.dir}/taghreed-${version}-withlib.jar" basedir="${build.dir}" >
        		 <zipfileset src="${dist.dir}/taghreed-${version}.jar" excludes="META-INF/*.SF" />
        		 <manifest>
-            		<attribute name="Main-Class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
+            		<attribute name="Main-Class" value="${main.class}" />
         	</manifest>
    	 </jar>
 	</target>
