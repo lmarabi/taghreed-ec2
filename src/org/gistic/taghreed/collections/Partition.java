@@ -94,9 +94,9 @@ public class Partition {
 	}
     
     public static void main(String[] args) throws IOException{
-    	String[] index = {"str","quadtree","str+"};
+    	String[] index = {"quadtree"};//{"str","quadtree","str+"};
     	
-    	for(int i=1;i<7;i++){
+    	for(int i=1;i<6;i++){
     		for(int j=0;j<index.length;j++){
     			readpartitions(i,index[j]);
     		}
@@ -106,7 +106,7 @@ public class Partition {
     private static void readpartitions(int i,String indexType) throws IOException{
     	File master;
 		List<Partition> result = new ArrayList<Partition>();
-		String fileString = System.getProperty("user.dir") + "/testbuildindex/_master_"+i+"."+indexType;
+		String fileString = System.getProperty("user.dir") + "/testbuildindex/cluster/_master_"+i+"."+indexType;
 		master = new File(fileString);
 		fileString = fileString+".WKT";
 		OutputStreamWriter writer = new OutputStreamWriter(

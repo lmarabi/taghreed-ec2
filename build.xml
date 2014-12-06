@@ -8,10 +8,13 @@
 	<property name="docs.dir" location="docs" />
 	<property name="lib.dir" location="lib" />
 	<property name="version" value="2" />
-        <!--
+       
         <property name="main.class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
-	-->
+	
+       
+        <!--
         <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.Main" />
+        -->
 
 	<!--
 	    Create a classpath container which can be later used in the ant task

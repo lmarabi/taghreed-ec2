@@ -67,7 +67,7 @@ public class BuildIndex {
 	// // Read the master file outputed from spatial hadoop
 	// String path = rtreeFolder;
 	// BufferedReader reader = new BufferedReader(new FileReader(new File(path
-	// + "/_master.str+")));
+	// + "/_master.quadtree")));
 	// List<String> metaData = new ArrayList<String>();
 	// String line = null;
 	// while ((line = reader.readLine()) != null) {
@@ -85,7 +85,7 @@ public class BuildIndex {
 	// }
 	// reader.close();
 	// // rewrite the master file with the number of data in each partition
-	// File f = new File(path + "/_master.str+");
+	// File f = new File(path + "/_master.quadtree");
 	// f.delete();
 	// f.createNewFile();
 	// FileWriter fileWriter = new FileWriter(f);
@@ -110,7 +110,7 @@ public class BuildIndex {
 		String path = rtreeFolder;
 		int threshold = Integer.MAX_VALUE;
 		BufferedReader reader = new BufferedReader(new FileReader(new File(path
-				+ "/_master.str+")));
+				+ "/_master.quadtree")));
 		List<String> metaData = new ArrayList<String>();
 		String line = null;
 		while ((line = reader.readLine()) != null) {
@@ -161,7 +161,7 @@ public class BuildIndex {
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
 				+ file.getName().replace(".bz2", "")
-				+ " -overwrite  sindex:str+ shape:"
+				+ " -overwrite  sindex:quadtree shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
 				+ "  -no-local";
 
@@ -225,7 +225,7 @@ public class BuildIndex {
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
 				+ file.getName().replace(".bz2", "")
-				+ " -overwrite  sindex:str+ "
+				+ " -overwrite  sindex:quadtree "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags "
 				+ " -no-local";
 
@@ -308,7 +308,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
-				+ folderName + " -overwrite  sindex:str+ "
+				+ folderName + " -overwrite  sindex:quadtree "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags"
 				+ "  -no-local";
 		commandExecuter(command);
@@ -359,7 +359,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
-				+ folderName + " -overwrite  sindex:str+ shape:"
+				+ folderName + " -overwrite  sindex:quadtree shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
 				+ "  -no-local";
 

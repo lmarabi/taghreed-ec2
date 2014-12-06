@@ -310,11 +310,8 @@ public class GridCell {
 	public String toStringHistogram(){
 		StringBuilder value = new StringBuilder();
 		value.append(this.mbr.toString());
-		for(Cluster group : this.cluster){
-			//remove all groups that are outliers 
-			if(group.getDays().size() > 1){
-				value.append(";"+group.toString());
-			}
+		for (Cluster group : this.cluster) {
+			value.append(";" + group.toString());
 		}
 		return value.toString();
 	}
