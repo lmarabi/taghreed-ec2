@@ -10,8 +10,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -488,20 +490,21 @@ public class BuildIndex {
 			InterruptedException {
 		System.out.println(command);
 		Process myProcess = Runtime.getRuntime().exec(command);
-		myProcess.waitFor();
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				myProcess.getInputStream()));
-		String line = null;
-		while ((line = in.readLine()) != null) {
-			System.out.println(line);
-		}
-		in = new BufferedReader(new InputStreamReader(
-				myProcess.getErrorStream()));
-		line = null;
-		while ((line = in.readLine()) != null) {
-			System.out.println(line);
-		}
-		in.close();
+
+		StreamGobbler errorGobbler = new StreamGobbler(
+				myProcess.getErrorStream(), System.out);
+
+		// Any output?
+		StreamGobbler outputGobbler = new StreamGobbler(
+				myProcess.getInputStream(), System.err);
+
+		errorGobbler.start();
+		outputGobbler.start();
+
+		// Any error
+		int exitVal = myProcess.waitFor();
+		errorGobbler.join(); // Handle condition where the
+		outputGobbler.join(); // process ends before the threads finish
 
 	}
 
@@ -524,3 +527,24 @@ public class BuildIndex {
 		// in.AddSelectivityToMasterFile("/export/scratch/louai/test/index/rtreeindex/tweets/Day/");
 	}
 }
+
+
+class StreamGobbler extends Thread {
+	  InputStream is;
+	  PrintStream os;
+	 
+	  StreamGobbler(InputStream is, PrintStream os) {
+	    this.is = is;
+	    this.os = os;
+	  }
+	 
+	  public void run() {
+	    try {
+	      int c;
+	      while ((c = is.read()) != -1)
+	          os.print((char) c);
+	    } catch (IOException x) {
+	      // handle error
+	    }
+	  }
+	}
