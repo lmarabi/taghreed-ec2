@@ -53,6 +53,23 @@ public class Week {
         return new Week(dateFormat.parse(range[0]),
                     dateFormat.parse(range[0]));
     }
+    
+    
+    
+    /**
+     * This method check whether the day in a week or not
+     * @param day
+     * @return 
+     * @throws ParseException 
+     */
+     public boolean isDayIntheWeek(String day) throws ParseException {
+    	 Date dayDate = dateFormat.parse(day);
+         if ((dayDate.compareTo(start) >= 0)
+                 && (dayDate.compareTo(end) <= 0)) {
+             return true;
+         }
+         return false;
+     }
 
    /**
     * This method check whether the day in a week or not

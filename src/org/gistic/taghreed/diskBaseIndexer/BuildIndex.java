@@ -155,7 +155,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (15 * 1024 * 1024)
+				+ (128 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -219,7 +219,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (15 * 1024 * 1024)
+				+ (128 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -303,7 +303,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (15 * 1024 * 1024)
+				+ (128 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -354,14 +354,14 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " index -D dfs.block.size="
-				+ (15 * 1024 * 1024)
+				+ (128 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
-				+ folderName + " -overwrite  sindex:quadtree shape:"
+				+ folderName + " -overwrite  sindex:str shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
 				+ "  -no-local";
 

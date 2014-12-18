@@ -25,6 +25,8 @@ import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.Months;
 
+import com.sun.java.swing.plaf.gtk.resources.gtk;
+
 /**
  *
  * @author louai
@@ -153,6 +155,18 @@ public class Lookup {
         }
         
     }
+    
+	public List<String> getDayDatesTweet() {
+		return dayDatesTweet;
+	}
+
+	public List<Week> getWeekDatesTweet() {
+		return weekDatesTweet;
+	}
+
+	public List<String> getMonthDatesTweet() {
+		return monthDatesTweet;
+	}
 
     /**
      * This method return HashMap<Date,Path> to all dates between the start and

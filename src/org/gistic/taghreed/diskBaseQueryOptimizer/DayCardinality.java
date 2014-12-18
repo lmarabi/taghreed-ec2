@@ -7,6 +7,7 @@ import java.util.Date;
 public class DayCardinality implements Comparable<DayCardinality>{
 	private String day;
 	private long cardinality;
+	private int clusterId;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public DayCardinality(String day, long cardinality) {
@@ -20,6 +21,14 @@ public class DayCardinality implements Comparable<DayCardinality>{
 	
 	public String getDay() {
 		return day;
+	}
+	
+	public int getClusterId() {
+		return clusterId;
+	}
+	
+	public void setClusterId(int clusterId) {
+		this.clusterId = clusterId;
 	}
 	
 	@Override

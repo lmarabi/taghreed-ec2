@@ -71,9 +71,10 @@ public class ConfidenceCoefficient {
 				double upperBound = stats.getMean() + critVal;
 				if(lowerBound <= minValue && upperBound >= maxValue){
 					result = i/100.0f;
+					 return result;
 				}
 			}
-            return result;
+			 return result;
         } catch (MathIllegalArgumentException e) {
             return result;
         }

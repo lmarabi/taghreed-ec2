@@ -105,14 +105,15 @@ public class HomeServer extends AbstractHandler {
 				req.setStartDate(startDate);
 				req.setEndDate(endDate);
 				List<Tweet> tweetsResult;
-				
-				queryLevel plan = this.queryPlanner.getQueryPlan(startDate, endDate, mbr);
-				req.setQueryResolution(plan);
 				double startTime = System.currentTimeMillis();
-				req.getTweetsRtreeDays();
+				queryLevel plan = this.queryPlanner.getQueryPlan(startDate, endDate, mbr);
 				double endTime = System.currentTimeMillis();
-				System.out.println("query time = " + (endTime - startTime)
-						+ " ms");
+				System.err.println("Query Plan Estimation Time: "+(endTime - startTime) + " ms");
+				req.setQueryResolution(plan);
+				startTime = System.currentTimeMillis();
+				req.getTweetsRtreeDays();
+				endTime = System.currentTimeMillis();
+				System.err.println("Query Time: "+(endTime - startTime) + " ms");
 
 				startTime = System.currentTimeMillis();
 				List<PopularHashtags> popularHashtags;

@@ -270,7 +270,16 @@ public class PyramidQueryProcessor {
             throws FileNotFoundException, IOException {
         File master;
         List<Partition> result = new ArrayList<Partition>();
-        master = new File(path + "/_master.str+");
+        master = new File(path + "/_master.quadtree");
+		if(!master.exists()){
+			master = new File(path + "/_master.str");
+			if(!master.exists()){
+				master = new File(path + "/_master.str+");
+				if(!master.exists()){
+					master = new File(path + "/_master.grid");
+				}
+			}
+		}
         BufferedReader reader = new BufferedReader(new FileReader(master));
 //        FileInputStream fin = new FileInputStream(master);
 //        BufferedInputStream bis = new BufferedInputStream(fin);

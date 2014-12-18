@@ -43,6 +43,10 @@ public class GridCell {
 		return mbr;
 	}
 	
+	public List<Cluster> getCluster() {
+		return cluster;
+	}
+	
 	/**
 	 * This add new day and cardinality, In case there is exist day then a new value of 
 	 * cardinality will be added to the old one. 

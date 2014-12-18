@@ -2,7 +2,9 @@ package org.gistic.taghreed.diskBaseQueryOptimizer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
+
 
 public class Cluster {
 	private List<DayCardinality> days;
@@ -61,6 +63,23 @@ public class Cluster {
 	
 	public double getConfidence(){
 		return ConfidenceCoefficient.getConfidenceOfCluster(this);
+	}
+	
+	
+	/**
+	 * This method retuern the median day of the cluster based on the cardinality. 
+	 * @return
+	 */
+	public String getMedianDay(){
+		Collections.sort(this.days);
+		int numArray = this.days.size();
+		int middle = ((numArray) / 2);
+		if(numArray % 2 == 0){
+		 return this.days.get(middle).getDay();
+		} else{
+			return this.days.get(middle-1).getDay();
+		}
+		
 	}
 	
 	/**

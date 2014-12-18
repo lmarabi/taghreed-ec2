@@ -51,15 +51,15 @@ public class Main {
 		
 		
 		ServerRequest req =  new ServerRequest();
-		req.setStartDate("2014-07-21");
+		req.setStartDate("2014-05-21");
 		req.setEndDate("2014-07-21");
 		req.setType(queryType.tweet);
 		req.setIndex(queryIndex.rtree);
 		MBR mbr = new MBR(new Point(40.694961541009995,118.07045041992582),new Point(38.98904106170265,114.92561399414794) );
 		req.setMBR(mbr);
 		
-//		queryLevel queryfrom = queryPlan.getQueryPlan(req.getStartDate(),req.getEndDate(), req.getMbr());
-		queryLevel queryfrom = queryLevel.Day;
+		queryLevel queryfrom = queryPlan.getQueryPlan(req.getStartDate(),req.getEndDate(), req.getMbr());
+//		queryLevel queryfrom = queryLevel.Day;
 		req.setQueryResolution(queryfrom);
 		
 		double starttime = System.currentTimeMillis();
