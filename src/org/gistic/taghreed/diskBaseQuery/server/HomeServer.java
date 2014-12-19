@@ -31,6 +31,7 @@ import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner;
+import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner2;
 
 import com.google.gson.stream.JsonWriter;
 
@@ -39,7 +40,8 @@ import com.google.gson.stream.JsonWriter;
  * @author turtle
  */
 public class HomeServer extends AbstractHandler {
-	static QueryPlanner queryPlanner;
+//	static QueryPlanner queryPlanner;
+	static QueryPlanner2 queryPlanner;
 
 	@Override
 	public void handle(String s, Request baseRequest,
@@ -108,7 +110,7 @@ public class HomeServer extends AbstractHandler {
 				double startTime = System.currentTimeMillis();
 				queryLevel plan = this.queryPlanner.getQueryPlan(startDate, endDate, mbr);
 				double endTime = System.currentTimeMillis();
-				System.err.println("Query Plan Estimation Time: "+(endTime - startTime) + " ms");
+				System.err.println("Query Plan Estimation Time: "+(endTime - startTime) + " ms\tSuggested plan:"+plan.toString());
 				req.setQueryResolution(plan);
 				startTime = System.currentTimeMillis();
 				req.getTweetsRtreeDays();
@@ -287,7 +289,7 @@ public class HomeServer extends AbstractHandler {
 	}
 
 	public static void main(String[] args) throws Exception {
-		queryPlanner = new QueryPlanner();
+		queryPlanner = new QueryPlanner2();
 		Server server = new Server(8085);
 		server.setHandler(new HomeServer());
 		server.start();

@@ -2,12 +2,12 @@ package org.gistic.taghreed.diskBaseQueryOptimizer;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.collections.Partition;
 
 public class HistogramCluster {
@@ -35,6 +35,16 @@ public class HistogramCluster {
 			this.histogram.add(part);
 		}
 		reader.close();
+	}
+	
+	public long getCardinality(MBR queryMbr){
+		long cardinality = 0;
+		for(Partition part : histogram){
+			if(queryMbr.Intersect(part.getArea())){
+				cardinality += part.getCardinality();
+			}
+		}
+		return cardinality;
 	}
 
 }
