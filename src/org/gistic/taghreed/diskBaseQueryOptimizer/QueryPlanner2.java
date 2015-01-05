@@ -58,10 +58,7 @@ public class QueryPlanner2 {
 				+ this.monthHistogram.size());
 	}
 
-	public QueryPlanner2(Lookup lookup) throws IOException {
-
-		// Offline processing
-	}
+	
 
 	/**
 	 * This method is offline phase of to prepare the clusters of the histogram.
@@ -187,10 +184,10 @@ public class QueryPlanner2 {
 		queryLevel queryFrom = queryLevel.Day;
 		double minPlan = Double.MAX_VALUE;
 		for (queryLevel q : queryLevel.values()) {
-			double plancost = this.getQueryCost(startDay, endDay, q, queryMBR);
+			long plancost = this.getQueryCost(startDay, endDay, q, queryMBR);
 			System.out.println("Histogram Statistics: \n" + q.toString()
 					+ "\tCardinality Cost: " + plancost);
-			if (plancost <= minPlan && plancost != 0) {
+			if (plancost <= minPlan && plancost != -1) {
 				minPlan = plancost;
 				queryFrom = q;
 			}
@@ -199,7 +196,7 @@ public class QueryPlanner2 {
 
 	}
 
-	private double getQueryCost(String startDay, String endDay, queryLevel q,
+	private long getQueryCost(String startDay, String endDay, queryLevel q,
 			MBR queryMBR) throws ParseException {
 		if (q.equals(queryLevel.Day)) {
 			return this.getDayLevelCardinality(startDay, endDay, queryMBR);
@@ -235,7 +232,7 @@ public class QueryPlanner2 {
 		}
 
 		// Calculate the actual cluster values
-		long result = 0;
+		long result = -1;
 		it = clusterCalculator.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<Integer, Integer> obj = (Entry<Integer, Integer>) it
@@ -270,7 +267,7 @@ public class QueryPlanner2 {
 		}
 
 		// Calculate the actual cluster values
-		long result = 0;
+		long result = -1;
 		it = clusterCalculator.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<Integer, Integer> obj = (Entry<Integer, Integer>) it
@@ -305,7 +302,7 @@ public class QueryPlanner2 {
 		}
 
 		// Calculate the actual cluster values
-		long result = 0;
+		long result = -1;
 		it = clusterCalculator.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<Integer, Integer> obj = (Entry<Integer, Integer>) it
@@ -333,13 +330,12 @@ public class QueryPlanner2 {
 
 	public static void main(String[] args) throws FileNotFoundException,
 			IOException, ParseException {
-		ServerRequest server = new ServerRequest();
+		
 		MBR mbr = new MBR(new Point(40.694961541009995, 118.07045041992582),
 				new Point(38.98904106170265, 114.92561399414794));
-		server.setMBR(mbr);
-		server.setIndex(queryIndex.rtree);
-		QueryPlanner2 planner2 = new QueryPlanner2(server.getLookup());
-		planner2.OfflinePhase();
+		
+		QueryPlanner2 planner2 = new QueryPlanner2();
+		
 		System.err.println("Done");
 		System.out.println("Num of day histogram: "
 				+ planner2.dayHistogram.size());
@@ -348,8 +344,8 @@ public class QueryPlanner2 {
 		System.out.println("Num of month histogram: "
 				+ planner2.monthHistogram.size());
 		// planner2.printArray();
-		queryLevel q = planner2.getQueryPlan("2014-05-01", "2014-05-12",
-				server.getMbr());
+		queryLevel q = planner2.getQueryPlan("2014-05-01", "2014-05-10",
+				mbr);
 		System.out.print(q.toString());
 
 	}

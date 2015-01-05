@@ -146,10 +146,10 @@ public class Queryoptimizer {
 
    
 
-    private static Map<String, String> getDayTree(String start, String end) throws ParseException {
-            return lookup.getTweetMissingDaysinWeek(start, end);
-       
-    }
+//    private static Map<String, String> getDayTree(String start, String end) throws ParseException {
+//            return lookup.getTweetMissingDaysinWeek(start, end);
+//       
+//    }
 
     private static Map<String, String> getMonthTree() throws ParseException, IOException {
         

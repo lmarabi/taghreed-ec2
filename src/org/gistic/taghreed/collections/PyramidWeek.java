@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -90,5 +91,46 @@ public class PyramidWeek {
              return true;
          }
         return false;
+    }
+    
+    public HashMap<String, List<File>> buildWeekIndex(List<File> list) throws ParseException{
+    	Calendar c = Calendar.getInstance();
+    	HashMap<String, List<File>> index = new HashMap<String, List<File>>();
+    	for(File file : list){
+            Date day = dateFormat.parse(file.getName().replace(".bz2", ""));
+            c.setTime(day);
+            String hashkey =  c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.WEEK_OF_MONTH);
+            if(!index.containsKey(hashkey)){
+            	List<File> templist = new ArrayList<File>();
+            	templist.add(file);
+            	index.put(hashkey, templist);
+            }else{
+            	List<File> templist = index.get(hashkey);
+            	templist.add(file);
+            	index.put(hashkey, templist);
+            }
+    	}
+    	return index;
+    }
+    
+    public static void main(String[] arg) throws ParseException{
+//    	PyramidWeek obj = new PyramidWeek();
+//    	String[] list = new String[30];
+//    	for(int i=0;i < 30;i++){
+//    		list[i] = "2014-05-"+(i+1);
+//    	}
+//    	
+//    	for(int i=0;i < 31;i++){
+//    		obj = new PyramidWeek(list[i]);
+//    		for(int j =i ; j< 31; j++){
+//    			if(obj.isTheSameWeek(list[j])){
+//    				System.out.println(list[j] + " - week"+ obj.weeknumber);
+//    			}else{
+//    				i=j;
+//    				break;
+//    			}
+//    		}
+//    	}
+    	
     }
 }

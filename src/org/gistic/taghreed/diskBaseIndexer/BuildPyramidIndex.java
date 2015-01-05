@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.invertedIndex.KWIndexBuilder;
@@ -22,6 +23,7 @@ import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.collections.PyramidMonth;
 import org.gistic.taghreed.collections.PyramidWeek;
+import org.gistic.taghreed.diskBaseIndexer.BuildIndex.Level;
 
 /**
  *
@@ -123,6 +125,7 @@ public class BuildPyramidIndex {
         }
     }
     
+    /*
     private void CreateInvertedHashtagWeekIndex() throws ParseException, IOException, InterruptedException, CompressorException{
         System.out.println("Create Tweets Week Index ");
         List<File> outputFiles = ListFiles(config.getHashtagFlushDir());
@@ -163,7 +166,7 @@ public class BuildPyramidIndex {
 
         }
     }
-    
+    */
     
     /**
      * This method create Months inverted index
@@ -280,52 +283,44 @@ public class BuildPyramidIndex {
      * This method create tweets indexMonth only
      */
     private void CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
-        System.out.println("Create Tweets Week Index ");
-        List<File> outputFiles = ListFiles(config.getTweetFlushDir());
-        Collections.sort(outputFiles);
-        Calendar c = Calendar.getInstance();
-        PyramidWeek temp = new PyramidWeek();
-        boolean firstF = true;
-        for (File f : outputFiles) {
-            if (firstF) {
-                temp = new PyramidWeek(f.getName());
-                temp.addNewFile(f);
-                firstF = false;
-            } else {
-                if (temp.isTheSameWeek(f.getName().replace(".bz2", ""))) {
-                    temp.addNewFile(f);
-                } else {
-                    //if not in the same week of the year then index the founded
-                    //week and then create a new list.
-                    if (temp.getFiles().size() >= 5) {
-                        System.out.println("*******\nFound week\n**********");
-                        String hadoopOutputFolder = temp.getFirstDayOfWeek().replace(".bz2", "")
-                                + "&" + temp.getLastDayofWeek().replace(".bz2", "");
-                        System.out.println(hadoopOutputFolder);
-                        File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Week/index." + hadoopOutputFolder);
-                        if (!indexFolder.exists()) {
-                            //Create folder in hdfs with hadoopoutputFolder
-                            indexer.CreateHdfsFolder(hadoopOutputFolder);
-                            //Copy data to hdfs under hadoopoutputfolder
-                            for (File day : temp.getFiles()) {
-                                indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath());
-                            }
-                            //build the index for tweets and copy to local
-                            indexer.BuildTweetHdfsIndex(hadoopOutputFolder, "Week");
-                        }
-                    }
+    	System.out.println("Create Tweets Week Index ");
+		List<File> outputFiles = ListFiles(config.getTweetFlushDir());
+		Collections.sort(outputFiles);
+		Calendar c = Calendar.getInstance();
+		PyramidWeek temp = new PyramidWeek();
+		HashMap<String, List<File>> indeces = temp.buildWeekIndex(outputFiles);
+		Iterator it = indeces.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, List<File>> week = (Entry<String, List<File>>) it
+					.next();
+			
+			System.out.println("*******\nFound week\n**********");
+			String hadoopOutputFolder = week.getKey();
+			System.out.println(hadoopOutputFolder);
+			File indexFolder = new File(config.getQueryRtreeIndex()
+					+ "tweets/Week/index." + hadoopOutputFolder);
+			if (!indexFolder.exists()) {
+				// Create folder in hdfs with hadoopoutputFolder
+				indexer.CreateHdfsFolder(hadoopOutputFolder);
+				// Copy data to hdfs under hadoopoutputfolder
+				for (File day : week.getValue()) {
+					indexer.CopytoHdfsFolder(hadoopOutputFolder,
+							day.getAbsolutePath());
+					System.out.println("copy to hdfs : "+day);
+				}
+				// build the index for tweets and copy to local
+				indexer.BuildTweetHdfsIndex(hadoopOutputFolder, "Week");
+				System.out.println("Build the index of "+ week.getKey());
+			}
 
-                    temp = new PyramidWeek(f.getName());
-                    temp.addNewFile(f);
-                }
-            }
-
-        }
+		}
     }
+    
+	
 
     /**
      * This method create tweets indexMonth only
-     */
+     
     private void CreateRtreeHashtagWeekIndex() throws IOException, InterruptedException, ParseException {
         System.out.println("Create Hashtags Week Index ");
         List<File> outputFiles = ListFiles(config.getHashtagFlushDir());
@@ -368,6 +363,7 @@ public class BuildPyramidIndex {
 
         }
     }
+    */
 
     /**
      * This Method takes a directory and return all files in the directory as
@@ -489,10 +485,10 @@ public class BuildPyramidIndex {
 */
     public static void main(String[] args) throws IOException, InterruptedException, ParseException, CompressorException {
         BuildPyramidIndex x = new BuildPyramidIndex();
-        x.createRtreeTweetMonths();
-//        x.indexer.UpdatelookupTable("Day");
-//        x.indexer.UpdatelookupTable("Week");
-//        x.indexer.UpdatelookupTable("Month");
+        x.CreateRtreeTweetWeekIndex();
+        x.indexer.UpdatelookupTable(Level.Day);
+        x.indexer.UpdatelookupTable(Level.Week);
+        x.indexer.UpdatelookupTable(Level.Month);
         System.out.println("End program");
     }
 }

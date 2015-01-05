@@ -4,10 +4,12 @@
  */
 package org.gistic.taghreed.diskBaseQuery.server;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -27,100 +29,147 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner;
+import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner2;
+import org.gistic.taghreed.diskBaseQueryOptimizer.TraditionalMultiHistogram;
+
+import edu.umn.cs.spatialHadoop.core.Rectangle;
 
 /**
  *
  * @author turtle
  * 
- * To support reading rtree index do the following 
- * Fs.open stream 
- * Rtree r = new Rtree();
- * setstokOjbect(Shape of the Tweet "new Tweets)
- * read Fileds(fs.open obj)
- * search(Rectagnle , Collection<output> )
- * result will return in the output 
+ *         To support reading rtree index do the following Fs.open stream Rtree
+ *         r = new Rtree(); setstokOjbect(Shape of the Tweet "new Tweets) read
+ *         Fileds(fs.open obj) search(Rectagnle , Collection<output> ) result
+ *         will return in the output
  * 
  */
 public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
+			UnsupportedEncodingException, IOException, ParseException,
+			InterruptedException {
 		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
 		List<Tweet> tweets = new ArrayList<Tweet>();
-		QueryPlanner queryPlan = new QueryPlanner();
-		
-		
-		ServerRequest req =  new ServerRequest();
-		req.setStartDate("2014-05-21");
-		req.setEndDate("2014-07-21");
+		ServerRequest req = new ServerRequest();
 		req.setType(queryType.tweet);
 		req.setIndex(queryIndex.rtree);
-		MBR mbr = new MBR(new Point(40.694961541009995,118.07045041992582),new Point(38.98904106170265,114.92561399414794) );
+		MBR mbr = new MBR(new Point(40.694961541009995, 118.07045041992582),
+				new Point(38.98904106170265, 114.92561399414794));
 		req.setMBR(mbr);
-		
-		queryLevel queryfrom = queryPlan.getQueryPlan(req.getStartDate(),req.getEndDate(), req.getMbr());
-//		queryLevel queryfrom = queryLevel.Day;
-		req.setQueryResolution(queryfrom);
-		
-		double starttime = System.currentTimeMillis();
-		req.getTweetsRtreeDays();
-		double endtime = System.currentTimeMillis();
-		System.out.println("Tweets Size:" + req.getTopKtweets().size());
-		System.out.println("Hashtags Size = " + req.getHashtags().size());
-		System.out.println("Active user size= "+ req.getActiveUser().size());
-		System.out.println("popular users size= "+ req.getPopularUsers().size());
-		System.out.println("Execcution Time:"+(endtime-starttime)+" Millis");
 
+		// Histogram estimation
+		QueryPlanner2 queryPlan = new QueryPlanner2();
+		TraditionalMultiHistogram queryPlanTradi = new TraditionalMultiHistogram();
+		queryLevel queryEstimated, queryEstimatedTraditional;
+		// Writer init
+		String fileString = System.getProperty("user.dir") + "/stat.csv";
+		OutputStreamWriter writer = new OutputStreamWriter(
+				new FileOutputStream(fileString, false), "UTF-8");
+		writer.write("queryMBR\tstartDate\tendDate\tExactQueryPlan_Traditional\tHistogramTime_Traditional\tExactExecutionTime_Traditional\tnewIdeaQueryPlan\tHistogramTime\tnewIdeaExecutiontime\tMatchFlag\n");
+		// Test
+		long startTime, endTime;
+		long queryEst_Time, queryEstTradi_Time, queryExec_time, QueryExecTradi_time;
+		for (int i = 5; i < 7; i++) {
+			for (int j = 1; j < 30; j++) {
+				req.setStartDate("2014-05" + "-01");
+				req.setEndDate("2014-0" + i + "-" + j);
+				// Get the queryPlan
+				startTime = System.currentTimeMillis();
+				queryEstimated = queryPlan.getQueryPlan(req.getStartDate(),
+						req.getEndDate(), req.getMbr());
+				endTime = System.currentTimeMillis();
+				queryEst_Time = endTime - startTime;
+				// Estimate Traditional
+				startTime = System.currentTimeMillis();
+				queryEstimatedTraditional = queryPlanTradi.getQueryPlan(
+						req.getStartDate(), req.getEndDate(), req.getMbr());
+				endTime = System.currentTimeMillis();
+				queryEstTradi_Time = endTime - startTime;
 
+				// Execute the query
+				req.setQueryResolution(queryEstimatedTraditional);
+				startTime = System.currentTimeMillis();
+				req.getTweetsRtreeDays();
+				endTime = System.currentTimeMillis();
+				QueryExecTradi_time = endTime - startTime;
+
+				req.setQueryResolution(queryEstimated);
+				startTime = System.currentTimeMillis();
+				req.getTweetsRtreeDays();
+				endTime = System.currentTimeMillis();
+				queryExec_time = endTime - startTime;
+
+				String temp = mbr.toWKT() + "\t" + req.getStartDate() + "\t"
+						+ req.getEndDate() + "\t" + queryEstimatedTraditional
+						+ "\t" + queryEstTradi_Time + "\t"
+						+ QueryExecTradi_time + "\t" + queryEstimated + "\t"
+						+ queryEst_Time + "\t" + queryExec_time + "\t"
+						+ Match(queryEstimated, queryEstimatedTraditional)
+						+ "\n";
+				System.err.println(temp);
+				writer.write(temp);
+			}
+		}
+
+		writer.close();
+
+	}
+
+	private static String Match(queryLevel queryEstimated,
+			queryLevel queryEstimatedTraditional) {
+		if (queryEstimated.equals(queryEstimatedTraditional))
+			return "true";
+		else
+			return "false";
 	}
 
 	private void testCall() throws FileNotFoundException, IOException,
 			ParseException {
-//		ServerRequest req = new ServerRequest();
-//		String maxlat = "90";
-//		String maxlon = "180";
-//		String minlat = "-90";
-//		String minlon = "-180";
-//		req.setMBR(maxlat, maxlon, minlat, minlon);
-//		req.setStartDate("2014-01-06");
-//		req.setEndDate("2014-01-06");
-//		req.setQuery("adsf");
-//		String index = "invereted";
-//		String level = "pyramid";
-//		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
-//		List<Tweet> tweets = new ArrayList<Tweet>();
+		// ServerRequest req = new ServerRequest();
+		// String maxlat = "90";
+		// String maxlon = "180";
+		// String minlat = "-90";
+		// String minlon = "-180";
+		// req.setMBR(maxlat, maxlon, minlat, minlon);
+		// req.setStartDate("2014-01-06");
+		// req.setEndDate("2014-01-06");
+		// req.setQuery("adsf");
+		// String index = "invereted";
+		// String level = "pyramid";
+		// List<PopularHashtags> popularHashtags = new
+		// ArrayList<PopularHashtags>();
+		// List<Tweet> tweets = new ArrayList<Tweet>();
 
-//		if (level.equals("day")) {
-//			if (index.equals("rtree")) {
-//				tweets = req.getTweetsRtreeDays();
-//			} else {
-//				tweets = req.getTweetsInvertedDay();
-//				popularHashtags = req.getHashtagsInvertedDays();
-//			}
-//
-//		} else {
-//			if (index.equals("rtree")) {
-//				tweets = req.getTweetsRtreePyramid();
-//				popularHashtags = req.getHashtagsRtreePyramid();
-//			} else {
-//				// query from inverted index
-//				tweets = req.getTweetsInvertedPyramid();
-//				// popularHashtags = req.getHashtagsInvertedPyramid();
-//			}
-//
-//		}
-//
-//		for (Tweet t : tweets) {
-//			System.out.println(t.toString());
-//		}
-//		for (PopularHashtags hash : popularHashtags) {
-//			System.out.println(hash.toString());
-//		}
-//
-//		System.out.println("Tweets Size:" + tweets.size());
-//		System.out.println("Hashtags Size = " + popularHashtags.size());
+		// if (level.equals("day")) {
+		// if (index.equals("rtree")) {
+		// tweets = req.getTweetsRtreeDays();
+		// } else {
+		// tweets = req.getTweetsInvertedDay();
+		// popularHashtags = req.getHashtagsInvertedDays();
+		// }
+		//
+		// } else {
+		// if (index.equals("rtree")) {
+		// tweets = req.getTweetsRtreePyramid();
+		// popularHashtags = req.getHashtagsRtreePyramid();
+		// } else {
+		// // query from inverted index
+		// tweets = req.getTweetsInvertedPyramid();
+		// // popularHashtags = req.getHashtagsInvertedPyramid();
+		// }
+		//
+		// }
+		//
+		// for (Tweet t : tweets) {
+		// System.out.println(t.toString());
+		// }
+		// for (PopularHashtags hash : popularHashtags) {
+		// System.out.println(hash.toString());
+		// }
+		//
+		// System.out.println("Tweets Size:" + tweets.size());
+		// System.out.println("Hashtags Size = " + popularHashtags.size());
 	}
-	
-	
 
 }

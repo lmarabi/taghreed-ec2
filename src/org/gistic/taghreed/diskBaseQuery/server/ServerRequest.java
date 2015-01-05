@@ -48,7 +48,7 @@ public class ServerRequest {
 	private queryIndex index;
 	private queryLevel queryResolution;
 	private TopTweetResult requestResult;
-	private static Lookup lookup = new Lookup();
+	private  Lookup lookup = new Lookup();
 
 	public enum queryIndex {
 
@@ -73,7 +73,7 @@ public class ServerRequest {
 		
 	}
 	
-	public static Lookup getLookup() {
+	public  Lookup getLookup() {
 		return lookup;
 	}
 

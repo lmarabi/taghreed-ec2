@@ -52,7 +52,7 @@ import com.sun.corba.se.spi.orbutil.fsm.Guard.Result;
 public class QueryExecutor {
 
 	// Global lookup
-	private static Lookup lookup = new Lookup();
+	private  Lookup lookup = new Lookup();
 	private static double startTime;
 	private static double endTime;
 	private Date startDate;
@@ -625,7 +625,7 @@ public class QueryExecutor {
 	 * @return
 	 * @throws ParseException
 	 */
-	private static Map<String, String> getIndexArmy() throws ParseException,
+	private  Map<String, String> getIndexArmy() throws ParseException,
 			IOException {
 			return lookup.getTweetsDayIndex(serverRequest.getStartDate(),
 					serverRequest.getEndDate());
@@ -641,7 +641,7 @@ public class QueryExecutor {
      * @return
      * @throws ParseException
      */
-    private static Map<String, String> getWeekTree() throws ParseException {
+    private  Map<String, String> getWeekTree() throws ParseException {
     	Map<String,String> result = new HashMap<String, String>();
     	Map<Week,String> temp =  lookup.getTweetsWeekIndex(serverRequest.getStartDate(), serverRequest.getEndDate());
     	Iterator<Entry<Week, String>> it = temp.entrySet().iterator();
@@ -653,7 +653,7 @@ public class QueryExecutor {
     }
 	
 	
-	private static Map<String,String> getMonthTree() throws ParseException, IOException {
+	private  Map<String,String> getMonthTree() throws ParseException, IOException {
 		List<String> months = lookup.getTweetsMonth(serverRequest.getStartDate(),
                 serverRequest.getEndDate());
 		Map<String,String> result = new HashMap<String, String>();

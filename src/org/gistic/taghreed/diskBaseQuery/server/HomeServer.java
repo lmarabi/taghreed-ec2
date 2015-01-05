@@ -29,9 +29,11 @@ import org.gistic.taghreed.collections.PopularHashtags;
 import org.gistic.taghreed.collections.PopularUsers;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner;
 import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner2;
+import org.gistic.taghreed.diskBaseQueryOptimizer.TraditionalMultiHistogram;
 
 import com.google.gson.stream.JsonWriter;
 
@@ -40,8 +42,10 @@ import com.google.gson.stream.JsonWriter;
  * @author turtle
  */
 public class HomeServer extends AbstractHandler {
-//	static QueryPlanner queryPlanner;
-	static QueryPlanner2 queryPlanner;
+	static TraditionalMultiHistogram THistogram;
+	static QueryPlanner2 queryPlannerHistogram;
+	static OutputStreamWriter outputWriter;
+	static ServerRequest req;
 
 	@Override
 	public void handle(String s, Request baseRequest,
@@ -68,7 +72,7 @@ public class HomeServer extends AbstractHandler {
 
 	}
 
-	public synchronized void  executeRequest(String s, Request baseRequest,
+	public synchronized void executeRequest(String s, Request baseRequest,
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException, FileNotFoundException,
 			UnsupportedEncodingException, InterruptedException {
@@ -82,6 +86,10 @@ public class HomeServer extends AbstractHandler {
 			response.addHeader("Access-Control-Allow-Credentials", "true");
 			baseRequest.setHandled(true);
 			String path = request.getPathInfo();
+			String fileString = System.getProperty("user.dir")
+					+ "/taghreed.log";
+			this.outputWriter = new OutputStreamWriter(new FileOutputStream(
+					fileString, true), "UTF-8");
 
 			if (path.equals("/allqueries")) {
 
@@ -99,24 +107,36 @@ public class HomeServer extends AbstractHandler {
 						+ ") - (" + maxLong + "-" + maxLat + "),StartDate: "
 						+ startDate + ",EndDate: " + endDate + ",topK: " + topK
 						+ ",Keyword: " + query + ",";
-				ServerRequest req = new ServerRequest();
-				MBR mbr = new MBR(new Point(maxLat, maxLong), new Point(
-						minLat, minLong));
+				
+				MBR mbr = new MBR(new Point(maxLat, maxLong), new Point(minLat,
+						minLong));
 				req.setMBR(mbr);
 				req.setQuery(query);
 				req.setStartDate(startDate);
 				req.setEndDate(endDate);
 				List<Tweet> tweetsResult;
-				double startTime = System.currentTimeMillis();
-				queryLevel plan = this.queryPlanner.getQueryPlan(startDate, endDate, mbr);
-				double endTime = System.currentTimeMillis();
-				System.err.println("Query Plan Estimation Time: "+(endTime - startTime) + " ms\tSuggested plan:"+plan.toString());
+				long startTime = System.currentTimeMillis();
+				queryLevel plan = this.queryPlannerHistogram.getQueryPlan(
+						startDate, endDate, mbr);
+				long endTime = System.currentTimeMillis();
+				long queryplanTime = (endTime - startTime);
+				System.err.println("Query Plan Estimation Time: "
+						+ queryplanTime + " ms\tSuggested plan:"
+						+ plan.toString());
+				queryLevel Tpaln = this.THistogram.getQueryPlan(startDate,
+						endDate, mbr);
 				req.setQueryResolution(plan);
+
 				startTime = System.currentTimeMillis();
 				req.getTweetsRtreeDays();
 				endTime = System.currentTimeMillis();
-				System.err.println("Query Time: "+(endTime - startTime) + " ms");
+				long executiontime = (endTime - startTime);
+				System.err.println("Query Time: " + executiontime + " ms");
 
+				this.outputWriter.write(mbr.toWKT() + "\t" + startDate + "\t"
+						+ endDate + "\t" + plan.toString() + "\t"
+						+ queryplanTime + "\t" + Tpaln.toString() + "\t"
+						+ executiontime + "\n");
 				startTime = System.currentTimeMillis();
 				List<PopularHashtags> popularHashtags;
 				popularHashtags = req.getHashtags();
@@ -124,19 +144,16 @@ public class HomeServer extends AbstractHandler {
 				endTime = System.currentTimeMillis();
 				System.out.println("*********\n" + "Found Hashtags: "
 						+ popularHashtags.size() + "\n" + "*************");
-				
 
 				List<ActiveUsers> activePeople = null;
 				startTime = System.currentTimeMillis();
 				activePeople = req.getActiveUser();
 				endTime = System.currentTimeMillis();
-				
 
 				startTime = System.currentTimeMillis();
 				List<PopularUsers> popularPeople = null;
 				popularPeople = req.getPopularUsers();
 				endTime = System.currentTimeMillis();
-				
 
 				// List<TweetVolumes> tweetVolumes = null;
 				// tweetVolumes = req.getTweetVolumesFast(tweetsResult);
@@ -146,7 +163,6 @@ public class HomeServer extends AbstractHandler {
 				int topkInt = Integer.parseInt(topK);
 				tweetsResult = req.getTopKtweets();
 				endTime = System.currentTimeMillis();
-				
 
 				JsonWriter writer = new JsonWriter(new OutputStreamWriter(
 						new GZIPOutputStream(response.getOutputStream()),
@@ -257,9 +273,13 @@ public class HomeServer extends AbstractHandler {
 					writer.name("tweet_count").value(vol.volume);
 					writer.endObject();
 				}
+				// show the stat of query optimizer
+
+				//
 				writer.endArray();
 				writer.endObject();
 				writer.close();
+				this.outputWriter.close();
 
 			} else {
 				response.getWriter()
@@ -284,12 +304,16 @@ public class HomeServer extends AbstractHandler {
 
 		} catch (ParseException e) {
 			System.out.println("error happened");
+			this.outputWriter.close();
 		}
 
 	}
 
 	public static void main(String[] args) throws Exception {
-		queryPlanner = new QueryPlanner2();
+		req = new ServerRequest();
+		req.setIndex(queryIndex.rtree);
+		queryPlannerHistogram = new QueryPlanner2();
+		THistogram = new TraditionalMultiHistogram();
 		Server server = new Server(8085);
 		server.setHandler(new HomeServer());
 		server.start();

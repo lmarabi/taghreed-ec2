@@ -33,13 +33,16 @@ public class TraditionalMultiHistogram {
 	Lookup lookup;
 	double confidenceThreshold = 0.75;
 
-	public TraditionalMultiHistogram(Lookup lookup) throws IOException {
+	public TraditionalMultiHistogram() throws IOException, ParseException {
 		// init in memory histograms
-		this.lookup = lookup;
+		ServerRequest server = new ServerRequest();
+		server.setIndex(queryIndex.rtree);
+		this.lookup = server.getLookup();
 		this.dayHistogram = new HashMap<String, HistogramCluster>();
 		this.weekHistogram = new HashMap<String, HistogramCluster>();
 		this.monthHistogram = new HashMap<String, HistogramCluster>();
 		// Offline processing
+		 OfflinePhase();
 	}
 
 	/**
@@ -59,21 +62,56 @@ public class TraditionalMultiHistogram {
 			dayHistogram.put(obj.getKey(), new HistogramCluster(obj.getValue()));
 		}
 		
-		System.out.println();
+		Map<Week,String> week = this.lookup.getTweetsWeekIndex(startDate, endDate);
+		it = week.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<Week, String> obj = (Entry<Week, String>) it.next();
+			weekHistogram.put(obj.getKey().toString(), new HistogramCluster(obj.getValue()));
+		}
+		
+		Map<String,String> month = this.lookup.getTweetsMonthsIndex(startDate, endDate);
+		it = month.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String, String> obj = (Entry<String, String>) it.next();
+			monthHistogram.put(obj.getKey(), new HistogramCluster(obj.getValue()));
+		}
 		
 	}
 	
-	public long getQueryPlan(String startDay,String endDay,MBR queryMBR) throws ParseException{
-		return getDayLevelCardinality(startDay, endDay, queryMBR);
+	public queryLevel getQueryPlan(String startDay,String endDay,MBR queryMBR) throws ParseException{
+		queryLevel queryFrom = queryLevel.Day;
+		double minPlan = Double.MAX_VALUE;
+		for (queryLevel q : queryLevel.values()) {
+			long plancost = this.getQueryCost(startDay, endDay, q, queryMBR);
+			System.out.println("Histogram Statistics: \n" + q.toString()
+					+ "\tCardinality Cost: " + plancost);
+			if (plancost <= minPlan && plancost != -1) {
+				minPlan = plancost;
+				queryFrom = q;
+			}
+		}
+		return queryFrom;
 		
 	}
 	
+	
+	private long getQueryCost(String startDay, String endDay, queryLevel q,
+			MBR queryMBR) throws ParseException {
+		if (q.equals(queryLevel.Day)) {
+			return this.getDayLevelCardinality(startDay, endDay, queryMBR);
+		} else if (q.equals(queryLevel.Week)) {
+			return this.getWeekLevelCardinality(startDay, endDay, queryMBR);
+		} else if (q.equals(queryLevel.Month)) {
+			return this.getMonthLevelCardinality(startDay, endDay, queryMBR);
+		}
+		return 0;
+	}
 	
 	
 	private long getDayLevelCardinality(String startDay,String endDay,MBR queryMBR) throws ParseException{
 		//clusterCalculator<clusterid,numberofdays>
 		//temporalRange<day,directorypath>
-		long result = 0;
+		long result = -1;
 		HashMap<Integer,Integer> clusterCalculator = new HashMap<Integer, Integer>();
 		Map<String,String> temporalRange = this.lookup.getTweetsDayIndex(startDay, endDay);
 		Iterator it = temporalRange.entrySet().iterator();
@@ -85,20 +123,54 @@ public class TraditionalMultiHistogram {
 		return result;
 	}
 	
+	private long getMonthLevelCardinality(String startDay,String endDay,MBR queryMBR) throws ParseException{
+		//clusterCalculator<clusterid,numberofdays>
+		//temporalRange<day,directorypath>
+		long result = -1;
+		HashMap<Integer,Integer> clusterCalculator = new HashMap<Integer, Integer>();
+		Map<String,String> temporalRange = this.lookup.getTweetsMonthsIndex(startDay, endDay);
+		Iterator it = temporalRange.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String,String> m = (Entry<String, String>) it.next();
+			HistogramCluster histogram = monthHistogram.get(m.getKey());
+			result += histogram.getCardinality(queryMBR);
+		}
+		return result;
+	}
+	
+	
+	private long getWeekLevelCardinality(String startDay,String endDay,MBR queryMBR) throws ParseException{
+		//clusterCalculator<clusterid,numberofdays>
+		//temporalRange<day,directorypath>
+		long result = -1;
+		HashMap<Integer,Integer> clusterCalculator = new HashMap<Integer, Integer>();
+		Map<Week,String> temporalRange = this.lookup.getTweetsWeekIndex(startDay, endDay);
+		Iterator it = temporalRange.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<Week,String> week = (Entry<Week, String>) it.next();
+			HistogramCluster histogram = weekHistogram.get(week.getKey().toString());
+			result += histogram.getCardinality(queryMBR);
+		}
+		return result;
+	}
+	
 	
 
 	public static void main(String[] args) throws FileNotFoundException, IOException, ParseException {
-		ServerRequest server = new ServerRequest();
-		MBR mbr = new MBR(new Point(40.694961541009995,118.07045041992582),new Point(38.98904106170265,114.92561399414794) );
-		server.setMBR(mbr);
-		server.setIndex(queryIndex.rtree);
-		TraditionalMultiHistogram planner2 = new TraditionalMultiHistogram(server.getLookup());
+	
+		//MBR mbr = new MBR(new Point(40.694961541009995,118.07045041992582),new Point(38.98904106170265,114.92561399414794) );
+		//40.06978032458496 21.29929525830078, 40.06978032458496 21.56846029736328, 39.55651280749512 21.56846029736328, 39.55651280749512 21.29929525830078, 40.06978032458496 21.29929525830078
+		MBR mbr = new MBR(new Point(21.56846029736328, 40.06978032458496), new Point(21.29929525830078, 39.55651280749512));
+
+		
+		
+		TraditionalMultiHistogram planner2 = new TraditionalMultiHistogram();
 		planner2.OfflinePhase();
 		System.err.println("Done");
 		System.out.println("Num of day histogram: "+planner2.dayHistogram.size());
 		System.out.println("Num of week histogram: "+planner2.weekHistogram.size());
 		System.out.println("Num of month histogram: "+planner2.monthHistogram.size());
-		long result = planner2.getQueryPlan("2014-05-01", "2014-05-01", server.getMbr());
+		queryLevel result = planner2.getQueryPlan("2014-05-01", "2014-05-10", mbr);
 		 System.out.print(result);
 
 	}

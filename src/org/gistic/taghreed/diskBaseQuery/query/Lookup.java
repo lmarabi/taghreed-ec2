@@ -4,8 +4,6 @@
  */
 package org.gistic.taghreed.diskBaseQuery.query;
 
-import org.gistic.taghreed.collections.Week;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,10 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.joda.time.Months;
-
-import com.sun.java.swing.plaf.gtk.resources.gtk;
+import org.gistic.taghreed.collections.Week;
 
 /**
  *
@@ -92,10 +87,7 @@ public class Lookup {
 		reader = new BufferedReader(new FileReader(tweetsLookup));
 		line = null;
 		while ((line = reader.readLine()) != null) {
-			String[] temp = line.split(",");
-			String[] range = temp[0].split("&");
-			weekDatesTweet.add(new Week(dateFormat.parse(range[0]), dateFormat
-					.parse(range[1])));
+			weekDatesTweet.add(new Week(line));
 			weekPathsTweet.add(path + "/tweets/Week/index." + line);
 
 		}
@@ -205,11 +197,29 @@ public class Lookup {
 	 */
 	public Map<Week, String> getTweetsWeekIndex(String startDate, String endDate)
 			throws ParseException {
+		Date start = dateFormat.parse(startDate);
+		Date end = dateFormat.parse(endDate);
+		Calendar cstart = Calendar.getInstance();
+		Calendar cend = Calendar.getInstance();
+		cstart.setTime(start);
+		cend.setTime(end);
 		Map<Week, String> result = new HashMap<Week, String>();
-		for (int i = 0; i < weekDatesTweet.size(); i++) {
-			if (insideWeekBoundry(startDate, endDate, weekDatesTweet.get(i))) {
-				result.put(weekDatesTweet.get(i), weekPathsTweet.get(i));
+		List<String> intermediateResult = new ArrayList<String>();
+		while(!(cstart.get(Calendar.YEAR) != cend.get(Calendar.YEAR) && 
+				(cstart.get(Calendar.MONTH) != cend.get(Calendar.MONTH)) &&
+						(cstart.get(Calendar.DAY_OF_MONTH) != cend.get(Calendar.DAY_OF_MONTH))
+				)){
+			String weekofDay = cstart.get(Calendar.YEAR)+"-"+(cstart.get(Calendar.MONTH)+1)+"-"+cstart.get(Calendar.WEEK_OF_MONTH);
+			if(!intermediateResult.contains(weekofDay)){
+				intermediateResult.add(weekofDay);
 			}
+			cstart.add(Calendar.DATE, 1);
+			
+		}
+		
+		//send result as hash map
+		for(String week : intermediateResult){
+			result.put(new Week(week), this.dirPath + "/tweets/Week/index."+week);
 		}
 		return result;
 	}
@@ -252,7 +262,7 @@ public class Lookup {
 					.getMonth() + 1) : "0"
 					+ String.valueOf(start.getMonth() + 1);
 			result.put(c.get(Calendar.YEAR) + "-" + month, this.dirPath
-					+ "/tweets/Month/" + c.get(Calendar.YEAR) + "-" + month);
+					+ "/tweets/Month/index." + c.get(Calendar.YEAR) + "-" + month);
 			c.add(Calendar.MONTH, 1);
 			start = c.getTime();
 
@@ -260,7 +270,7 @@ public class Lookup {
 		month = ((start.getMonth() + 1) >= 10) ? String.valueOf(start
 				.getMonth() + 1) : "0" + String.valueOf(start.getMonth() + 1);
 		result.put(c.get(Calendar.YEAR) + "-" + month, this.dirPath
-				+ "/tweets/Month/" + c.get(Calendar.YEAR) + "-" + month);
+				+ "/tweets/Month/index." + c.get(Calendar.YEAR) + "-" + month);
 		return result;
 	}
 
@@ -289,6 +299,10 @@ public class Lookup {
 					// add only month to temp
 					months.add(temp[0] + "-" + temp[1]);
 				}
+			}else if((start.getMonth() == end.getMonth())&& (start.getYear() == end.getYear())){
+				String[] temp = Week.dateFormat.format(start).split("-");
+				// add only month to temp
+				months.add(temp[0] + "-" + temp[1]);
 			}
 			c.add(Calendar.DATE, 1);
 			start = c.getTime();
@@ -444,49 +458,49 @@ public class Lookup {
 		}
 	}
 
-	/**
-	 * Get the missing tweets lookup Map<Date,String>
-	 *
-	 * @param startDate
-	 * @param endDate
-	 * @return
-	 * @throws ParseException
-	 */
-	public Map<String, String> getTweetMissingDaysinWeek(String startDate,
-			String endDate) throws ParseException {
-		Map<String, String> result = new HashMap<String, String>();
-		Date start = dateFormat.parse(startDate);
-		Date end = dateFormat.parse(endDate);
-		Map<Week, String> weekcovred = this.getTweetsWeekIndex(startDate,
-				endDate);
-		Map<String, String> days = this.getTweetsDayIndex(startDate, endDate);
-		Calendar c = Calendar.getInstance();
-		boolean cover = false;
-		while (!start.after(end)) {
-			Iterator it = weekcovred.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry obj = (Map.Entry) it.next();
-				Week week = (Week) obj.getKey();
-				// check and add to the list
-				if (week.isDayIntheWeek(start)) {
-					cover = true;
-				}
-
-			}
-			if (!cover) {
-				if (days.get(start) != null) {
-					result.put(dateFormat.format(start),
-							days.get(dateFormat.format(start)));
-				}
-			} else {
-				cover = false;
-			}
-			c.setTime(start);
-			c.add(Calendar.DATE, 1); // number of days to add
-			start = c.getTime();
-		}
-		return result;
-	}
+//	/**
+//	 * Get the missing tweets lookup Map<Date,String>
+//	 *
+//	 * @param startDate
+//	 * @param endDate
+//	 * @return
+//	 * @throws ParseException
+//	 */
+//	public Map<String, String> getTweetMissingDaysinWeek(String startDate,
+//			String endDate) throws ParseException {
+//		Map<String, String> result = new HashMap<String, String>();
+//		Date start = dateFormat.parse(startDate);
+//		Date end = dateFormat.parse(endDate);
+//		Map<Week, String> weekcovred = this.getTweetsWeekIndex(startDate,
+//				endDate);
+//		Map<String, String> days = this.getTweetsDayIndex(startDate, endDate);
+//		Calendar c = Calendar.getInstance();
+//		boolean cover = false;
+//		while (!start.after(end)) {
+//			Iterator it = weekcovred.entrySet().iterator();
+//			while (it.hasNext()) {
+//				Map.Entry obj = (Map.Entry) it.next();
+//				Week week = (Week) obj.getKey();
+//				// check and add to the list
+//				if (week.isDayIntheWeek(start)) {
+//					cover = true;
+//				}
+//
+//			}
+//			if (!cover) {
+//				if (days.get(start) != null) {
+//					result.put(dateFormat.format(start),
+//							days.get(dateFormat.format(start)));
+//				}
+//			} else {
+//				cover = false;
+//			}
+//			c.setTime(start);
+//			c.add(Calendar.DATE, 1); // number of days to add
+//			start = c.getTime();
+//		}
+//		return result;
+//	}
 
 	/**
 	 * Return the dayLookupTweet table
@@ -526,14 +540,14 @@ public class Lookup {
 		return false;
 	}
 
-	public static boolean insideWeekBoundry(String start, String end, Week range)
-			throws ParseException {
-		if (insideDaysBoundry(start, end, range.getStart())
-				&& insideDaysBoundry(start, end, range.getEnd())) {
-			return true;
-		}
-		return false;
-	}
+//	public static boolean insideWeekBoundry(String start, String end, Week range)
+//			throws ParseException {
+//		if (insideDaysBoundry(start, end, range.getStart())
+//				&& insideDaysBoundry(start, end, range.getEnd())) {
+//			return true;
+//		}
+//		return false;
+//	}
 
 	/***
 	 * This method check if day exist in the missing day list or not
