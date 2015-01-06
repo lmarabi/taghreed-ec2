@@ -185,6 +185,26 @@ public class Lookup {
 		}
 		return result;
 	}
+	
+	/**
+	 * This method return HashMap<Date,Path> to all dates between the start and
+	 * the end date.
+	 *
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 * @throws ParseException
+	 */
+	public Map<Week, String> getAllTweetsWeekIndex(String startDate,
+			String endDate) throws ParseException {
+		Map<Week, String> result = new HashMap<Week, String>();
+		for (int i = 0; i < weekDatesTweet.size(); i++) {
+			if (insideDaysBoundry(startDate, endDate, dayDatesTweet.get(i))) {
+				result.put(weekDatesTweet.get(i), weekPathsTweet.get(i));
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * This method return HashMap<Date,Path> to all dates between the start and
@@ -205,9 +225,9 @@ public class Lookup {
 		cend.setTime(end);
 		Map<Week, String> result = new HashMap<Week, String>();
 		List<String> intermediateResult = new ArrayList<String>();
-		while(!(cstart.get(Calendar.YEAR) != cend.get(Calendar.YEAR) && 
-				(cstart.get(Calendar.MONTH) != cend.get(Calendar.MONTH)) &&
-						(cstart.get(Calendar.DAY_OF_MONTH) != cend.get(Calendar.DAY_OF_MONTH))
+		while(!(cstart.get(Calendar.YEAR) == cend.get(Calendar.YEAR) && 
+				(cstart.get(Calendar.MONTH) == cend.get(Calendar.MONTH)) &&
+						(cstart.get(Calendar.DATE) == cend.get(Calendar.DATE))
 				)){
 			String weekofDay = cstart.get(Calendar.YEAR)+"-"+(cstart.get(Calendar.MONTH)+1)+"-"+cstart.get(Calendar.WEEK_OF_MONTH);
 			if(!intermediateResult.contains(weekofDay)){

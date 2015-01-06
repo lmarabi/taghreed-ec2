@@ -62,7 +62,7 @@ public class TraditionalMultiHistogram {
 			dayHistogram.put(obj.getKey(), new HistogramCluster(obj.getValue()));
 		}
 		
-		Map<Week,String> week = this.lookup.getTweetsWeekIndex(startDate, endDate);
+		Map<Week,String> week = this.lookup.getAllTweetsWeekIndex(startDate, endDate);
 		it = week.entrySet().iterator();
 		while(it.hasNext()){
 			Map.Entry<Week, String> obj = (Entry<Week, String>) it.next();
@@ -165,7 +165,7 @@ public class TraditionalMultiHistogram {
 		
 		
 		TraditionalMultiHistogram planner2 = new TraditionalMultiHistogram();
-		planner2.OfflinePhase();
+		
 		System.err.println("Done");
 		System.out.println("Num of day histogram: "+planner2.dayHistogram.size());
 		System.out.println("Num of week histogram: "+planner2.weekHistogram.size());

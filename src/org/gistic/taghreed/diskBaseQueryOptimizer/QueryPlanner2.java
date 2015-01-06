@@ -23,8 +23,6 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 
 public class QueryPlanner2 {
-	String startDay;
-	String endDay;
 	GridCell worldCell;
 	HashMap<Integer, HistogramCluster> dayHistogram;
 	HashMap<Integer, HistogramCluster> weekHistogram;
@@ -34,7 +32,7 @@ public class QueryPlanner2 {
 	List<DayCardinality> monthArrayList;
 	queryLevel level;
 	Lookup lookup;
-	double confidenceThreshold = 0.75;
+	double confidenceThreshold = 0.85;
 
 	public QueryPlanner2() throws FileNotFoundException, IOException, ParseException {
 		// init in memory histograms
@@ -49,7 +47,7 @@ public class QueryPlanner2 {
 		this.monthArrayList = new ArrayList<DayCardinality>();
 		this.OfflinePhase();
 		//
-		System.err.println("Done");
+		System.out.println("Done");
 		System.out.println("Num of day histogram: "
 				+ this.dayHistogram.size());
 		System.out.println("Num of week histogram: "
@@ -284,7 +282,8 @@ public class QueryPlanner2 {
 		// temporalRange<day,directorypath>
 
 		HashMap<Integer, Integer> clusterCalculator = new HashMap<Integer, Integer>();
-		Map<String, String> temporalRange = this.lookup.getTweetsDayIndex(
+		Map<String, String> temporalRange = new HashMap<String, String>();
+		temporalRange = lookup.getTweetsDayIndex(
 				startDay, endDay);
 		Iterator it = temporalRange.entrySet().iterator();
 		while (it.hasNext()) {
@@ -336,14 +335,8 @@ public class QueryPlanner2 {
 		
 		QueryPlanner2 planner2 = new QueryPlanner2();
 		
-		System.err.println("Done");
-		System.out.println("Num of day histogram: "
-				+ planner2.dayHistogram.size());
-		System.out.println("Num of week histogram: "
-				+ planner2.weekHistogram.size());
-		System.out.println("Num of month histogram: "
-				+ planner2.monthHistogram.size());
-		// planner2.printArray();
+		
+		 planner2.printArray();
 		queryLevel q = planner2.getQueryPlan("2014-05-01", "2014-05-10",
 				mbr);
 		System.out.print(q.toString());

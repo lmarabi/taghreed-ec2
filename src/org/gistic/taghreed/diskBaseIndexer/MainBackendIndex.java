@@ -127,7 +127,7 @@ public class MainBackendIndex {
 				indexer.CreateRtreeTweetIndex();
 				// index.CreateRtreeHashtagIndex();
 				// index.createInvertedHashtagIndex();
-				// indexer.createInvertedTweetIndex();
+     		    //indexer.createInvertedTweetIndex();
 			} catch (InterruptedException ex) {
 				Logger.getLogger(MainBackendIndex.class.getName()).log(
 						Level.SEVERE, null, ex);
