@@ -37,6 +37,8 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 import org.gistic.taghreed.spatialHadoop.Tweets;
 
+import com.jcraft.jsch.jce.Random;
+
 import edu.umn.cs.spatialHadoop.OperationsParams;
 import edu.umn.cs.spatialHadoop.core.Rectangle;
 import edu.umn.cs.spatialHadoop.core.ResultCollector;
@@ -57,7 +59,7 @@ public class QueryExecutor {
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static ServerRequest serverRequest;
 
-	public static TopTweetResult result = new TopTweetResult(100);
+	public final static TopTweetResult result = new TopTweetResult(100);
 
 	public QueryExecutor(ServerRequest request) throws IOException,
 			FileNotFoundException, ParseException {
@@ -195,14 +197,14 @@ public class QueryExecutor {
 					if (serverRequest.getQuery() != null) {
 						if (tweetObj.tweetText.contains(serverRequest
 								.getQuery())) {
-							result.put(tweetObj);
+//							result.put(tweetObj);
 							// output.write(tweet);
 							// output.write("\n");
 							count++;
 							// insertTweetsToVolume(tweetObj.created_at);
 						}
 					} else {
-						result.put(tweetObj);
+//						result.put(tweetObj);
 						// output.write(tweet);
 						// output.write("\n");
 						count++;
@@ -440,13 +442,16 @@ public class QueryExecutor {
 	private static long executeRangeQuery(Rectangle mbr, String path)
 			throws IllegalArgumentException, IOException {
 		long count;
+		final List<Tweets> list = new ArrayList<Tweets>();
+		Random r = new Random(); 
 		count = RangeQuery.rangeQueryLocal(new Path(path), mbr, new Tweets(),
 				new OperationsParams(), new ResultCollector<Tweets>() {
 
 					@Override
 					public void collect(Tweets arg0) {
 						if(arg0 != null)
-							result.put(new Tweet(arg0));
+							result.put(arg0);
+							
 
 					}
 				});
@@ -527,7 +532,7 @@ public class QueryExecutor {
 					// outwriter.write(doc);
 					// outwriter.write("\n");
 					count++;
-					this.result.put(tweet);
+//					this.result.put(tweet);
 				}
 			}
 		} else {

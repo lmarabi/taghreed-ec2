@@ -18,7 +18,7 @@ import org.gistic.taghreed.spatialHadoop.Tweets;
 
 //import org.apache.hadoop.util.PriorityQueue;
 
-public class TopTweetResult extends PriorityBlockingQueue<Tweet> {
+public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 
 	// private int capacity;
 	private ConcurrentHashMap<String, Integer> popularHashtags = new ConcurrentHashMap<String, Integer>();
@@ -26,7 +26,6 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweet> {
 	private ConcurrentHashMap<String, Integer> popularPeople = new ConcurrentHashMap<String, Integer>();
 	private ConcurrentHashMap<String, Integer> tweetsVolume = new ConcurrentHashMap<String, Integer>();
 	private Random r;
-	private  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	public TopTweetResult(int size) {
 		super(size);
@@ -34,78 +33,78 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweet> {
 	}
 
 	@Override
-	public void put(Tweet element) {
-		// boolean overflow = this.size() == this.capacity;
-		// int R = r.nextInt(this.capacity - 0) + 0;
-		int priorityValue = r.nextInt();
-		element.setPriorityValue(priorityValue);
-//		setStatistics(element);
+	public void put(Tweets element) {
+//		// boolean overflow = this.size() == this.capacity;
+//		// int R = r.nextInt(this.capacity - 0) + 0;
+//		int priorityValue = r.nextInt();
+//		element.priority = priorityValue;
+////		setStatistics(element);
 		int counts;
-		try {
-			// Get active people and popular users on the fly
-			if (activePeople.containsKey(element.screenName)) {
-				activePeople.put(element.screenName, activePeople.get(element.screenName)+1);
-				counts = Math.max(popularPeople.get(element.screenName),element.followersCount);
-				popularPeople.put(element.screenName, counts);
-				
-			} else {
-				activePeople.put(element.screenName, 1);
-				popularPeople.put(element.screenName, element.followersCount);
-			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-
+//		try {
+//			// Get active people and popular users on the fly
+//			if (activePeople.containsKey(element.screen_name)) {
+//				activePeople.put(element.screen_name, activePeople.get(element.screen_name)+1);
+//				counts = Math.max(popularPeople.get(element.screen_name),element.follower_count);
+//				popularPeople.put(element.screen_name, counts);
+//				
+//			} else {
+//				activePeople.put(element.screen_name, 1);
+//				popularPeople.put(element.screen_name, element.follower_count);
+//			}
+//		} catch (ArrayIndexOutOfBoundsException e) {
+//			e.printStackTrace();
+//		}
+//
 		// Get popular Hashtags on the fly.
-		try {
-			List<String> hashtags = new ArrayList<String>();
-			String temp = "";
-			boolean flag = false;
-			if (element.tweetText.contains("#")) {
-				for(int index=0 ; index< element.tweetText.length(); index++){
-					if(element.tweetText.charAt(index) == '#' && flag == false){
-						flag = true; 
-					}
-					if(element.tweetText.charAt(index) != ' ' && (index+1) != element.tweetText.length()){
-						if(flag){
-							temp += element.tweetText.charAt(index);
-						}
-					}else if(flag){
-						temp += element.tweetText.charAt(index);
-						hashtags.add(temp.replace(" ", ""));
-						temp ="";
-						flag = false;
-					}
-				}
-				 
-				// iterate the list of hashtags 
-				for(int i =0 ; i < hashtags.size(); i++){
-					if(popularHashtags.contains(hashtags.get(i))){
-						counts = popularHashtags.get(hashtags.get(i));
-						popularHashtags.put(hashtags.get(i), counts);
-						
-					}else{
-						popularHashtags.put(hashtags.get(i), 1);
-					}
-				}
-//				String[] token = tweetobj.tweetText.split(" ");
-//				for (int i = 0; i < token.length; i++) {
-//					// Match the hashtags with the regular expression
-//					if (token[i].matches("^#[\\p{L}\\p{N}\\p{M}]+")) {
-//						if (popularHashtags.containsKey(token[i])) {
-//							counts = popularHashtags.get(token[i]);
-//							popularHashtags.put(token[i], counts);
-//							
-//						}else{
-//							popularHashtags.put(token[i], 1);
+//		try {
+//			List<String> hashtags = new ArrayList<String>();
+//			String temp = "";
+//			boolean flag = false;
+//			if (element.tweet_text.contains("#")) {
+//				for(int index=0 ; index< element.tweet_text.length(); index++){
+//					if(element.tweet_text.charAt(index) == '#' && flag == false){
+//						flag = true; 
+//					}
+//					if(element.tweet_text.charAt(index) != ' ' && (index+1) != element.tweet_text.length()){
+//						if(flag){
+//							temp += element.tweet_text.charAt(index);
 //						}
+//					}else if(flag){
+//						temp += element.tweet_text.charAt(index);
+//						hashtags.add(temp.replace(" ", ""));
+//						temp ="";
+//						flag = false;
 //					}
 //				}
-		}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-
+//				 
+//				// iterate the list of hashtags 
+//				for(int i =0 ; i < hashtags.size(); i++){
+//					if(popularHashtags.contains(hashtags.get(i))){
+//						counts = popularHashtags.get(hashtags.get(i));
+//						popularHashtags.put(hashtags.get(i), counts);
+//						
+//					}else{
+//						popularHashtags.put(hashtags.get(i), 1);
+//					}
+//				}
+////				String[] token = tweetobj.tweetText.split(" ");
+////				for (int i = 0; i < token.length; i++) {
+////					// Match the hashtags with the regular expression
+////					if (token[i].matches("^#[\\p{L}\\p{N}\\p{M}]+")) {
+////						if (popularHashtags.containsKey(token[i])) {
+////							counts = popularHashtags.get(token[i]);
+////							popularHashtags.put(token[i], counts);
+////							
+////						}else{
+////							popularHashtags.put(token[i], 1);
+////						}
+////					}
+////				}
+//		}
+//		} catch (ArrayIndexOutOfBoundsException e) {
+//			e.printStackTrace();
+//		}
+//
 		// Insert tweets volume
 		
 		if (tweetsVolume.containsKey(element.created_at)) {
@@ -209,7 +208,7 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweet> {
 	public List<Tweet> getTweet() {
 		List<Tweet> tweets = new ArrayList<Tweet>();
 		while (this.size() > 0) {
-			tweets.add(this.poll());
+			tweets.add(new Tweet(poll()));
 		}
 		return tweets;
 	}
