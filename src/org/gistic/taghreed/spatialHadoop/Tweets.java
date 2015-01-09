@@ -39,6 +39,7 @@ public class Tweets extends Point{
 	  public int follower_count;
 	  public String language;
 	  public String osystem;
+	  public int priority;
 	
 
   @Override
