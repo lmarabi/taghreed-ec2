@@ -8,12 +8,11 @@
 	<property name="docs.dir" location="docs" />
 	<property name="lib.dir" location="lib" />
 	<property name="version" value="2" />
-       <property name="ant.build.javac.source" value="1.6"/>
-       <property name="ant.build.javac.target" value="1.6"/>
+        <property name="ant.build.javac.source" value="1.6" />
+        <property name="ant.build.javac.target" value="1.6" />
        <!--
         <property name="main.class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
 	-->
-       
         
         <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.HomeServer" />
         
@@ -43,7 +42,7 @@
 
 	<!-- Compiles the java code (including the usage of library for JUnit -->
 	<target name="compile" depends="clean, makedir">
-		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath" target="${ant.build.javac.target}" source="${ant.build.javac.source}">
+		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath" target="${ant.build.javac.target}" source="${ant.build.javac.source}">
 		</javac>
 
 	</target>

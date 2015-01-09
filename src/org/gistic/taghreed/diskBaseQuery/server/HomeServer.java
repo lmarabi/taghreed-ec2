@@ -19,9 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.collections.ActiveUsers;
@@ -31,7 +29,6 @@ import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
-import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner;
 import org.gistic.taghreed.diskBaseQueryOptimizer.QueryPlanner2;
 import org.gistic.taghreed.diskBaseQueryOptimizer.TraditionalMultiHistogram;
 
