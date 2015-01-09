@@ -110,6 +110,7 @@ public class HomeServer extends AbstractHandler {
 				
 				MBR mbr = new MBR(new Point(maxLat, maxLong), new Point(minLat,
 						minLong));
+				System.out.println("Query MBR: "+mbr.toWKT());
 				req.setMBR(mbr);
 				req.setQuery(query);
 				req.setStartDate(startDate);
@@ -120,18 +121,23 @@ public class HomeServer extends AbstractHandler {
 						startDate, endDate, mbr);
 				long endTime = System.currentTimeMillis();
 				long queryplanTime = (endTime - startTime);
-				System.err.println("Query Plan Estimation Time: "
+				System.out.println("\n****MultiResolution estimated Histogram****\n8Query Plan Estimation Time: "
 						+ queryplanTime + " ms\tSuggested plan:"
-						+ plan.toString());
+						+ plan.toString()+"\n****************");
+				startTime = System.currentTimeMillis();
 				queryLevel Tpaln = this.THistogram.getQueryPlan(startDate,
 						endDate, mbr);
+				endTime = System.currentTimeMillis();
+				queryplanTime = (endTime - startTime);
+				System.out.println("\n****Exact Histogram****\n8Query Plan Estimation Time: "
+						+ queryplanTime + " ms\tSuggested plan:"
+						+ Tpaln.toString()+"\n****************");
 				req.setQueryResolution(plan);
-
 				startTime = System.currentTimeMillis();
 				req.getTweetsRtreeDays();
 				endTime = System.currentTimeMillis();
 				long executiontime = (endTime - startTime);
-				System.err.println("Query Time: " + executiontime + " ms");
+				System.out.println("Query Time: " + executiontime + " ms");
 
 				this.outputWriter.write(mbr.toWKT() + "\t" + startDate + "\t"
 						+ endDate + "\t" + plan.toString() + "\t"
