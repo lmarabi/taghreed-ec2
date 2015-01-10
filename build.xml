@@ -14,7 +14,7 @@
         <property name="main.class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
 	-->
         
-        <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.HomeServer" />
+        <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.Main" />
         
 
 	<!--

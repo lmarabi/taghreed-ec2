@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.gistic.invertedIndex.KWIndexSearcher;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.collections.Hashtag;
@@ -36,8 +35,6 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 import org.gistic.taghreed.spatialHadoop.Tweets;
-
-import com.jcraft.jsch.jce.Random;
 
 import edu.umn.cs.spatialHadoop.OperationsParams;
 import edu.umn.cs.spatialHadoop.core.Rectangle;
@@ -106,8 +103,8 @@ public class QueryExecutor {
 			// read eachfile and output the result.
 			for (Partition f : files) {
 				System.out.println("Start Reading file "
-						+ f.getPartition().getName()+"\n"
-						+f.getArea().toWKT());
+						+ f.getPartition().getName() + "\n"
+						+ f.getArea().toWKT());
 				readThreads[index] = new Thread(new smartQueryThread(f));
 				readThreads[index].start();
 				index++;
@@ -197,14 +194,14 @@ public class QueryExecutor {
 					if (serverRequest.getQuery() != null) {
 						if (tweetObj.tweetText.contains(serverRequest
 								.getQuery())) {
-//							result.put(tweetObj);
+							// result.put(tweetObj);
 							// output.write(tweet);
 							// output.write("\n");
 							count++;
 							// insertTweetsToVolume(tweetObj.created_at);
 						}
 					} else {
-//						result.put(tweetObj);
+						// result.put(tweetObj);
 						// output.write(tweet);
 						// output.write("\n");
 						count++;
@@ -383,7 +380,7 @@ public class QueryExecutor {
 			// 0,minLon,MinLat,MaxLon,MaxLat,Filename
 			if (temp.length == 8) {
 				Partition part = new Partition(line, path, day);
-//				System.out.println(part.getPartition().getName()+"\t"+part.getArea().toWKT());
+				// System.out.println(part.getPartition().getName()+"\t"+part.getArea().toWKT());
 				if (serverRequest.getMbr().Intersect(part.getArea().getMax(),
 						part.getArea().getMain())) {
 					result.add(part);
@@ -400,19 +397,24 @@ public class QueryExecutor {
 	 * @throws InterruptedException
 	 */
 	public TopTweetResult executeQuery() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
+			UnsupportedEncodingException, IOException, ParseException,
+			InterruptedException {
 		Map<String, String> index = null;
 		double startTime = System.currentTimeMillis();
-		Rectangle mbr = new Rectangle(serverRequest.getMbr().getMin().getLat(),serverRequest.getMbr().getMin().getLon(), serverRequest.getMbr().getMax().getLat(),serverRequest.getMbr().getMax().getLon());
-		if(this.serverRequest.getQueryResolution().equals(queryLevel.Day)){
+		Rectangle mbr = new Rectangle(serverRequest.getMbr().getMin().getLat(),
+				serverRequest.getMbr().getMin().getLon(), serverRequest
+						.getMbr().getMax().getLat(), serverRequest.getMbr()
+						.getMax().getLon());
+		if (this.serverRequest.getQueryResolution().equals(queryLevel.Day)) {
 			index = getIndexArmy();
-		}else if(this.serverRequest.getQueryResolution().equals(queryLevel.Month)){
+		} else if (this.serverRequest.getQueryResolution().equals(
+				queryLevel.Month)) {
 			index = getMonthTree();
-		}else if(this.serverRequest.getQueryResolution().equals(queryLevel.Week)){
-			 index = getWeekTree();
+		} else if (this.serverRequest.getQueryResolution().equals(
+				queryLevel.Week)) {
+			index = getWeekTree();
 		}
-		
-		
+
 		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
 		while (it.hasNext()) {
@@ -420,39 +422,38 @@ public class QueryExecutor {
 			System.out.println("#Start Reading index of "
 					+ entry.getKey().toString());
 
-//			GetSmartOutput(entry.getKey().toString(), entry.getValue()
-//					.toString());
-			
+			// GetSmartOutput(entry.getKey().toString(), entry.getValue()
+			// .toString());
+
 			long count = executeRangeQuery(mbr, entry.getValue().toString());
-			System.out.println("Result reterived : "+count);
-
-
+			System.out.println("Result reterived : " + count);
 
 		}
 
 		double endTime = System.currentTimeMillis();
 		System.out.println("query time = " + (endTime - startTime) + " ms");
 
-
-		
 		return this.result;
 
 	}
 
+	/**
+	 * This method execute the range query from the disk. 
+	 * @param mbr
+	 * @param path
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
 	private static long executeRangeQuery(Rectangle mbr, String path)
 			throws IllegalArgumentException, IOException {
 		long count;
-		final List<Tweets> list = new ArrayList<Tweets>();
-		Random r = new Random(); 
 		count = RangeQuery.rangeQueryLocal(new Path(path), mbr, new Tweets(),
 				new OperationsParams(), new ResultCollector<Tweets>() {
 
 					@Override
 					public void collect(Tweets arg0) {
-						if(arg0 != null)
-							result.put(arg0);
-							
-
+						result.put(arg0);
 					}
 				});
 		return count;
@@ -532,7 +533,7 @@ public class QueryExecutor {
 					// outwriter.write(doc);
 					// outwriter.write("\n");
 					count++;
-//					this.result.put(tweet);
+					// this.result.put(tweet);
 				}
 			}
 		} else {
