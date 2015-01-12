@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -20,12 +21,11 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 
 	private Map<String, Integer> popularHashtags = new ConcurrentHashMap<String, Integer>();
 	private Map<String, Integer> activePeople = new ConcurrentHashMap<String, Integer>();
-	private Map<String, Integer> popularPeople = new ConcurrentHashMap<String, Integer>();
 	private Map<String, Integer> tweetsVolume = new ConcurrentHashMap<String, Integer>();
 
-	private topPopularUser popularUser = new topPopularUser(20);
+	private topPopularUser topPopularUser = new topPopularUser(20);
 	private topPopularHashtags topHashtags = new topPopularHashtags(50);
-	private topActiveUsers activeUsers = new topActiveUsers(20);
+	private topActiveUsers topActiveUsers = new topActiveUsers(20);
 
 	private Random r;
 
@@ -42,7 +42,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 	public boolean insert(Tweet element) {
 		
 		element.priority = r.nextInt();
-		popularUser.insert(new PopularUsers(element.screen_name,
+		topPopularUser.insert(new PopularUsers(element.screen_name,
 				element.follower_count));
 		// // setStatistics(element);
 		int counts;
@@ -90,7 +90,11 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 
 				// iterate the list of hashtags
 				for (int i = 0; i < hashtags.size(); i++) {
-					topHashtags.add(new PopularHashtags(hashtags.get(i), 1));
+					if(popularHashtags.containsKey(hashtags.get(i))){
+						popularHashtags.put(hashtags.get(i), (popularHashtags.get(hashtags.get(i))+1));
+					}else{
+						popularHashtags.put(hashtags.get(i), 1);
+					}
 				}
 
 			}
@@ -174,50 +178,54 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 	 */
 	public List<Tweet> getTweet() {
 		List<Tweet> tweets = new ArrayList<Tweet>();
-		int i = 500;
-		while (i > 0) {
+		while (this.size() > 0) {
 			tweets.add(this.pop());
-			i--;
 		}
+		this.clear();
 		return tweets;
 	}
 
 	public List<ActiveUsers> getActiveUser() {
-		List<ActiveUsers> activePeopleResult = new ArrayList<ActiveUsers>();
-		// Active people
-		int i = 30;
-		while (i > 0) {
-			activePeopleResult.add(activeUsers.poll());
-			i--;
+		List<ActiveUsers> result = new ArrayList<ActiveUsers>();
+		Iterator it = activePeople.entrySet().iterator();
+		while(it.hasNext()){
+			Entry<String, Integer> obj = (Entry<String, Integer>) it.next();
+			topActiveUsers.insert(new ActiveUsers(obj.getKey(), obj.getValue()));
 		}
-		activeUsers.clear();
-		Collections.sort(activePeopleResult);
-		return activePeopleResult;
+		while(topActiveUsers.size() > 0){
+			result.add(topActiveUsers.pop());
+		}
+		activePeople.clear();
+		topActiveUsers.clear();
+		Collections.sort(result);
+		return result;
 	}
 
 	public List<PopularHashtags> getPopularHashtags() {
-		List<PopularHashtags> popularHashtagsResult = new ArrayList<PopularHashtags>();
-		int i = 30;
-		while (i > 0) {
-			popularHashtagsResult.add(topHashtags.poll());
-			i--;
+		List<PopularHashtags> result = new ArrayList<PopularHashtags>();
+		Iterator it = popularHashtags.entrySet().iterator();
+		while(it.hasNext()){
+			Entry<String, Integer> obj = (Entry<String, Integer>) it.next();
+			topHashtags.insert(new PopularHashtags(obj.getKey(), obj.getValue()));
+		}
+		while(topHashtags.size() > 0){
+			result.add(topHashtags.pop());
 		}
 		topHashtags.clear();
-		Collections.sort(popularHashtagsResult);
-		return popularHashtagsResult;
+		popularHashtags.clear();
+		Collections.sort(result);
+		return result;
 
 	}
 
 	public List<PopularUsers> getPopularUser() {
-		List<PopularUsers> popularPeopleResult = new ArrayList<PopularUsers>();
-		int i = 20;
-		while (i > 0) {
-			popularPeopleResult.add(popularUser.pop());
-			i--;
+		List<PopularUsers> result = new ArrayList<PopularUsers>();
+		while(topPopularUser.size() > 0){
+			result.add(topPopularUser.pop());
 		}
-		popularUser.clear();
-		Collections.sort(popularPeopleResult);
-		return popularPeopleResult;
+		topPopularUser.clear();
+		Collections.sort(result);
+		return result;
 	}
 
 	public List<TweetVolumes> getTweetVolume() throws ParseException {
@@ -228,6 +236,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 			result.add(new TweetVolumes(obj.getKey(), obj.getValue()));
 		}
 		this.tweetsVolume.clear();
+		tweetsVolume.clear();
 		Collections.sort(result);
 		return result;
 	}
@@ -251,41 +260,39 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		
 	}
 
-	class topActiveUsers extends PriorityBlockingQueue<ActiveUsers> {
-		int maxSize;
-
+	class topActiveUsers extends PriorityQueue<ActiveUsers> {
 		public topActiveUsers(int size) {
-			this.maxSize = size;
+			super.initialize(size);
 		}
 
 		@Override
-		public void put(ActiveUsers arg0) {
-			if (this.size() > this.maxSize)
-				this.poll();
-			super.put(arg0);
+		public boolean insert(ActiveUsers arg0) {
+			return super.insert(arg0);
 
+		}
+
+		@Override
+		protected boolean lessThan(Object arg0, Object arg1) {
+			return ((ActiveUsers) arg0).tweetCount >= ((ActiveUsers) arg1).tweetCount;
 		}
 	}
 
-	class topPopularHashtags extends PriorityBlockingQueue<PopularHashtags> {
-		int maxSize;
-
+	class topPopularHashtags extends PriorityQueue<PopularHashtags> {
 		public topPopularHashtags(int size) {
-			this.maxSize = size;
+			super.initialize(size);
 		}
 
 		@Override
-		public boolean add(PopularHashtags arg0) {
-			// if(this.size() >= maxSize)
-			// this.removeLast();
-			return super.add(arg0);
+		public boolean insert(PopularHashtags element) {
+			// TODO Auto-generated method stub
+			return super.insert(element);
 		}
-		// @Override
-		// public void put(PopularHashtags arg0) {
-		// if(this.size() > this.maxSize)
-		// this.poll();
-		// super.put(arg0);
-		// }
+		
+
+		@Override
+		protected boolean lessThan(Object arg0, Object arg1) {
+			return ((PopularHashtags) arg0).hashtagCount >= ((PopularHashtags) arg1).hashtagCount;
+		}
 	}
 
 }
