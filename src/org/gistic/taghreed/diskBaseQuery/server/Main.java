@@ -15,6 +15,7 @@ import java.util.List;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.collections.PopularHashtags;
+import org.gistic.taghreed.collections.PopularUsers;
 import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
@@ -37,7 +38,7 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException,
 			UnsupportedEncodingException, IOException, ParseException,
 			InterruptedException {
-		TestCase1();
+		TestCase1(args);
 //		String result1,result2;
 //		long startTime, endTime;
 //		String text = "BIG NEWS from CS&E! We are now accepting applications for the Data Science MS program. http://datascience.umn.edu/admissions  #UMN #CSE #BigData;";
@@ -96,7 +97,7 @@ public class Main {
 			return result;
 	}
 
-	private static void TestCase1() throws ParseException, FileNotFoundException, IOException, InterruptedException {
+	private static void TestCase1(String[] args) throws ParseException, FileNotFoundException, IOException, InterruptedException {
 		List<PopularHashtags> popularHashtags = new ArrayList<PopularHashtags>();
 		List<Tweet> tweets = new ArrayList<Tweet>();
 		ServerRequest req = new ServerRequest();
@@ -104,8 +105,8 @@ public class Main {
 		req.setIndex(queryIndex.rtree);
 		MBR mbr = new MBR(new Point(90, 180),new Point(-90, -180));
 		req.setMBR(mbr);
-		req.setStartDate("2013-12-01");
-		req.setEndDate("2013-12-01");
+		req.setStartDate(args[0]);
+		req.setEndDate(args[1]);
 		// Test
 				long startTime, endTime;
 				long queryEst_Time, queryExec_time;
@@ -125,10 +126,29 @@ public class Main {
 		endTime = System.currentTimeMillis();
 		queryExec_time = endTime - startTime;
 		
+		List<PopularUsers> listp = req.getPopularUsers();
+		System.out.println("******\n"+"Number of popular users:"+ listp.size()+"\n*****");
+//		for(PopularUsers user : listp){
+//			System.out.println("User:"+ user.screenName+" follower:"+ user.followersCount);
+//		}
+		
+		List<PopularHashtags> listh = req.getHashtags();
+		System.out.println("******\n"+"Number of Hashtags:"+ listh.size()+"\n*****");
+//		for(PopularHashtags tag : listh){
+//			System.out.println("hashtag:"+ tag.hashtagName+" count:"+ tag.hashtagCount);
+//		}
+		
+		
+		List<TweetVolumes> daysVolume = req.getDayVolumes();
+		System.out.println("******\n"+"Volume day:"+ daysVolume.size()+"\n*****");
+//		for(TweetVolumes day : daysVolume)
+//			System.out.println("day: "+day.dayName + "- volume:"+day.volume);
+		
+		System.out.println("******\n"+"# Tweets:"+ req.getTopKtweets().size()+"\n*****");
+		
+		System.out.println("*****Over all ******");
 		//Print statistics result:
-	    List<TweetVolumes> daysVolume = req.getDayVolumes();
-		for(TweetVolumes day : daysVolume)
-			System.out.println("day: "+day.dayName + "- volume:"+day.volume);
+	    
 		String temp = "Query from " + queryEstimated + "\nEstimated Time"
 				+ queryEst_Time + "\nEexution Time" + queryExec_time;
 		System.out.println(temp);

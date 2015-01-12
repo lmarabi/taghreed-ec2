@@ -28,11 +28,18 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 	private ConcurrentHashMap<String, Integer> popularPeople = new ConcurrentHashMap<String, Integer>();
 	private ConcurrentHashMap<String, Integer> tweetsVolume = new ConcurrentHashMap<String, Integer>();
 	
+	private topPopularUser popularUser = new topPopularUser(30);
+	private topPopularHashtags topHashtags = new  topPopularHashtags(50);
+	private topActiveUsers activeUsers = new topActiveUsers(20);
+	
+	
 	private Random r;
+	private int size; 
 	
 	
 	public TopTweetResult(int size) {
 		super(size);
+		this.size = size;
 		r = new Random();
 		
 	}
@@ -40,7 +47,7 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 	@Override
 	public void put(Tweets element) {
 		element.priority = r.nextInt();
-		System.out.println(element.tweet_text);
+		popularUser.add(new PopularUsers(element.screen_name, element.follower_count));
 ////		setStatistics(element);
 		int counts;
 //		try {
@@ -82,33 +89,19 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 				 
 				// iterate the list of hashtags 
 				for(int i =0 ; i < hashtags.size(); i++){
-					if(popularHashtags.containsKey(hashtags.get(i))){
-						counts = popularHashtags.get(hashtags.get(i).getBytes());
-						counts++;
-						System.out.println("update "+hashtags.get(i)+ ""+ counts);
-						popularHashtags.put(hashtags.get(i), counts);
-						
-					}else{
-						popularHashtags.put(hashtags.get(i), 1);
-//						System.out.println("add "+hashtags.get(i));
-					}
+					topHashtags.add(new PopularHashtags(hashtags.get(i), 1));
+//					if(popularHashtags.containsKey(hashtags.get(i))){
+//						counts = popularHashtags.get(hashtags.get(i).getBytes());
+//						counts++;
+//						System.out.println("update "+hashtags.get(i)+ ""+ counts);
+//						popularHashtags.put(hashtags.get(i), counts);
+//						
+//					}else{
+//						popularHashtags.put(hashtags.get(i), 1);
+////						System.out.println("add "+hashtags.get(i));
+//					}
 				}
 				
-				
-				
-//				String[] token = element.tweet_text.split(" ");
-//				for (int i = 0; i < token.length; i++) {
-//					// Match the hashtags with the regular expression
-//					if (token[i].matches("^#[\\p{L}\\p{N}\\p{M}]+")) {
-//						if (popularHashtags.containsKey(token[i])) {
-//							counts = popularHashtags.get(token[i]);
-//							popularHashtags.put(token[i], counts);
-//							
-//						}else{
-//							popularHashtags.put(token[i], 1);
-//						}
-//					}
-//				}
 		}
 		} catch (ArrayIndexOutOfBoundsException e) {
 			e.printStackTrace();
@@ -116,12 +109,13 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 //
 		// Insert tweets volume
 		
-//		if (tweetsVolume.containsKey(element.created_at)) {
-//			tweetsVolume.put(element.created_at, (tweetsVolume.get(element.created_at) + 1));
-//		} else {
-//			tweetsVolume.put(element.created_at, 1);
-//		}
-		super.put(element);
+		if (tweetsVolume.containsKey(element.created_at)) {
+			tweetsVolume.put(element.created_at, (tweetsVolume.get(element.created_at) + 1));
+		} else {
+			tweetsVolume.put(element.created_at, 1);
+		}
+			super.put(element);
+		
 	}
 
 	protected boolean lessThan(Object arg0, Object arg1) {
@@ -217,8 +211,10 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 */
 	public List<Tweet> getTweet() {
 		List<Tweet> tweets = new ArrayList<Tweet>();
-		while (this.size() > 0) {
+		int i = 500;
+		while(i > 0){
 			tweets.add(new Tweet(poll()));
+			i--;
 		}
 		return tweets;
 	}
@@ -226,50 +222,60 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 	public List<ActiveUsers> getActiveUser() {
 		List<ActiveUsers> activePeopleResult = new ArrayList<ActiveUsers>();
 		// Active people
-		Iterator it = activePeople.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry<String,Integer> obj = (Map.Entry) it.next();
-			activePeopleResult.add(new ActiveUsers(obj.getKey(), obj.getValue()));
+//		Iterator it = activePeople.entrySet().iterator();
+//		while(it.hasNext()){
+//			Map.Entry<String,Integer> obj = (Map.Entry) it.next();
+//			activePeopleResult.add(new ActiveUsers(obj.getKey(), obj.getValue()));
+//		}
+//		Collections.sort(activePeopleResult);
+//		this.activePeople.clear();
+		int i = 30;
+		while(i > 0){
+			activePeopleResult.add(activeUsers.poll());
+			i--;
 		}
-		Collections.sort(activePeopleResult);
-		this.activePeople.clear();
+		activeUsers.clear();
 		return activePeopleResult;
 	}
 
 	public List<PopularHashtags> getPopularHashtags() {
 		List<PopularHashtags> popularHashtagsResult = new ArrayList<PopularHashtags>();
 		// popular hashtas
-		topPopularHashtags topHashtags = new  topPopularHashtags();
-		Iterator it = popularHashtags.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry<String,Integer> obj = (Map.Entry) it.next();
-			topHashtags.put(new PopularHashtags(obj.getKey(), obj.getValue()));
-		}
+//		topPopularHashtags topHashtags = new  topPopularHashtags();
+//		Iterator it = popularHashtags.entrySet().iterator();
+//		while(it.hasNext()){
+//			Map.Entry<String,Integer> obj = (Map.Entry) it.next();
+//			topHashtags.put(new PopularHashtags(obj.getKey(), obj.getValue()));
+//		}
 //		Collections.sort(popularHashtagsResult);
 //		this.popularHashtags.clear();
-		while(!topHashtags.isEmpty()){
+		int i = 30;
+		while(i > 0){
 			popularHashtagsResult.add(topHashtags.poll());
+			i--;
 		}
-		this.popularHashtags.clear();
+		topHashtags.clear();
 		return popularHashtagsResult;
 		
 	}
 
 	public List<PopularUsers> getPopularUser() {
 		List<PopularUsers> popularPeopleResult = new ArrayList<PopularUsers>();
-		topPopularUser popularUser = new topPopularUser();
+		
 		// popular users
-		Iterator it = popularPeople.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry<String,Integer> obj = (Map.Entry) it.next();
-			popularUser.put(new PopularUsers(obj.getKey(), obj.getValue()));
-		}
+//		Iterator it = popularPeople.entrySet().iterator();
+//		while(it.hasNext()){
+//			Map.Entry<String,Integer> obj = (Map.Entry) it.next();
+//			popularUser.put(new PopularUsers(obj.getKey(), obj.getValue()));
+//		}
 //		Collections.sort(popularPeopleResult);
 //		this.popularPeople.clear();
-		while(!popularUser.isEmpty()){
+		int i = 30;
+		while(i > 0){
 			popularPeopleResult.add(popularUser.poll());
+			i--;
 		}
-		this.popularPeople.clear();
+		popularUser.clear();
 		return popularPeopleResult;
 	}
 
@@ -287,37 +293,36 @@ public class TopTweetResult extends PriorityBlockingQueue<Tweets> {
 	}
 
 	class topPopularUser extends PriorityBlockingQueue<PopularUsers>{
-		
-		public topPopularUser() {
-			super(25);
+		public topPopularUser(int size) {
+			super(size);
 		}
 		@Override
 		public void put(PopularUsers arg0) {
-			super.put(arg0);
+				super.put(arg0);
 		}
 	}
 	
 	class topActiveUsers extends PriorityBlockingQueue<ActiveUsers>{
-		public topActiveUsers() {
-			super(25);
+		public topActiveUsers(int size) {
+			super(size);
 		}
 		
 		@Override
 		public void put(ActiveUsers arg0) {
-			super.put(arg0);
+				super.put(arg0);
+			
 		}
 	}
 	
 	class topPopularHashtags extends PriorityBlockingQueue<PopularHashtags>{
-		public topPopularHashtags() {
-			super(50);
+		public topPopularHashtags(int size) {
+			super(size); 
 		}
 		
 		@Override
 		public void put(PopularHashtags arg0) {
-			super.put(arg0);
+				super.put(arg0);
 		}
 	}
 	
 }
-
