@@ -27,10 +27,10 @@ public class Results {
             activeUsersHashMap = new HashMap<String, ActiveUsers>();
             for (Tweet tweet : tweets) {
 
-                if (activeUsersHashMap.containsKey(tweet.userID))
-                    activeUsersHashMap.get(tweet.screenName).tweetCount++;
+                if (activeUsersHashMap.containsKey(tweet.user_id))
+                    activeUsersHashMap.get(tweet.screen_name).tweetCount++;
                 else
-                    activeUsersHashMap.put(tweet.screenName, new ActiveUsers(tweet.screenName, 1));
+                    activeUsersHashMap.put(tweet.screen_name, new ActiveUsers(tweet.screen_name, 1));
             }
             System.out.println("Computed Active Users.....");
 
@@ -47,10 +47,10 @@ public class Results {
 
             popularUsersHashMap = new HashMap<String, PopularUsers>();
             for (Tweet tweet : tweets) {
-                if (popularUsersHashMap.containsKey(tweet.screenName))
-                    popularUsersHashMap.get(tweet.screenName).followersCount = Math.max(tweet.followersCount, popularUsersHashMap.get(tweet.screenName).followersCount);
+                if (popularUsersHashMap.containsKey(tweet.screen_name))
+                    popularUsersHashMap.get(tweet.screen_name).followersCount = Math.max(tweet.follower_count, popularUsersHashMap.get(tweet.screen_name).followersCount);
                 else
-                    popularUsersHashMap.put(tweet.screenName, new PopularUsers(tweet.screenName, tweet.followersCount));
+                    popularUsersHashMap.put(tweet.screen_name, new PopularUsers(tweet.screen_name, tweet.follower_count));
             }
             System.out.println("Computed Popular Users.....");
 

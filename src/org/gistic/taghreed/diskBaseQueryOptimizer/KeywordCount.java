@@ -71,7 +71,7 @@ public class KeywordCount {
             String line;
             while ((line = reader.readLine()) != null) {
                 Tweet objTweet = new Tweet(line);
-                StringTokenizer tokenizer = new QuotedStringTokenizer(objTweet.tweetText, " ");
+                StringTokenizer tokenizer = new QuotedStringTokenizer(objTweet.tweet_text, " ");
                 while (tokenizer.hasMoreTokens()) {
                     String token = tokenizer.nextToken();
                     token = token.replace('*', ' ');

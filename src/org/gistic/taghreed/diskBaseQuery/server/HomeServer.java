@@ -177,10 +177,10 @@ public class HomeServer extends AbstractHandler {
 				for (Tweet x : tweetsResult) {
 					writer.beginObject();
 					writer.name("created_at").value(x.created_at);
-					writer.name("tweet_id").value(x.tweetID);
-					writer.name("user_id").value(x.userID);
-					writer.name("screen_name").value(x.screenName);
-					writer.name("text").value(x.tweetText);
+					writer.name("tweet_id").value(x.tweet_id);
+					writer.name("user_id").value(x.user_id);
+					writer.name("screen_name").value(x.screen_name);
+					writer.name("text").value(x.tweet_text);
 					writer.name("lang").value(x.language);
 					writer.name("os").value(x.osystem);
 					writer.name("lat").value(x.lat);

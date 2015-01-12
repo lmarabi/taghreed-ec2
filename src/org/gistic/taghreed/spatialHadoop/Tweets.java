@@ -40,6 +40,23 @@ public class Tweets extends Point{
 	  public String language;
 	  public String osystem;
 	  public int priority;
+	  
+	  public Tweets() {
+		// TODO Auto-generated constructor stub
+	}
+	  
+	  public Tweets(String text) {
+		  String[] list = text.toString().split(",");
+		  created_at = list[0];
+		  tweet_id = Long.parseLong(list[1]);
+		  user_id = Long.parseLong(list[2]);
+		  screen_name = list[3];
+		  tweet_text = list[4];
+		  follower_count = Integer.parseInt(list[5]);
+		  language = list[6];
+		  osystem = list[7];
+		  super.fromText(new Text(list[8]+","+list[9]));
+	}
 	
 
   @Override

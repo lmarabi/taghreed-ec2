@@ -187,7 +187,7 @@ public class PyramidQueryProcessor {
                 node = new Point(tweetObj.lat, tweetObj.lon);
                 if (serverRequest.getMbr().insideMBR(node)) {
                     if (serverRequest.getQuery() != null) {
-                        if (tweetObj.tweetText.contains(serverRequest.getQuery())) {
+                        if (tweetObj.tweet_text.contains(serverRequest.getQuery())) {
                             Date date = Tweet.parseTweetTimeToDate(tweetObj.created_at);
                             if (weekVolume.containsKey(date)) {
                                 weekVolume.put(date, weekVolume.get(date) + 1);

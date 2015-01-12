@@ -8,9 +8,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,6 +26,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.gistic.invertedIndex.KWIndexSearcher;
 import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.collections.Hashtag;
@@ -57,6 +60,7 @@ public class QueryExecutor {
 	private static ServerRequest serverRequest;
 
 	public final static TopTweetResult result = new TopTweetResult(100);
+	
 
 	public QueryExecutor(ServerRequest request) throws IOException,
 			FileNotFoundException, ParseException {
@@ -192,38 +196,12 @@ public class QueryExecutor {
 				node = new Point(tweetObj.lat, tweetObj.lon);
 				if (serverRequest.getMbr().insideMBR(node)) {
 					if (serverRequest.getQuery() != null) {
-						if (tweetObj.tweetText.contains(serverRequest
+						if (tweetObj.tweet_text.contains(serverRequest
 								.getQuery())) {
-							// result.put(tweetObj);
-							// output.write(tweet);
-							// output.write("\n");
-							count++;
-							// insertTweetsToVolume(tweetObj.created_at);
+							result.insert(tweetObj);
 						}
 					} else {
-						// result.put(tweetObj);
-						// output.write(tweet);
-						// output.write("\n");
-						count++;
-						// insertTweetsToVolume(tweetObj.created_at);
-					}
-
-				}
-			} else {
-				Hashtag hashtag = new Hashtag(tweet);
-				node = new Point(hashtag.getLat(), hashtag.getLon());
-				if (serverRequest.getMbr().insideMBR(node)) {
-					if (serverRequest.getQuery() != null) {
-						if (hashtag.getHashtagText().contains(
-								serverRequest.getQuery())) {
-							// output.write(tweet);
-							// output.write("\n");
-							count++;
-						}
-					} else {
-						// output.write(tweet);
-						// output.write("\n");
-						count++;
+						result.insert(tweetObj);
 					}
 
 				}
@@ -391,6 +369,9 @@ public class QueryExecutor {
 		return result;
 	}
 
+	
+	private static OutputStreamWriter writer; 
+	
 	/**
 	 * @param args
 	 *            the command line arguments
@@ -414,6 +395,14 @@ public class QueryExecutor {
 				queryLevel.Week)) {
 			index = getWeekTree();
 		}
+		
+		try {
+			writer = new OutputStreamWriter(
+					new FileOutputStream(System.getProperty("user.dir")+ "/_tweets_" + ".txt", false), "UTF-8");
+		} catch (UnsupportedEncodingException | FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
@@ -422,17 +411,19 @@ public class QueryExecutor {
 			System.out.println("#Start Reading index of "
 					+ entry.getKey().toString());
 
-			// GetSmartOutput(entry.getKey().toString(), entry.getValue()
-			// .toString());
+			 GetSmartOutput(entry.getKey().toString(), entry.getValue()
+			 .toString());
 
-			long count = executeRangeQuery(mbr, entry.getValue().toString());
-			System.out.println("Result reterived : " + count);
+//			long count = executeRangeQuery(mbr, entry.getValue().toString());
+//			System.out.println("Result reterived : " + count);
 
 		}
 
 		double endTime = System.currentTimeMillis();
 		System.out.println("query time = " + (endTime - startTime) + " ms");
-
+		
+			writer.close();
+		
 		return this.result;
 
 	}
@@ -452,8 +443,8 @@ public class QueryExecutor {
 				new OperationsParams(), new ResultCollector<Tweets>() {
 
 					@Override
-					public void collect(Tweets arg0) {
-						result.put(arg0);
+					public synchronized void collect(Tweets arg0) {
+						result.insert(new Tweet(arg0));
 					}
 				});
 		return count;
