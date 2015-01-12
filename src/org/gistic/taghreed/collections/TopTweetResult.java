@@ -195,9 +195,9 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		while(topActiveUsers.size() > 0){
 			result.add(topActiveUsers.pop());
 		}
-		activePeople.clear();
-		topActiveUsers.clear();
-		Collections.sort(result);
+//		activePeople.clear();
+//		topActiveUsers.clear();
+//		Collections.sort(result);
 		return result;
 	}
 
@@ -211,9 +211,9 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		while(topHashtags.size() > 0){
 			result.add(topHashtags.pop());
 		}
-		topHashtags.clear();
-		popularHashtags.clear();
-		Collections.sort(result);
+//		topHashtags.clear();
+//		popularHashtags.clear();
+//		Collections.sort(result);
 		return result;
 
 	}
@@ -223,8 +223,8 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		while(topPopularUser.size() > 0){
 			result.add(topPopularUser.pop());
 		}
-		topPopularUser.clear();
-		Collections.sort(result);
+//		topPopularUser.clear();
+//		Collections.sort(result);
 		return result;
 	}
 
@@ -235,14 +235,13 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 			Map.Entry<String, Integer> obj = (Map.Entry) it.next();
 			result.add(new TweetVolumes(obj.getKey(), obj.getValue()));
 		}
-		this.tweetsVolume.clear();
-		tweetsVolume.clear();
-		Collections.sort(result);
+//		this.tweetsVolume.clear();
+//		tweetsVolume.clear();
+//		Collections.sort(result);
 		return result;
 	}
 
 	class topPopularUser extends PriorityQueue<PopularUsers> {
-		int maxSize;
 
 		public topPopularUser(int size) {
 			super.initialize(size);
