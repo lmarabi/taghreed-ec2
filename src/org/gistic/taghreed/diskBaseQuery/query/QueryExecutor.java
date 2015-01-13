@@ -59,7 +59,7 @@ public class QueryExecutor {
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private static ServerRequest serverRequest;
 
-	public final static TopTweetResult result = new TopTweetResult(100);
+	public final static TopTweetResult result = new TopTweetResult(5000);
 	
 
 	public QueryExecutor(ServerRequest request) throws IOException,
