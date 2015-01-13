@@ -48,8 +48,8 @@ public class Main {
 			UnsupportedEncodingException, IOException, ParseException,
 			InterruptedException {
 		args = new String[2];
-		args[0] = "2013-12-01";
-		args[1] = "2013-12-01";
+		args[0] = "2014-10-01";
+		args[1] = "2014-10-31";
 		TestCase1(args);
 //		experments();
 //		String result1,result2;

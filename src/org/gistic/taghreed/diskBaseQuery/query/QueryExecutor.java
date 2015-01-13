@@ -327,7 +327,7 @@ public class QueryExecutor {
 	 * @return
 	 */
 	private static List<Partition> ReadMaster(String day, String path)
-			throws FileNotFoundException, IOException {
+			  {
 		File master;
 		List<Partition> result = new ArrayList<Partition>();
 		// check the master files with the index used at the backend
@@ -342,7 +342,10 @@ public class QueryExecutor {
 			}
 		}
 
-		BufferedReader reader = new BufferedReader(new FileReader(master));
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(master));
+		
 		// FileInputStream fin = new FileInputStream(master);
 		// BufferedInputStream bis = new BufferedInputStream(fin);
 		// CompressorInputStream input = new
@@ -365,7 +368,12 @@ public class QueryExecutor {
 				}
 			}
 		}
-		reader.close();
+			reader.close();
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return result;
 	}
 

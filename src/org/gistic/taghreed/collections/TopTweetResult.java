@@ -237,7 +237,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		}
 		this.tweetsVolume.clear();
 //		tweetsVolume.clear();
-//		Collections.sort(result);
+		Collections.sort(result);
 		return result;
 	}
 
