@@ -10,12 +10,12 @@
 	<property name="version" value="2" />
         <property name="ant.build.javac.source" value="1.6" />
         <property name="ant.build.javac.target" value="1.6" />
-       <!--
+       
         <property name="main.class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
-	-->
-        
+	
+        <!--
         <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.Main" />
-        
+        -->
 
 	<!--
 	    Create a classpath container which can be later used in the ant task
