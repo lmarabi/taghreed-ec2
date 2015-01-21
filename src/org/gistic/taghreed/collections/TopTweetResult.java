@@ -103,7 +103,7 @@ public class TopTweetResult extends PriorityQueue<Tweet> {
 		}
 
 		// Insert tweets volume
-		String time = element.created_at.substring(0, 9);
+		String time = element.created_at.substring(0, 10);
 		if (tweetsVolume.containsKey(time)) {
 			tweetsVolume.put(time,
 					(tweetsVolume.get(time) + 1));

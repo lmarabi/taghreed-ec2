@@ -316,6 +316,7 @@ public class QueryPlanner2 {
 		System.err.println("day\tClusterID");
 		for (DayCardinality day : dayArrayList) {
 			System.out.println(day.getDay() + "\t" + day.getClusterId());
+			
 		}
 		System.err.println("week\tClusterID");
 		for (DayCardinality day : weekArrayList) {
@@ -324,6 +325,13 @@ public class QueryPlanner2 {
 		System.err.println("month\tClusterID");
 		for (DayCardinality day : monthArrayList) {
 			System.out.println(day.getDay() + "\t" + day.getClusterId());
+		}
+		
+		Iterator it = dayHistogram.entrySet().iterator();
+		while(it.hasNext()){
+			System.out.println("\n\n\n****************************************************\n");
+			Map.Entry<Integer, HistogramCluster> obj = (Entry<Integer, HistogramCluster>) it.next();
+			obj.getValue().printHistogram();
 		}
 	}
 

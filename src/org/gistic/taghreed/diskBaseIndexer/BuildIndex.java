@@ -361,7 +361,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
-				+ folderName + " -overwrite  sindex:str shape:"
+				+ folderName + " -overwrite  sindex:quadtree shape:"
 				+ "org.gistic.taghreed.spatialHadoop.Tweets"
 				+ "  -no-local";
 
@@ -395,7 +395,7 @@ public class BuildIndex {
 	public void UpdatelookupTable(Level level) throws IOException {
 		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex());
 		// UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
-		// UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
+		 UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
 		// UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
 
 	}

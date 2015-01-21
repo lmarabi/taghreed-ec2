@@ -46,5 +46,11 @@ public class HistogramCluster {
 		}
 		return cardinality;
 	}
+	
+	public void printHistogram(){
+		for(Partition p : histogram){
+			System.out.println(p.getArea().toWKT());
+		}
+	}
 
 }

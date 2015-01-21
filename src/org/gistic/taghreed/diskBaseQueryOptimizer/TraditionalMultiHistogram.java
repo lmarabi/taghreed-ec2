@@ -118,7 +118,11 @@ public class TraditionalMultiHistogram {
 		while(it.hasNext()){
 			Map.Entry<String,String> day = (Entry<String, String>) it.next();
 			HistogramCluster histogram = dayHistogram.get(day.getKey());
+			try{
 			result += histogram.getCardinality(queryMBR);
+			}catch(NullPointerException e){
+				
+			}
 		}
 		return result;
 	}
@@ -133,7 +137,11 @@ public class TraditionalMultiHistogram {
 		while(it.hasNext()){
 			Map.Entry<String,String> m = (Entry<String, String>) it.next();
 			HistogramCluster histogram = monthHistogram.get(m.getKey());
+			try{
 			result += histogram.getCardinality(queryMBR);
+			}catch(NullPointerException e){
+				
+			}
 		}
 		return result;
 	}
@@ -149,7 +157,11 @@ public class TraditionalMultiHistogram {
 		while(it.hasNext()){
 			Map.Entry<Week,String> week = (Entry<Week, String>) it.next();
 			HistogramCluster histogram = weekHistogram.get(week.getKey().toString());
-			result += histogram.getCardinality(queryMBR);
+			try{
+				result += histogram.getCardinality(queryMBR);
+			}catch(NullPointerException e){
+				System.out.println(week.getValue());
+			}
 		}
 		return result;
 	}

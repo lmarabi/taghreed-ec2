@@ -378,7 +378,7 @@ public class QueryExecutor {
 	}
 
 	
-	private static OutputStreamWriter writer; 
+	
 	
 	/**
 	 * @param args
@@ -404,13 +404,6 @@ public class QueryExecutor {
 			index = getWeekTree();
 		}
 		
-		try {
-			writer = new OutputStreamWriter(
-					new FileOutputStream(System.getProperty("user.dir")+ "/_tweets_" + ".txt", false), "UTF-8");
-		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		System.out.println("#number of dates found: " + index.size());
 		Iterator it = index.entrySet().iterator();
@@ -429,8 +422,6 @@ public class QueryExecutor {
 
 		double endTime = System.currentTimeMillis();
 		System.out.println("query time = " + (endTime - startTime) + " ms");
-		
-			writer.close();
 		
 		return this.result;
 

@@ -56,20 +56,11 @@ public class BuildPyramidIndex {
     public void CreateIndex() throws IOException, InterruptedException, ParseException, CompressorException {
         //Create the rtree index using hadoop
         CreateRtreeTweetWeekIndex();
-//        CreateRtreeHashtagWeekIndex();
-        createRtreeTweetMonths();
-//        createRtreeHashtagMonths();
+        createRtreeTweetMonths();;
         //Create the inverted index 
-//        CreateInvertedTweetWeekIndex();
-//        createInvertedTweetMonths();
-//        CreateInvertedHashtagWeekIndex();
-//        createInvertedHashtagMonths();
-        //update the lookup tables for all indeces
-        indexer.UpdatelookupTable(BuildIndex.Level.Day);
-        indexer.UpdatelookupTable(BuildIndex.Level.Week);
-        indexer.UpdatelookupTable(BuildIndex.Level.Month);
+        CreateInvertedTweetWeekIndex();
+        createInvertedTweetMonths();
         
-        // need to update the inverted index lookup table
     }
     
     /**
@@ -80,11 +71,40 @@ public class BuildPyramidIndex {
      * @throws CompressorException 
      */
     private void CreateInvertedTweetWeekIndex() throws ParseException, IOException, InterruptedException, CompressorException{
-        System.out.println("Create Tweets Week Index ");
-        List<File> outputFiles = ListFiles(config.getTweetFlushDir());
-        Collections.sort(outputFiles);
-        Calendar c = Calendar.getInstance();
-        PyramidWeek temp = new PyramidWeek();
+    	System.out.println("Create Tweets Week Index ");
+		List<File> outputFiles = ListFiles(config.getTweetFlushDir());
+		Collections.sort(outputFiles);
+		Calendar c = Calendar.getInstance();
+		PyramidWeek temp = new PyramidWeek();
+		HashMap<String, List<File>> indeces = temp.buildWeekIndex(outputFiles);
+		Iterator it = indeces.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, List<File>> week = (Entry<String, List<File>>) it
+					.next();
+			
+			System.out.println("*******\nFound week\n**********");
+			System.out.println("Build the index of "+ week.getKey());
+			String hadoopOutputFolder = week.getKey();
+			System.out.println(hadoopOutputFolder);
+			String weekdir = config.getQueryInvertedIndex() + "tweets/Week/index." + hadoopOutputFolder;
+			File indexFolder = new File(weekdir);
+			if (!indexFolder.exists()) {
+				//Create the inverted index 
+                KWIndexBuilder kWIndexBuilder = new KWIndexBuilder();
+                boolean status = kWIndexBuilder.buildIndex(week.getValue(), weekdir,KWIndexBuilder.dataType.tweets);
+                System.out.println("status: "+status+" "+weekdir);
+                MetaData md = new MetaData();
+        		// create the meta data for the index
+        		md.buildMetaData(weekdir,
+        				config.getQueryInvertedIndex(), hadoopOutputFolder,
+        				BuildIndex.getThreshold(config.getQueryRtreeIndex()+ "tweets/Week/index."+ hadoopOutputFolder.replace(".bz2", "")));
+			}
+
+		}
+		
+		
+		
+		/************************************************************/
         boolean firstF = true;
         for (File f : outputFiles) {
             if (firstF) {
