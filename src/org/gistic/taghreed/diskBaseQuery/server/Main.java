@@ -58,6 +58,10 @@ public class Main {
 		queryPlan = new QueryPlanner2();
 		exactPlan = new TraditionalMultiHistogram();
 		queryPlan.printArray();
+		args = new String[2];
+		args[0] = "2014-06-01";
+		args[1] = "2014-06-01";
+		TestCase1(args);
 //		for (int month = 1; month < 11; month++) {
 //			String fileString = System.getProperty("user.dir")
 //					+ "/MRHistogram-"+month+"-2014.log";
@@ -184,7 +188,7 @@ public class Main {
 		List<Tweet> tweets = new ArrayList<Tweet>();
 		ServerRequest req = new ServerRequest();
 		req.setType(queryType.tweet);
-		req.setIndex(queryIndex.rtree);
+		req.setIndex(queryIndex.inverted);
 		//MBR mbr = new MBR(new Point(90, 180),new Point(-90, -180));
 		double maxlon = -93.18933596240234;
 		double minlat = 44.94941027490235;

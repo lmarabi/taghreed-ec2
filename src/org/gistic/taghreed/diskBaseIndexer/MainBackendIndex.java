@@ -55,8 +55,8 @@ public class MainBackendIndex {
 			// Create Index in spatial hadoop
 			System.out.println("Build the Day rtree index of tweets*");
 			indexer.CreateRtreeTweetIndex();
-			System.out.println("Build the Day inverted index of tweets");
-			 indexer.createInvertedTweetIndex();
+//			System.out.println("Build the Day inverted index of tweets");
+//			 indexer.createInvertedTweetIndex();
 			// update lookupTable
 			System.out.println("Update the lookup table");
 			pyramidIndexer.CreateIndex();
@@ -123,7 +123,7 @@ public class MainBackendIndex {
 				indexer.CreateRtreeTweetIndex();
 //				 index.CreateRtreeHashtagIndex();
 //				 index.createInvertedHashtagIndex();
-     		    indexer.createInvertedTweetIndex();
+//     		    indexer.createInvertedTweetIndex();
 			} catch (InterruptedException ex) {
 				Logger.getLogger(MainBackendIndex.class.getName()).log(
 						Level.SEVERE, null, ex);

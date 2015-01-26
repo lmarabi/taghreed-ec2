@@ -258,9 +258,9 @@ public class ServerRequest {
 	
 	private void loadLookupTables() throws FileNotFoundException, IOException, ParseException{
 		//Load lookuptabe
-        if(this.index.equals(queryIndex.rtree)){
+        if(this.index.equals(queryIndex.rtree) && this.rtreeDir != null){
             lookup.loadLookupTableToArrayList(this.rtreeDir);
-        }else{
+        }else if(this.index.equals(queryIndex.rtree) && this.invertedDir != null){
             lookup.loadLookupTableToArrayList(this.invertedDir);
         }
 	}

@@ -159,7 +159,8 @@ public class Commons {
     private void loadConfigFile() throws IOException {
 
         Properties prop = new Properties();
-        prop.load(new FileInputStream("config.properties"));
+//        prop.load(new FileInputStream("config.properties"));
+      prop.load(new FileInputStream("config_testOnly.properties"));
         Commons.accessToken = prop.getProperty("accessToken");
         Commons.accessTokenSecret = prop.getProperty("accessTokenSecret");
         Commons.consumerKey = prop.getProperty("consumerKey");

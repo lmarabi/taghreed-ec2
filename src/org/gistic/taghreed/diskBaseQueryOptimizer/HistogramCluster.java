@@ -37,6 +37,25 @@ public class HistogramCluster {
 		reader.close();
 	}
 	
+	
+	/**
+	 * This method return the volume of the whole histogram, for instance the number of tweets in the index
+	 * @return long volume of the records in the index.
+	 */
+	public long getHistogramVolume(){
+		long result =0 ; 
+		for(Partition part : histogram){
+			result += part.getCardinality();
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * This method return the cardinality of given query
+	 * @param queryMbr
+	 * @return
+	 */
 	public long getCardinality(MBR queryMbr){
 		long cardinality = 0;
 		for(Partition part : histogram){
@@ -46,6 +65,72 @@ public class HistogramCluster {
 		}
 		return cardinality;
 	}
+	
+	/**
+	 * Get the max latitude in the partition. 
+	 * @return
+	 */
+	public double getMaxlat(){
+		double tempDouble,result = 0;
+		for(Partition part : histogram){
+			tempDouble = part.getArea().getMax().getLat(); 
+			if(tempDouble > result){
+				result = tempDouble;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the max Longitude in the partition. 
+	 * @return
+	 */
+	public double getMaxLon(){
+		double tempDouble,result = 0;
+		for(Partition part : histogram){
+			tempDouble = part.getArea().getMax().getLon();
+			if(tempDouble > result){
+				result = tempDouble;
+			}
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * Get the min latitude in the partition. 
+	 * @return
+	 */
+	public double getMinLat(){
+		double tempDouble;
+		double result = Double.MAX_VALUE;
+		for(Partition part : histogram){
+			tempDouble = part.getArea().getMin().getLat();
+			if(tempDouble < result){
+				result = tempDouble;
+			}
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * Get the min latitude in the partition. 
+	 * @return
+	 */
+	public double getMinLon(){
+		double tempDouble;
+		double result = Double.MAX_VALUE;
+		for(Partition part : histogram){
+			tempDouble = part.getArea().getMin().getLon();
+			if(tempDouble < result){
+				result = tempDouble;
+			}
+		}
+		return result;
+	}
+	
+	
 	
 	public void printHistogram(){
 		for(Partition p : histogram){

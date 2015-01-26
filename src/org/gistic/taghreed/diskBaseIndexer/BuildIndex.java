@@ -115,15 +115,20 @@ public class BuildIndex {
 				+ "/_master.quadtree")));
 		List<String> metaData = new ArrayList<String>();
 		String line = null;
+		int cardinality = 0 ;
 		while ((line = reader.readLine()) != null) {
 			String[] temp = line.split(",");
 			// Get the minimum number of partition
-			if (Integer.parseInt(temp[5]) < threshold) {
-				threshold = Integer.parseInt(temp[5]);
+			cardinality = Integer.parseInt(temp[5]); 
+			if(cardinality > 15000){
+				if (cardinality < threshold) {
+					threshold = Integer.parseInt(temp[5]);
+				}
 			}
 		}
 		reader.close();
-		return threshold;
+		
+		return threshold < 15000 ? 15000 : threshold;
 
 	}
 
@@ -395,7 +400,7 @@ public class BuildIndex {
 	public void UpdatelookupTable(Level level) throws IOException {
 		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex());
 		// UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
-		 UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
+		// UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
 		// UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
 
 	}

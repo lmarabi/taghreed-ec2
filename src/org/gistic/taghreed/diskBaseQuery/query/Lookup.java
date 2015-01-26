@@ -87,8 +87,10 @@ public class Lookup {
 		reader = new BufferedReader(new FileReader(tweetsLookup));
 		line = null;
 		while ((line = reader.readLine()) != null) {
-			weekDatesTweet.add(new Week(line));
-			weekPathsTweet.add(path + "/tweets/Week/index." + line);
+			if(line.matches(".*[1-9].*")){
+				weekDatesTweet.add(new Week(line));
+				weekPathsTweet.add(path + "/tweets/Week/index." + line);
+			}
 
 		}
 		reader.close();
@@ -98,8 +100,10 @@ public class Lookup {
 		reader = new BufferedReader(new FileReader(tweetsLookup));
 		line = null;
 		while ((line = reader.readLine()) != null) {
-			monthDatesTweet.add(line);
-			monthPathsTweet.add(path + "/tweets/Month/index." + line);
+			if (line.matches(".*[1-9].*")) {
+				monthDatesTweet.add(line);
+				monthPathsTweet.add(path + "/tweets/Month/index." + line);
+			}
 
 		}
 		reader.close();

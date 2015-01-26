@@ -26,6 +26,7 @@ public class Partition {
     private File partition;
     private MBR area;
     private long cardinality;
+    private double persent;
     private String Day;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     
@@ -69,6 +70,14 @@ public class Partition {
     public void setCardinality(long cardinality) {
         this.cardinality = cardinality;
     }
+    
+    public void setPersent(double persent) {
+		this.persent = persent;
+	}
+    
+    public double getPersent() {
+		return persent;
+	}
 
     /**
      * Cardinality of the partition is the number of rows in this partition

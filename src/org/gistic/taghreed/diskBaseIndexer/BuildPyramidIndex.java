@@ -58,8 +58,8 @@ public class BuildPyramidIndex {
         CreateRtreeTweetWeekIndex();
         createRtreeTweetMonths();;
         //Create the inverted index 
-        CreateInvertedTweetWeekIndex();
-        createInvertedTweetMonths();
+//        CreateInvertedTweetWeekIndex();
+//        createInvertedTweetMonths();
         
     }
     
