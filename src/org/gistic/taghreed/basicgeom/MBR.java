@@ -22,12 +22,12 @@ public class MBR {
      * @param stringValue
      * @return
      */
-    public MBR parse(String stringValue){
+    public void parse(String stringValue){
     	MBR temp = new MBR();
     	String[] token = stringValue.split(" ");
-    	temp.max = new Point(token[3], token[1]);
-    	temp.min = new Point(token[7], token[5]);
-    	return temp;
+    	this.max = new Point(token[3], token[1]);
+    	this.min = new Point(token[7], token[5]);
+    	
     }
 
     public MBR(Point max, Point min) {

@@ -10,6 +10,10 @@ public class DayCardinality implements Comparable<DayCardinality>{
 	private int clusterId;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
+	public DayCardinality() {
+		// TODO Auto-generated constructor stub
+	}
+	
 	public DayCardinality(String day, long cardinality) {
 		this.day = day;
 		this.cardinality = cardinality;
@@ -29,6 +33,12 @@ public class DayCardinality implements Comparable<DayCardinality>{
 	
 	public void setClusterId(int clusterId) {
 		this.clusterId = clusterId;
+	}
+	
+	public void parse(String fromText){
+		String[]temp  = fromText.split("_");
+		this.day = temp[0];
+		this.cardinality = Long.parseLong(temp[1]);
 	}
 	
 	@Override

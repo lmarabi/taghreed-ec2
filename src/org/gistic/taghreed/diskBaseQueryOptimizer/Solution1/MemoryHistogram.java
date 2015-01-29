@@ -1,13 +1,16 @@
 package org.gistic.taghreed.diskBaseQueryOptimizer.Solution1;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,18 +18,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.basicgeom.Point;
-import org.gistic.taghreed.collections.Partition;
 import org.gistic.taghreed.collections.Week;
 import org.gistic.taghreed.diskBaseQuery.query.Lookup;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
+import org.gistic.taghreed.diskBaseQueryOptimizer.Cluster;
+import org.gistic.taghreed.diskBaseQueryOptimizer.DayCardinality;
 import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
 import org.gistic.taghreed.diskBaseQueryOptimizer.HistogramCluster;
-import org.gistic.taghreed.diskBaseQueryOptimizer.TraditionalMultiHistogram;
 
 
 /**
@@ -35,6 +37,9 @@ import org.gistic.taghreed.diskBaseQueryOptimizer.TraditionalMultiHistogram;
  * we list all the days with the volume, and construct the histogram based only on the the present
  * -----------
  * | day-volume-clusterid  | , | histogram | 
+ * 
+ * the clusters constains a list of histogram each buckets cell in histogram has a ratio reflects the DayVolume/Cardinality
+ * 
  * 
  * the algorithm as follow:
  * 1- find the max and the min (x,y) 
@@ -54,11 +59,11 @@ public class MemoryHistogram {
 	
 	String startDay;
 	String endDay;
-	GridCell worldCell;
+	
 	HashMap<String,HistogramCluster> dayHistogram;
 	HashMap<String,HistogramCluster> weekHistogram;
 	HashMap<String,HistogramCluster> monthHistogram;
-	queryLevel level;
+//	queryLevel level;
 	Lookup lookup;
 	
 	//MBR of the grid cell 
@@ -67,10 +72,28 @@ public class MemoryHistogram {
 	Map<String,List<Bucket>> initHistogram; 
 	List<Bucket> histogramBackets; 
 //	Map<String,List<String>> clusters;
-	
+	//Day
 	List<TemporalLookupTable> dayLookup;
 	List<TemporalClusterTable> dayClusters;
+	//Week
+	List<TemporalLookupTable> weekLookup;
+	List<TemporalClusterTable> weekClusters;
+	//Month
+	List<TemporalLookupTable> monthLookup;
+	List<TemporalClusterTable> monthClusters;
+	//time
+	double starttime,endtime;
+	double confidenceThreshold = 0.85;
 	
+	
+	private void startLog(){
+		starttime = System.currentTimeMillis();
+	}
+	
+	private void endLog(String log){
+		endtime = System.currentTimeMillis();
+		System.out.println(log+"\ttooks :"+(endtime-starttime)+" ms");
+	}
 
 	public MemoryHistogram() throws IOException, ParseException {
 		// init in memory histograms
@@ -119,16 +142,32 @@ public class MemoryHistogram {
 		// We partition the space of the histograms into buckets of equal width size. 
 		maxPoint = new Point(maxlat, maxlon);
 		minPoint = new Point(minlat, minlon);
+		startLog();
 		histogramBackets = creatHistogramBuckets(maxPoint,minPoint);
+		endLog("Create the buckets mbr");
+		startLog();
 		initHistogramo(queryLevel.Day);
-		matchDays();
+//		ReadHistogramFromDisk();
+		writeHistogramToDisk("xxxxWorld_Histogram.WKT");
+		matchBuckets(queryLevel.Day);
+		endLog("ini Histogram");
+		writeHistogramToDisk("xxxxWorld_Cluster.WKT");
+//		for(Bucket d : this.histogramBackets){
+//			System.out.println(d.toString());
+//		}
 		
-		System.out.println("**** Day level**** with size:"+ dayLookup.size());
-		for(TemporalLookupTable day : dayLookup){
-			System.out.println(day.toString());
-		}
 		
-		System.out.println("\n*****\nNumber of clusters:  "+dayClusters.size());
+//		startLog();
+//		matchDays(queryLevel.Day);
+//		endLog("Creating clusters");
+//		
+//		System.out.println("**** Day level**** with size:"+ dayLookup.size());
+//		for(TemporalLookupTable day : dayLookup){
+//			System.out.println(day.toString());
+//		}
+//		
+//		System.out.println("\n*****\nNumber of clusters:  "+dayClusters.size());
+//		System.out.println("\n*****\ninit histogram left:  "+initHistogram.size());
 		
 //		Map<Week,String> week = this.lookup.getAllTweetsWeekIndex(startDate, endDate);
 //		it = week.entrySet().iterator();
@@ -168,12 +207,10 @@ public class MemoryHistogram {
 		for(int x =0 ; x < 100 ; x++){
 			maxlat = prelat + latBucketSize;
 			for(int y =0; y < 100; y++){
-				part = new Bucket();
 				maxlon = preLon + lonBucketSize;
 				//new mbr 
 				MBR mbr = new MBR(new Point(maxlat,maxlon), new Point(prelat, preLon));
-				part.setArea(mbr);
-				part.setId(inc++);
+				part = new Bucket(mbr, inc++);
 				result.add(part);
 				//change the prelon to the next value.
 				preLon = maxlon;
@@ -185,37 +222,69 @@ public class MemoryHistogram {
 	}
 	
 	
-	private void initHistogramo(queryLevel level) throws ParseException{
+	private void initHistogramo(queryLevel level) throws ParseException, IOException{
 		if(level.equals(queryLevel.Day)){
 			initDayHistogram();
 		}else if(level.equals(queryLevel.Week)){
-			
+			initWeekHistogram();
 		}else{
-			
+			initMonthHistogram();
 		}
 	}
 	
+	private void writeHistogramToDisk(String fileName) throws IOException{
+		OutputStreamWriter writer = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+fileName, false), "UTF-8"); 
+		for(Bucket b : histogramBackets)
+			writer.write(b.getId()+"\t"+b.getArea().toWKT()+"\n");
+		writer.close();
+	}
 	
-	private void initDayHistogram() throws ParseException{
-		List<Bucket> temp;
-		String day;
-		long dayVolume = 0;
-		Iterator it = dayHistogram.entrySet().iterator();
-		while(it.hasNext()){
-			temp = histogramBackets;
-			Map.Entry<String, HistogramCluster> obj = (Entry<String,HistogramCluster>) it.next();
-			day = obj.getKey();
-			dayVolume = obj.getValue().getHistogramVolume();
-			// invoke method to fill the histogram with persent of the cardinality.
-			for(Bucket part: temp){
-				double cardinality = getDayLevelCardinality(day, day, part.getArea()); 
-				double persent = (cardinality/dayVolume);
-//				System.out.println("Cardinality: "+cardinality+" persent :"+persent);
-				part.setPersent(persent);
+	
+	private void initDayHistogram() throws ParseException, IOException{
+		GridCell worldCell;
+		MBR mbr;
+		for(Bucket bucket : this.histogramBackets){
+			mbr = bucket.getArea();
+			worldCell = new GridCell(mbr, this.lookup);
+			// add the days in this mbr to the cell 
+			Iterator it = dayHistogram.entrySet().iterator();
+			while(it.hasNext()){
+				Map.Entry<String, HistogramCluster> obj = (Entry<String, HistogramCluster>) it.next();
+				worldCell.add(obj.getKey(),obj.getValue().getCardinality(mbr));
 			}
-			//put the new histogram with values 
-			initHistogram.put(day, temp);
+			//crate the cluster
+			worldCell.initCluster(this.confidenceThreshold);
+			// get the clusters created Then add in this bucket the days with their mean only
+			List<Cluster> cluster = worldCell.getCluster();
+			for(Cluster c : cluster){
+			    List<DayCardinality> temporalSegment = c.getDays();
+			    for(DayCardinality segment : temporalSegment){
+//			    	System.out.println("Set day cardinality in bucket"+segment.getDay()+"- mean "+c.getMean());
+			    	bucket.setCardinality(segment.getDay(), c.getMean());
+			    }
+			}
+			System.out.println(cluster.size());
+			
 		}
+		
+	}
+	
+	private void ReadHistogramFromDisk() throws IOException{
+		BufferedReader reader = new BufferedReader(new FileReader(new File(
+				System.getProperty("user.dir") + "/HistogramInit.txt")));
+//		OutputStreamWriter writer = new OutputStreamWriter(
+//				new FileOutputStream(System.getProperty("user.dir") + "/HistogramInit.WKT", false), "UTF-8"); 
+		String line;
+		Bucket temp; 
+		while((line = reader.readLine()) != null){
+			temp = new Bucket();
+			temp.parseFromText(line);
+			histogramBackets.add(temp);
+//			writer.write(temp.getId()+"\t"+temp.getArea().toWKT()+"\n");
+		}
+		reader.close();
+//		writer.close();
 	}
 	
 	private void initWeekHistogram() throws ParseException{
@@ -261,66 +330,120 @@ public class MemoryHistogram {
 	}
 	
 	
-	private void matchDays(){
-		List<String> keys = new ArrayList<String>();
-		Iterator it = initHistogram.entrySet().iterator();
-		//Add all the days,week,Month "keys" in temporary list 
-		while(it.hasNext()){
-			Map.Entry<String, List<Bucket>> obj = (Entry<String, List<Bucket>>) it.next();
-			keys.add(obj.getKey());
-		}
-		
-		for(String key: keys){
-			if (initHistogram.containsKey(key)) {
-				List<Bucket> histogram = initHistogram.get(key);
-				 getSimilarHistogram(key, histogram);
+	private void matchBuckets(queryLevel level){
+		System.out.println("Histogram size before: "+ histogramBackets.size());
+		for(int i=0 ; i < histogramBackets.size(); i++){
+			while(intersect_Combine(histogramBackets.get(i))){
+				
 			}
 		}
+		System.out.println("Histogram size after: "+ histogramBackets.size());
 	}
 	
-	private List<String> getSimilarHistogram(String timeSegment,List<Bucket> histogram){
-		List<String> result = new ArrayList<String>();
-		boolean samehistogramFlag = false;
-		//Sort the histogram
-		Collections.sort(histogram);
-		Iterator it = initHistogram.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry<String, List<Bucket>> obj = (Entry<String, List<Bucket>>) it.next();
-			if(!timeSegment.equals(obj.getKey())){
-				List<Bucket> temp = obj.getValue();
-				Collections.sort(temp);
-				samehistogramFlag = true;
-				for(int i =0 ; i < temp.size(); i++){
-					System.out.println("histogramID: "+histogram.get(i).getId() +" tempId:"+ temp.get(i).getId());
-					if (histogram.get(i).getId() == temp.get(i).getId()) {
-						if (histogram.get(i).getPersent() != temp.get(i)
-								.getPersent()) {
-							samehistogramFlag = false;
-						}
+	private boolean intersect_Combine(Bucket a){
+		List<Integer> bucketsIds  = new ArrayList<Integer>();
+		double maxlat =  a.getArea().getMax().getLat();
+		double maxlon =  a.getArea().getMax().getLon();
+		double minlat =  a.getArea().getMin().getLat();
+		double minlon = a.getArea().getMin().getLon();
+		for(Bucket b : histogramBackets){			
+			if(a.getArea().Intersect(b.getArea())){
+				if (a.getId() != b.getId()) {
+					if (bucketMatched(a, b)) {
+						// get the maximum Point
+						maxlat = maxlat < b.getArea().getMax().getLat() ? b
+								.getArea().getMax().getLat() : maxlat;
+						maxlon = maxlon < b.getArea().getMax().getLon() ? b
+								.getArea().getMax().getLon() : maxlon;
+						// get the min point
+						minlat = b.getArea().getMin().getLat() < minlat ? b
+								.getArea().getMin().getLat() : minlat;
+						minlon = b.getArea().getMin().getLon() < minlon ? b
+								.getArea().getMin().getLon() : minlon;
+						bucketsIds.add(b.getId());
+					} else {
+						return false;
 					}
 				}
-				if(samehistogramFlag){
-					result.add(obj.getKey());
+			}
+		}
+		//delete old buckets and create the new one.
+		if(bucketsIds.isEmpty())
+			return false;
+		bucketsIds.add(a.getId());
+		Bucket combinedBucket = new Bucket(new MBR(new Point(maxlat, maxlon), new Point(minlat, minlon)), a.getId());
+		combinedBucket.setDayCardinality(a.getDayCardinality());
+		reconstructBuckets(bucketsIds);
+		histogramBackets.add(combinedBucket);
+		return true;
+	}
+	
+	private void reconstructBuckets(List<Integer> bucketsIds){
+		List<Integer> index = new ArrayList<Integer>();
+		//search
+		for(Integer i : bucketsIds){
+			for(int pos = 0 ; pos < histogramBackets.size(); pos++){
+				if(histogramBackets.get(pos).getId() == i){
+					System.out.println("delete "+ histogramBackets.get(pos).getId()+ " status"+
+							histogramBackets.remove(histogramBackets.get(pos)));
+					index.add(pos);
+					break;
 				}
 			}
 		}
-		//Delete the matched segments 
-		deleteMatchedTemporalSegments(timeSegment, result);
-		return result;
 		
+		// delete
+//		for(Integer in : index){
+//			histogramBackets.remove(in);
+//		}
 	}
 	
-	
-	private void deleteMatchedTemporalSegments(String temporalSegment, List<String> matches){
-		if (matches.size() != 0) {
-			//add the day to the cluster then remove it from the list. 
-			int clusterId = dayClusters.size()+1;
-			dayClusters.add(new TemporalClusterTable(clusterId, initHistogram.get(temporalSegment)));
-			for (String temporal : matches) {
-				dayLookup.add(new TemporalLookupTable(temporal, dayHistogram.get(temporal).getHistogramVolume(), clusterId));
-				initHistogram.remove(temporal);
+	/**
+	 * This method match the bucket if they have the same number of median cardinality then the are similar 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private boolean bucketMatched(Bucket a,Bucket b){
+		List<DayCardinality> a_card = a.getDayCardinality();
+		List<DayCardinality> b_card = b.getDayCardinality();
+		Collections.sort(a_card);
+		Collections.sort(b_card);
+		for(int i =0 ; i < a_card.size(); i++){
+			if(a_card.get(i).getCardinality() != b_card.get(i).getCardinality()){
+				return false;
 			}
-			initHistogram.remove(temporalSegment);
+		}
+		return true;
+	}
+	
+
+	
+	
+	
+	private int addNewCluster(String temporalSegment, queryLevel level){
+		System.out.println("Found cluster");
+		int clusterId = 0;
+		if(level.equals(queryLevel.Day)){
+			clusterId = dayClusters.size()+1;
+			dayClusters.add(new TemporalClusterTable(clusterId, initHistogram.get(temporalSegment)));
+		}else if(level.equals(queryLevel.Week)){
+			clusterId = weekClusters.size()+1;
+			weekClusters.add(new TemporalClusterTable(clusterId, initHistogram.get(temporalSegment)));
+		}else{
+			clusterId = monthClusters.size()+1;
+			monthClusters.add(new TemporalClusterTable(clusterId, initHistogram.get(temporalSegment)));
+		}
+		return clusterId;
+	}
+	
+	private void addToLookupTable(String temporal,int clusterId,queryLevel level){
+		if(level.equals(queryLevel.Day)){
+			dayLookup.add(new TemporalLookupTable(temporal, dayHistogram.get(temporal).getHistogramVolume(), clusterId));
+		}else if(level.equals(queryLevel.Week)){
+			weekLookup.add(new TemporalLookupTable(temporal, weekHistogram.get(temporal).getHistogramVolume(), clusterId));
+		}else{
+			monthLookup.add(new TemporalLookupTable(temporal, monthHistogram.get(temporal).getHistogramVolume(), clusterId));
 		}
 	}
 	
