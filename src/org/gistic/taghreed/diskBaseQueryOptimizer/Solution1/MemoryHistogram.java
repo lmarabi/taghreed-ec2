@@ -110,20 +110,15 @@ public class MemoryHistogram {
 		this.dayLookup = new ArrayList<TemporalLookupTable>();
 		 OfflinePhase();
 	}
-
-	/**
-	 * This method is offline phase of to prepare the clusters of the histogram.
-	 * 
-	 * @throws IOException
-	 * @throws ParseException 
-	 */
-	private void OfflinePhase() throws IOException, ParseException {
+	
+	
+	private void readExactDayHistogram() throws ParseException, IOException{
 		double temp,maxlon = 0,maxlat = 0;
 		double minlat = Double.MAX_VALUE,minlon = Double.MAX_VALUE;
 		MBR mbr = new MBR(new Point(90, 180), new Point(-90, -180));
 		String startDate = "2000-01-01";
 		String endDate = "3000-01-01";
-		Map<String,String> days = this.lookup.getTweetsDayIndex(startDate, endDate);
+		Map<String,String> days= this.lookup.getTweetsDayIndex(startDate, endDate);
 		Iterator it = days.entrySet().iterator();
 		while(it.hasNext()){
 			Map.Entry<String, String> obj = (Entry<String, String>) it.next();
@@ -144,14 +139,103 @@ public class MemoryHistogram {
 		minPoint = new Point(minlat, minlon);
 		startLog();
 		histogramBackets = creatHistogramBuckets(maxPoint,minPoint);
+	}
+	
+	private void readExactWeekHistogram() throws ParseException, IOException{
+		double temp,maxlon = 0,maxlat = 0;
+		double minlat = Double.MAX_VALUE,minlon = Double.MAX_VALUE;
+		MBR mbr = new MBR(new Point(90, 180), new Point(-90, -180));
+		String startDate = "2000-01-01";
+		String endDate = "3000-01-01";
+		Map<Week,String> week= this.lookup.getAllTweetsWeekIndex(startDate, endDate);
+		Iterator it = week.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<Week, String> obj = (Entry<Week, String>) it.next();
+			weekHistogram.put(obj.getKey().getWeekName(), new HistogramCluster(obj.getValue()));
+			//Get the maximum and the Minimum MBR over all paritions 
+			temp = weekHistogram.get(obj.getKey().getWeekName()).getMinLon();
+			minlon = temp < minlon ? temp : minlon;
+			temp = weekHistogram.get(obj.getKey().getWeekName()).getMinLat();
+			minlat = temp < minlat ? temp : minlat;
+			temp = weekHistogram.get(obj.getKey().getWeekName()).getMaxlat();
+			maxlat = temp > maxlat ? temp : maxlat;
+			temp = weekHistogram.get(obj.getKey().getWeekName()).getMaxLon();
+			maxlon = temp > maxlon ? temp : maxlon;
+			
+		}
+		// We partition the space of the histograms into buckets of equal width size. 
+		maxPoint = new Point(maxlat, maxlon);
+		minPoint = new Point(minlat, minlon);
+		startLog();
+		this.histogramBackets.clear();
+		histogramBackets = creatHistogramBuckets(maxPoint,minPoint);
+	}
+	
+	private void readExactMonthkHistogram() throws ParseException, IOException{
+		double temp,maxlon = 0,maxlat = 0;
+		double minlat = Double.MAX_VALUE,minlon = Double.MAX_VALUE;
+		MBR mbr = new MBR(new Point(90, 180), new Point(-90, -180));
+		String startDate = "2000-01-01";
+		String endDate = "3000-01-01";
+		Map<String,String> month= this.lookup.getTweetsMonthsIndex(startDate, endDate);
+		Iterator it = month.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<String, String> obj = (Entry<String, String>) it.next();
+			monthHistogram.put(obj.getKey(), new HistogramCluster(obj.getValue()));
+			//Get the maximum and the Minimum MBR over all paritions 
+			temp = monthHistogram.get(obj.getKey()).getMinLon();
+			minlon = temp < minlon ? temp : minlon;
+			temp = monthHistogram.get(obj.getKey()).getMinLat();
+			minlat = temp < minlat ? temp : minlat;
+			temp = monthHistogram.get(obj.getKey()).getMaxlat();
+			maxlat = temp > maxlat ? temp : maxlat;
+			temp = monthHistogram.get(obj.getKey()).getMaxLon();
+			maxlon = temp > maxlon ? temp : maxlon;
+			
+		}
+		// We partition the space of the histograms into buckets of equal width size. 
+		maxPoint = new Point(maxlat, maxlon);
+		minPoint = new Point(minlat, minlon);
+		startLog();
+		this.histogramBackets.clear();
+		histogramBackets = creatHistogramBuckets(maxPoint,minPoint);
+	}
+	
+	private void reset(queryLevel q){
+		this.histogramBackets.clear();
+		this.dayHistogram.clear();
+		this.weekHistogram.clear();
+		this.monthHistogram.clear();
+		
+	}
+	
+
+	/**
+	 * This method is offline phase of to prepare the clusters of the histogram.
+	 * 
+	 * @throws IOException
+	 * @throws ParseException 
+	 */
+	private void OfflinePhase() throws IOException, ParseException {
+		
 		endLog("Create the buckets mbr");
 		startLog();
-		initHistogramo(queryLevel.Day);
-//		ReadHistogramFromDisk();
-		writeHistogramToDisk("xxxxWorld_Histogram.WKT");
-		matchBuckets(queryLevel.Day);
-		endLog("ini Histogram");
-		writeHistogramToDisk("xxxxWorld_Cluster.WKT");
+		for(queryLevel q : queryLevel.values()){
+			if (!q.equals(queryLevel.Day) && !q.equals(queryLevel.Week)) {
+				initHistogramo(q);
+				System.out.println("Start writing to disk");
+				writeHistogramToDisk("xxxxWorld_Histogram" + q.toString()+ ".txt");
+				writeWKTHistogramToDisk("xxxxWorld_Histogram" + q.toString()+ ".WKT");
+				System.out.println("End writing to disk");
+//				ReadHistogramFromDisk("xxxxWorld_Histogram" + q.toString()+ ".txt");
+				matchBuckets(q);
+				endLog("ini Histogram");
+				writeHistogramToDisk("xxxxWorld_Histogram_Cluster" + q.toString()+ ".txt");
+				writeWKTHistogramToDisk("xxxxWorld_Histogram_Cluster" + q.toString()+ ".WKT");
+				reset(q);
+			}
+		}
+		
 //		for(Bucket d : this.histogramBackets){
 //			System.out.println(d.toString());
 //		}
@@ -224,15 +308,26 @@ public class MemoryHistogram {
 	
 	private void initHistogramo(queryLevel level) throws ParseException, IOException{
 		if(level.equals(queryLevel.Day)){
+			readExactDayHistogram();
 			initDayHistogram();
 		}else if(level.equals(queryLevel.Week)){
+			readExactWeekHistogram();
 			initWeekHistogram();
 		}else{
+			readExactMonthkHistogram();
 			initMonthHistogram();
 		}
 	}
 	
 	private void writeHistogramToDisk(String fileName) throws IOException{
+		OutputStreamWriter writer = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+fileName, false), "UTF-8"); 
+		for(Bucket b : histogramBackets)
+			writer.write(b.toString()+"\n");
+		writer.close();
+	}
+	
+	private void writeWKTHistogramToDisk(String fileName) throws IOException{
 		OutputStreamWriter writer = new OutputStreamWriter(
 				new FileOutputStream(System.getProperty("user.dir") + "/"+fileName, false), "UTF-8"); 
 		for(Bucket b : histogramBackets)
@@ -270,9 +365,9 @@ public class MemoryHistogram {
 		
 	}
 	
-	private void ReadHistogramFromDisk() throws IOException{
+	private void ReadHistogramFromDisk(String fileName) throws IOException{
 		BufferedReader reader = new BufferedReader(new FileReader(new File(
-				System.getProperty("user.dir") + "/HistogramInit.txt")));
+				System.getProperty("user.dir") + "/"+fileName)));
 //		OutputStreamWriter writer = new OutputStreamWriter(
 //				new FileOutputStream(System.getProperty("user.dir") + "/HistogramInit.WKT", false), "UTF-8"); 
 		String line;
@@ -288,44 +383,58 @@ public class MemoryHistogram {
 	}
 	
 	private void initWeekHistogram() throws ParseException{
-		List<Bucket> temp;
-		String day;
-		long dayVolume = 0;
-		Iterator it = weekHistogram.entrySet().iterator();
-		while(it.hasNext()){
-			temp = histogramBackets;
-			Map.Entry<String, HistogramCluster> obj = (Entry<String,HistogramCluster>) it.next();
-			day = obj.getKey();
-			dayVolume = obj.getValue().getHistogramVolume();
-			// invoke method to fill the histogram with persent of the cardinality.
-			for(Bucket part: temp){
-				double cardinality = getWeekLevelCardinality(day, day, part.getArea()); 
-				double persent = (cardinality/dayVolume);
-				part.setPersent(persent);
+		GridCell worldCell;
+		MBR mbr;
+		for(Bucket bucket : this.histogramBackets){
+			mbr = bucket.getArea();
+			worldCell = new GridCell(mbr, this.lookup);
+			// add the days in this mbr to the cell 
+			Iterator it = weekHistogram.entrySet().iterator();
+			while(it.hasNext()){
+				Map.Entry<String, HistogramCluster> obj = (Entry<String, HistogramCluster>) it.next();
+				worldCell.add(obj.getKey(),obj.getValue().getCardinality(mbr));
 			}
-			//put the new histogram with values 
-			initHistogram.put(day, temp);
+			//crate the cluster
+			worldCell.initCluster(this.confidenceThreshold);
+			// get the clusters created Then add in this bucket the days with their mean only
+			List<Cluster> cluster = worldCell.getCluster();
+			for(Cluster c : cluster){
+			    List<DayCardinality> temporalSegment = c.getDays();
+			    for(DayCardinality segment : temporalSegment){
+//			    	System.out.println("Set day cardinality in bucket"+segment.getDay()+"- mean "+c.getMean());
+			    	bucket.setCardinality(segment.getDay(), c.getMean());
+			    }
+			}
+			System.out.println(cluster.size());
+			
 		}
 	}
 	
 	private void initMonthHistogram() throws ParseException{
-		List<Bucket> temp;
-		String day;
-		long dayVolume = 0;
-		Iterator it = monthHistogram.entrySet().iterator();
-		while(it.hasNext()){
-			temp = histogramBackets;
-			Map.Entry<String, HistogramCluster> obj = (Entry<String,HistogramCluster>) it.next();
-			day = obj.getKey();
-			dayVolume = obj.getValue().getHistogramVolume();
-			// invoke method to fill the histogram with persent of the cardinality.
-			for(Bucket part: temp){
-				double cardinality = getMonthLevelCardinality(day, day, part.getArea()); 
-				double persent = (cardinality/dayVolume);
-				part.setPersent(persent);
+		GridCell worldCell;
+		MBR mbr;
+		for(Bucket bucket : this.histogramBackets){
+			mbr = bucket.getArea();
+			worldCell = new GridCell(mbr, this.lookup);
+			// add the days in this mbr to the cell 
+			Iterator it = monthHistogram.entrySet().iterator();
+			while(it.hasNext()){
+				Map.Entry<String, HistogramCluster> obj = (Entry<String, HistogramCluster>) it.next();
+				worldCell.add(obj.getKey(),obj.getValue().getCardinality(mbr));
 			}
-			//put the new histogram with values 
-			initHistogram.put(day, temp);
+			//crate the cluster
+			worldCell.initCluster(this.confidenceThreshold);
+			// get the clusters created Then add in this bucket the days with their mean only
+			List<Cluster> cluster = worldCell.getCluster();
+			for(Cluster c : cluster){
+			    List<DayCardinality> temporalSegment = c.getDays();
+			    for(DayCardinality segment : temporalSegment){
+//			    	System.out.println("Set day cardinality in bucket"+segment.getDay()+"- mean "+c.getMean());
+			    	bucket.setCardinality(segment.getDay(), c.getMean());
+			    }
+			}
+			System.out.println(cluster.size());
+			
 		}
 	}
 	
@@ -334,7 +443,9 @@ public class MemoryHistogram {
 		System.out.println("Histogram size before: "+ histogramBackets.size());
 		for(int i=0 ; i < histogramBackets.size(); i++){
 			while(intersect_Combine(histogramBackets.get(i))){
-				
+				if(i > histogramBackets.size()){
+					i = histogramBackets.size()-1;
+				}
 			}
 		}
 		System.out.println("Histogram size after: "+ histogramBackets.size());
@@ -384,8 +495,9 @@ public class MemoryHistogram {
 		for(Integer i : bucketsIds){
 			for(int pos = 0 ; pos < histogramBackets.size(); pos++){
 				if(histogramBackets.get(pos).getId() == i){
-					System.out.println("delete "+ histogramBackets.get(pos).getId()+ " status"+
-							histogramBackets.remove(histogramBackets.get(pos)));
+//					System.out.println("delete "+ histogramBackets.get(pos).getId()+ " status"+
+//							histogramBackets.remove(histogramBackets.get(pos)));
+					histogramBackets.remove(histogramBackets.get(pos));
 					index.add(pos);
 					break;
 				}

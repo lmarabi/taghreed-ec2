@@ -53,6 +53,10 @@ public class Week {
 //        this.end = end;
 //    }
     
+    public String getWeekName() {
+		return weekName;
+	}
+    
     /**
      * This method parse the expression 2013-01-15&2014-10-12 To week object
      * @param args
