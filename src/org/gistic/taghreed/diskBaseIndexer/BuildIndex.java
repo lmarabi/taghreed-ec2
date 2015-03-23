@@ -7,6 +7,7 @@ package org.gistic.taghreed.diskBaseIndexer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.servlet.jsp.jstl.core.Config;
 
 import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.invertedIndex.KWIndexBuilder;
@@ -33,6 +36,9 @@ public class BuildIndex {
 	private Commons config;
 	private String command;
 	private String tweetFile, hashtagFile;
+	private OutputStreamWriter logger = new OutputStreamWriter(
+			new FileOutputStream(System.getProperty("user.dir")
+					+ "/indexTime.log", true), "UTF-8");
 
 	public enum Level {
 
@@ -43,6 +49,7 @@ public class BuildIndex {
 		this.config = new Commons();
 		this.tweetFile = tweetFile;
 		this.hashtagFile = hashtagFile;
+
 	}
 
 	public BuildIndex() throws IOException {
@@ -106,28 +113,28 @@ public class BuildIndex {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static int getThreshold(String rtreeFolder)
-			throws FileNotFoundException, IOException {
+	public int getThreshold(String rtreeFolder) throws FileNotFoundException,
+			IOException {
 		// Read the master file outputed from spatial hadoop
 		String path = rtreeFolder;
 		int threshold = Integer.MAX_VALUE;
 		BufferedReader reader = new BufferedReader(new FileReader(new File(path
-				+ "/_master.quadtree")));
+				+ "/_master." + config.getSpatialIndex())));
 		List<String> metaData = new ArrayList<String>();
 		String line = null;
-		int cardinality = 0 ;
+		int cardinality = 0;
 		while ((line = reader.readLine()) != null) {
 			String[] temp = line.split(",");
 			// Get the minimum number of partition
-			cardinality = Integer.parseInt(temp[5]); 
-			if(cardinality > 15000){
+			cardinality = Integer.parseInt(temp[5]);
+			if (cardinality > 15000) {
 				if (cardinality < threshold) {
 					threshold = Integer.parseInt(temp[5]);
 				}
 			}
 		}
 		reader.close();
-		
+
 		return threshold < 15000 ? 15000 : threshold;
 
 	}
@@ -167,12 +174,14 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
-				+ file.getName().replace(".bz2", "")
-				+ " -overwrite  sindex:quadtree shape:"
-				+ "org.gistic.taghreed.spatialHadoop.Tweets"
-				+ "  -no-local";
-
+				+ file.getName().replace(".bz2", "") + " -overwrite  sindex:"
+				+ config.getSpatialIndex() + " shape:"
+				+ "org.gistic.taghreed.spatialHadoop.Tweets" + "  -no-local";
+		long starttime = System.currentTimeMillis();
 		commandExecuter(command);
+		long endtime = System.currentTimeMillis() - starttime; 
+		logger.write("\n"+file.getName()+","+endtime);
+		logger.flush();
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index."
@@ -231,8 +240,8 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
-				+ file.getName().replace(".bz2", "")
-				+ " -overwrite  sindex:quadtree "
+				+ file.getName().replace(".bz2", "") + " -overwrite  sindex:"
+				+ config.getSpatialIndex() + " "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags "
 				+ " -no-local";
 
@@ -315,7 +324,8 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
-				+ folderName + " -overwrite  sindex:quadtree "
+				+ folderName + " -overwrite  sindex:"
+				+ config.getSpatialIndex() + " "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags"
 				+ "  -no-local";
 		commandExecuter(command);
@@ -353,6 +363,7 @@ public class BuildIndex {
 			f.mkdirs();
 		}
 		// Build index
+		
 		command = config.getHadoopDir()
 				+ "hadoop jar "
 				// + config.getHadoopDir()
@@ -366,11 +377,14 @@ public class BuildIndex {
 				// + "/"
 				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 				+ folderName + " " + config.getHadoopHDFSPath() + "index."
-				+ folderName + " -overwrite  sindex:quadtree shape:"
-				+ "org.gistic.taghreed.spatialHadoop.Tweets"
-				+ "  -no-local";
-
+				+ folderName + " -overwrite  sindex:"
+				+ config.getSpatialIndex() + " shape:"
+				+ "org.gistic.taghreed.spatialHadoop.Tweets" + "  -no-local";
+		long starttime = System.currentTimeMillis();
 		commandExecuter(command);
+		long endtime = System.currentTimeMillis() - starttime; 
+		logger.write("\n"+folderName+","+endtime);
+		logger.flush();
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + folderName + " "
@@ -490,6 +504,10 @@ public class BuildIndex {
 		indexbuilder.buildIndex(file, indexfolder,
 				KWIndexBuilder.dataType.hashtags);
 	}
+	
+	public void CloseLogger() throws IOException{
+		logger.close();
+	}
 
 	public void commandExecuter(String command) throws IOException,
 			InterruptedException {
@@ -533,23 +551,22 @@ public class BuildIndex {
 	}
 }
 
-
 class StreamGobbler extends Thread {
-	  InputStream is;
-	  PrintStream os;
-	 
-	  StreamGobbler(InputStream is, PrintStream os) {
-	    this.is = is;
-	    this.os = os;
-	  }
-	 
-	  public void run() {
-	    try {
-	      int c;
-	      while ((c = is.read()) != -1)
-	          os.print((char) c);
-	    } catch (IOException x) {
-	      // handle error
-	    }
-	  }
+	InputStream is;
+	PrintStream os;
+
+	StreamGobbler(InputStream is, PrintStream os) {
+		this.is = is;
+		this.os = os;
 	}
+
+	public void run() {
+		try {
+			int c;
+			while ((c = is.read()) != -1)
+				os.print((char) c);
+		} catch (IOException x) {
+			// handle error
+		}
+	}
+}

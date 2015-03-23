@@ -37,6 +37,8 @@ public class Commons {
     
     public static String libJars;
     
+    public static String spatialIndex;
+    
 
     public Commons() throws IOException {
         this.loadConfigFile();
@@ -155,6 +157,9 @@ public class Commons {
 		Commons.libJars = libJars;
 	}
     
+    public static String getSpatialIndex() {
+		return spatialIndex;
+	}
     
     private void loadConfigFile() throws IOException {
 
@@ -175,6 +180,7 @@ public class Commons {
         Commons.queryInvertedIndex = prop.getProperty("queryInvertedIndex");
         Commons.queryRtreeIndex = prop.getProperty("queryRtreeIndex");
         Commons.tweetFlushDir = prop.getProperty("tweetFlushDir");
+        Commons.spatialIndex = prop.getProperty("shape");
         System.out.println("Config file Loaded");
 
 
