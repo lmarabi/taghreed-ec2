@@ -60,7 +60,6 @@ public class BuildPyramidIndex {
         //Create the inverted index 
 //        CreateInvertedTweetWeekIndex();
 //        createInvertedTweetMonths();
-        indexer.CloseLogger();
         
     }
     

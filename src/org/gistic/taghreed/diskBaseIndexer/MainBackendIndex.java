@@ -120,7 +120,7 @@ public class MainBackendIndex {
 			//indexer = new BuildIndex();
 			indexer.setTweetFile(sortedtweetsFile.get(i));
 			try {
-				indexer.CreateRtreeTweetIndex();
+				 indexer.CreateRtreeTweetIndex();
 //				 index.CreateRtreeHashtagIndex();
 //				 index.createInvertedHashtagIndex();
 //     		    indexer.createInvertedTweetIndex();
@@ -130,7 +130,6 @@ public class MainBackendIndex {
 			}
 		}
 		indexer.UpdatelookupTable(BuildIndex.Level.Day);
-		indexer.CloseLogger();
 		MainBackendIndex index = new MainBackendIndex();
 		index.setTweetsFile(sortedtweetsFile.get(0));
 		index.run(args);
