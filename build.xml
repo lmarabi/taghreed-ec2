@@ -7,11 +7,11 @@
 	<property name="dist.dir" location="dist" />
 	<property name="docs.dir" location="docs" />
 	<property name="lib.dir" location="lib" />
-	<property name="version" value="2" />
+	<property name="version" value="1" />
         <property name="ant.build.javac.source" value="1.6" />
         <property name="ant.build.javac.target" value="1.6" />
        
-        <property name="main.class" value="org.gistic.taghreed.diskBaseIndexer.MainBackendIndex" />
+        <property name="main.class" value="umn.ec2.exp.Main" />
 	
         <!--
         <property name="main.class" value="org.gistic.taghreed.diskBaseQuery.server.Main" />
@@ -59,14 +59,14 @@
 	
 	<!--Creates the deployable jar file -->
 	<target name="jar" depends="compile" description="Create one big jarfile.">
-    	<jar jarfile="${dist.dir}/taghreed-${version}.jar">
+    	<jar jarfile="${dist.dir}/taghreed-ec2-${version}.jar">
        	 <zipgroupfileset dir="${lib.dir}">
        	     <include name="**/*.jar" />
        	 </zipgroupfileset>
    	 </jar>
    	 <sleep seconds="1" />
-   	 <jar jarfile="${dist.dir}/taghreed-${version}-withlib.jar" basedir="${build.dir}" >
-       		 <zipfileset src="${dist.dir}/taghreed-${version}.jar" excludes="META-INF/*.SF" />
+   	 <jar jarfile="${dist.dir}/taghreed-ec2-${version}-withlib.jar" basedir="${build.dir}" >
+       		 <zipfileset src="${dist.dir}/taghreed-ec2-${version}.jar" excludes="META-INF/*.SF" />
        		 <manifest>
             		<attribute name="Main-Class" value="${main.class}" />
         	</manifest>

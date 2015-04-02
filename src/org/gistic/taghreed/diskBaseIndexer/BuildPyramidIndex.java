@@ -302,7 +302,7 @@ public class BuildPyramidIndex {
     /**
      * This method create tweets indexMonth only
      */
-    private void CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
+    public void CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
     	System.out.println("Create Tweets Week Index ");
 		List<File> outputFiles = ListFiles(config.getTweetFlushDir());
 		Collections.sort(outputFiles);
@@ -410,7 +410,7 @@ public class BuildPyramidIndex {
         return resultList;
     }
 
-    private void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
+    public void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -506,9 +506,6 @@ public class BuildPyramidIndex {
     public static void main(String[] args) throws IOException, InterruptedException, ParseException, CompressorException {
         BuildPyramidIndex x = new BuildPyramidIndex();
         x.CreateRtreeTweetWeekIndex();
-        x.indexer.UpdatelookupTable(Level.Day);
-        x.indexer.UpdatelookupTable(Level.Week);
-        x.indexer.UpdatelookupTable(Level.Month);
         System.out.println("End program");
     }
 }

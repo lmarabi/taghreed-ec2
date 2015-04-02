@@ -146,8 +146,9 @@ public class BuildIndex {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void CreateRtreeTweetIndex() throws IOException,
+	public synchronized void CreateRtreeTweetIndex() throws IOException,
 			InterruptedException {
+		this.UpdatelookupTable(Level.Day, this.tweetFile);
 		Thread t = new Thread(new BuildIndexThreads("",Level.Day));
 		t.start();
 	}
@@ -181,7 +182,7 @@ public class BuildIndex {
 				// + config.getHadoopDir()
 				// + "/"
 				+ config.getShadoopJar()
-				+ " index -D dfs.block.size="
+				+ " partition -D dfs.block.size="
 				+ (128 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
@@ -265,7 +266,7 @@ public class BuildIndex {
 				// + config.getHadoopDir()
 				// + "/"
 				+ config.getShadoopJar()
-				+ " index -D dfs.block.size="
+				+ " partition -D dfs.block.size="
 				+ (128 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
@@ -307,6 +308,7 @@ public class BuildIndex {
 	 */
 	public void BuildTweetHdfsIndex(String folderName, String level)
 			throws IOException, InterruptedException {
+		this.UpdatelookupTable(Level.valueOf(level), folderName);
 		Thread t = new Thread(new BuildIndexThreads(folderName,Level.valueOf(level)));
 		t.start();
 		
@@ -319,25 +321,22 @@ public class BuildIndex {
 	 * @param level
 	 * @throws IOException
 	 */
-	public void UpdatelookupTable(Level level) throws IOException {
-		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex());
+	public void UpdatelookupTable(Level level,String IndexName) throws IOException {
+		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex(),IndexName);
 		// UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
 		// UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
 		// UpdatelookupTable("hashtags", level, config.getQueryInvertedIndex());
 
 	}
 
-	private void UpdatelookupTable(String type, Level level, String directory)
+	private void UpdatelookupTable(String type, Level level, String directory,String IndexName)
 			throws IOException {
-
+		
 		System.out.println("Update lookupTable Type:" + type + " level:"
 				+ level.toString());
+		File indexFile = new File(IndexName);
 		File lookupTweet = new File(directory + "/" + type + "/"
 				+ level.toString() + "/lookupTable.txt");
-		System.out.println(lookupTweet);
-		if (lookupTweet.exists()) {
-			lookupTweet.delete();
-		}
 		File dir = new File(lookupTweet.getParent());
 		if (!dir.exists()) {
 			dir.mkdirs();
@@ -346,19 +345,8 @@ public class BuildIndex {
 		OutputStreamWriter writer = new FileWriter(lookupTweet, true);
 		File lookupDir = new File(directory + "/" + type + "/"
 				+ level.toString() + "/");
-		File[] indeces = lookupDir.listFiles();
-		for (File f : indeces) {
-			if (!f.getName().equals("lookupTable.txt")) {
-				String[] fileName;
-				fileName = f.getName().split("\\.");
-				// writer.write(fileName[1] + ","+directory+ type +"/" +
-				// level.toString() + "/" + f.getName() + "\n");
-				writer.write(fileName[1] + "\n");
-
-			}
-		}
+		writer.write(indexFile.getName().replace(".bz2", "") + "\n");
 		writer.close();
-
 	}
 
 	public void createInvertedTweetIndex() throws IOException,
@@ -434,7 +422,6 @@ public class BuildIndex {
 		int exitVal = myProcess.waitFor();
 		errorGobbler.join(); // Handle condition where the
 		outputGobbler.join(); // process ends before the threads finish
-
 	}
 	
 	
@@ -466,9 +453,9 @@ public class BuildIndex {
 		public BuildIndexThreads(String fileName,Level level) throws UnsupportedEncodingException, FileNotFoundException {
 			this.level = level;
 			this.fileName = fileName;
-			this.writer =  new OutputStreamWriter(
-					new FileOutputStream(System.getProperty("user.dir")
-							+ "/indexTime.log", true), "UTF-8");
+//			this.writer =  new OutputStreamWriter(
+//					new FileOutputStream(System.getProperty("user.dir")
+//							+ "/indexTime.log", true), "UTF-8");
 		}
 
 		@Override
@@ -494,14 +481,14 @@ public class BuildIndex {
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getShadoopJar()
-							+ " index -D dfs.block.size="
+							+ " partition -D dfs.block.size="
 							+ (128 * 1024 * 1024)
 							+ " "
 							+ "-libjars "
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getLibJars() + " " + config.getHadoopHDFSPath()
-							+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
+							+ file.getName() + " " + config.getHadoopHDFSPath() + "Day/index."
 							+ file.getName().replace(".bz2", "") + " -overwrite  sindex:"
 							+ config.getSpatialIndex() + " shape:"
 							+ "org.gistic.taghreed.spatialHadoop.Tweets" + "  -no-local";
@@ -509,25 +496,32 @@ public class BuildIndex {
 					long starttime = System.currentTimeMillis();
 					commandExecuter(command);
 					long endtime = System.currentTimeMillis() - starttime;
-					writer.write("\n" + file.getName() + "," + endtime);
-					writer.close();
-					// Copy to local
-					command = config.getHadoopDir() + "hadoop fs -copyToLocal "
-							+ config.getHadoopHDFSPath() + "index."
-							+ file.getName().replace(".bz2", "") + " "
-							+ config.getQueryRtreeIndex() + "tweets/Day/" + "index."
-							+ file.getName().replace(".bz2", "") + "/";
-
-					commandExecuter(command);
-					// remove from hdfs
-					command = config.getHadoopDir() + "hadoop fs -rmr "
-							+ config.getHadoopHDFSPath() + file.getName();
-
-					commandExecuter(command);
-					command = config.getHadoopDir() + "hadoop fs -rmr "
-							+ config.getHadoopHDFSPath() + "index."
-							+ file.getName().replace(".bz2", "");
-					commandExecuter(command);
+					synchronized(this){
+						this.writer = new OutputStreamWriter(
+								new FileOutputStream(
+										System.getProperty("user.dir")
+												+ "/indexTime.log", true),
+								"UTF-8");
+						writer.write("\n" + file.getName() + "," + endtime);
+						writer.close();
+					}
+//					// Copy to local
+//					command = config.getHadoopDir() + "hadoop fs -copyToLocal "
+//							+ config.getHadoopHDFSPath() + "index."
+//							+ file.getName().replace(".bz2", "") + " "
+//							+ config.getQueryRtreeIndex() + "tweets/Day/" + "index."
+//							+ file.getName().replace(".bz2", "") + "/";
+//
+//					commandExecuter(command);
+//					// remove from hdfs
+//					command = config.getHadoopDir() + "hadoop fs -rmr "
+//							+ config.getHadoopHDFSPath() + file.getName();
+//
+//					commandExecuter(command);
+//					command = config.getHadoopDir() + "hadoop fs -rmr "
+//							+ config.getHadoopHDFSPath() + "index."
+//							+ file.getName().replace(".bz2", "");
+//					commandExecuter(command);
 				}else{
 					File f = new File(config.getQueryRtreeIndex() + "tweets/" + level + "/");
 					if (!f.exists()) {
@@ -540,38 +534,45 @@ public class BuildIndex {
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getShadoopJar()
-							+ " index -D dfs.block.size="
+							+ " partition -D dfs.block.size="
 							+ (128 * 1024 * 1024)
 							+ " "
 							+ "-libjars "
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getLibJars() + " " + config.getHadoopHDFSPath()
-							+ this.fileName + " " + config.getHadoopHDFSPath() + "index."
+							+ this.fileName + " " + config.getHadoopHDFSPath() + level+"/index."
 							+ this.fileName + " -overwrite  sindex:"
 							+ config.getSpatialIndex() + " shape:"
 							+ "org.gistic.taghreed.spatialHadoop.Tweets" + "  -no-local";
 					long starttime = System.currentTimeMillis();
 					commandExecuter(command);
 					long endtime = System.currentTimeMillis() - starttime;
-					writer.write("\n" + this.fileName + "," + endtime);
-					writer.close();
-						// Copy to local
-						command = config.getHadoopDir() + "hadoop fs -copyToLocal "
-								+ config.getHadoopHDFSPath() + "index." + this.fileName + " "
-								+ config.getQueryRtreeIndex() + "tweets/" + level + "/"
-								+ "index." + this.fileName + " ";
-
-						commandExecuter(command);
-						// remove from hdfs
-						command = config.getHadoopDir() + "hadoop fs -rmr "
-								+ config.getHadoopHDFSPath() + this.fileName;
-
-						commandExecuter(command);
-						command = config.getHadoopDir() + "hadoop fs -rmr "
-								+ config.getHadoopHDFSPath() + "index." + this.fileName;
-
-						commandExecuter(command);
+					synchronized(this){
+						this.writer = new OutputStreamWriter(
+								new FileOutputStream(
+										System.getProperty("user.dir")
+												+ "/indexTime.log", true),
+								"UTF-8");
+						writer.write("\n" + this.fileName + "," + endtime);
+						writer.close();
+					}
+//						// Copy to local
+//						command = config.getHadoopDir() + "hadoop fs -copyToLocal "
+//								+ config.getHadoopHDFSPath() + "index." + this.fileName + " "
+//								+ config.getQueryRtreeIndex() + "tweets/" + level + "/"
+//								+ "index." + this.fileName + " ";
+//
+//						commandExecuter(command);
+//						// remove from hdfs
+//						command = config.getHadoopDir() + "hadoop fs -rmr "
+//								+ config.getHadoopHDFSPath() + this.fileName;
+//
+//						commandExecuter(command);
+//						command = config.getHadoopDir() + "hadoop fs -rmr "
+//								+ config.getHadoopHDFSPath() + "index." + this.fileName;
+//
+//						commandExecuter(command);
 				}
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -592,19 +593,46 @@ public class BuildIndex {
 class StreamGobbler extends Thread {
 	InputStream is;
 	PrintStream os;
+	OutputStreamWriter writer;
 
-	StreamGobbler(InputStream is, PrintStream os) {
+	StreamGobbler(InputStream is, PrintStream os) throws UnsupportedEncodingException, FileNotFoundException {
 		this.is = is;
 		this.os = os;
+		this.writer = new OutputStreamWriter(
+				new FileOutputStream(
+						System.getProperty("user.dir")
+								+ "/outstream.log", true),
+				"UTF-8");
 	}
 
 	public void run() {
+		BufferedReader reader = null;
 		try {
-			int c;
-			while ((c = is.read()) != -1)
-				os.print((char) c);
-		} catch (IOException x) {
-			// handle error
+			reader = new BufferedReader(new InputStreamReader(is));
+			 String line = null;
+			 while ((line = reader.readLine()) != null) {
+				 os.println(line);
+				 writer.write(line+"\n");
+				 writer.flush();
+			 }
+			 writer.close();
+		}catch (IOException ioe) {
+			//handel error.
 		}
+		
+		
+		
+//		try {
+//			int c;
+//			while ((c = is.read()) != -1)
+//				os.print((char) c);
+//		} catch (IOException x) {
+//			// handle error
+//		}
+		
 	}
 }
+
+
+
+

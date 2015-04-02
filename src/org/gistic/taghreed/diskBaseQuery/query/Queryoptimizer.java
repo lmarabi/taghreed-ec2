@@ -8,17 +8,31 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.RunningJob;
+import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.collections.TopTweetResult;
+import org.gistic.taghreed.collections.Tweet;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.collections.Week;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
+import org.gistic.taghreed.spatialHadoop.Tweets;
+
+import edu.umn.cs.spatialHadoop.OperationsParams;
+import edu.umn.cs.spatialHadoop.core.Rectangle;
+import edu.umn.cs.spatialHadoop.core.ResultCollector;
+import edu.umn.cs.spatialHadoop.core.Shape;
+import edu.umn.cs.spatialHadoop.operations.RangeQuery;
+import edu.umn.cs.spatialHadoop.operations.RangeQuery.RangeQueryMap;
+import edu.umn.cs.spatialHadoop.osm.OSMPolygon;
 
 /**
  *
@@ -31,13 +45,14 @@ public class Queryoptimizer {
     public static QueryExecutor dayrequest;
     public static List<TweetVolumes> dayVolume;
     private static ServerRequest serverRequest;
-    private static String[] headWeeks;
+    private static Commons conf;
 
     public Queryoptimizer(ServerRequest serverRequest) throws IOException, FileNotFoundException, ParseException {
         this.serverRequest = serverRequest;
         pyramidRequest = new PyramidQueryProcessor(serverRequest);
         dayrequest = new QueryExecutor(serverRequest);
         lookup = serverRequest.getLookup();
+        conf = new Commons();
 
     }
 
@@ -45,118 +60,81 @@ public class Queryoptimizer {
      * @param args the command line arguments
      * @throws InterruptedException 
      */
-    public TopTweetResult executeQuery() throws FileNotFoundException,
+    public long executeQuery() throws FileNotFoundException,
             UnsupportedEncodingException, IOException, ParseException, InterruptedException {
-				return null;
+        boolean queryTail = false;
+        List<RunningJob> rangeJobs = new ArrayList<RunningJob>();
+        Rectangle mbr = new Rectangle(serverRequest.getMbr().getMin().getLat(),
+				serverRequest.getMbr().getMin().getLon(), serverRequest
+						.getMbr().getMax().getLat(), serverRequest.getMbr()
+						.getMax().getLon());
+        double startTime = System.currentTimeMillis();
+        //Query From Months
+        Map<String, String> indexMonths = lookup.getTweetsMonthsIndex(serverRequest.getStartDate(), serverRequest.getEndDate());
+        List<String> months = new ArrayList<String>();
+        System.out.println("#number of Months found: " + indexMonths.size());
+        Iterator it = indexMonths.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            System.out.println("#Start Reading index of " + entry.getKey().toString());
+            months.add(entry.getKey().toString());
+            rangeJobs.add(executeRangeQuery(mbr, getindexPath(entry.getKey().toString(),queryLevel.Month)));
+        }
+            Map<Week, String> index = lookup.getTweetsWeekIndex(serverRequest.getStartDate(),serverRequest.getEndDate(),months);
+            System.out.println("#number of Weeks found: " + index.size());
+            List<String> weeks = new ArrayList<String>();
+            it = index.entrySet().iterator(); 
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                Week week = (Week) entry.getKey();
+                System.out.println("#Start Reading Week " + week.getWeekName());
+                weeks.add(week.getWeekName());
+                rangeJobs.add(executeRangeQuery(mbr, getindexPath(entry.getKey().toString(),queryLevel.Week)));
+            }
+            //Query missing days in head week
+            Map<String, String> indexDays = lookup.getTweetsDayIndex(serverRequest.getStartDate(),serverRequest.getEndDate(),weeks,months);
+            System.out.println("#number of Days found: " + indexDays.size());
+            it = indexDays.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                System.out.println("#Start Reading index of " + entry.getKey().toString());
+                rangeJobs.add(executeRangeQuery(mbr, getindexPath(entry.getKey().toString(),queryLevel.Day)));
+            }
+         
+        
 
-//        boolean queryTail = false;
-//        double startTime = System.currentTimeMillis();
-//        dayrequest.createStreamer();
-////        pyramidRequest.createStreamer();
-//        //Query From Months
-//        Map<String, String> indexMonths = getMonthTree();
-//        System.out.println("#number of Months found: " + indexMonths.size());
-//        Iterator it = indexMonths.entrySet().iterator();
-//        while (it.hasNext()) {
-//            Map.Entry entry = (Map.Entry) it.next();
-//            System.out.println("#Start Reading index of " + entry.getKey().toString());
-//            dayrequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
-//        }
-//        //Copy TweetVolume and check weeks
-//        pyramidRequest.setWeekVolume(dayrequest.getTweetsVolume());
-//        pyramidRequest.parseStreamer(dayrequest.getStreamer());
-//        //Check non Queried week in previous month query.
-//        if (indexMonths.size() > 0) {
-//            headWeeks = lookup.getHeadofSubMonth(serverRequest.getStartDate(),
-//                    serverRequest.getEndDate());
-//            queryTail = true;
-//        } else {
-//            headWeeks = new String[2];
-//            headWeeks[0] = serverRequest.getStartDate();
-//            headWeeks[1] = serverRequest.getEndDate();
-//            queryTail = true;
-//        }
-//        if (headWeeks[0] != null && headWeeks[1] != null) {
-//            Map<Week, String> index = getWeekTree(headWeeks[0], headWeeks[1]);
-//            System.out.println("#number of dates found: " + index.size());
-//            it = index.entrySet().iterator(); 
-//            while (it.hasNext()) {
-//                Map.Entry entry = (Map.Entry) it.next();
-//                Week week = (Week) entry.getKey();
-//                System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
-//                pyramidRequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
-//            }
-//            //Query missing days in head week
-//            pyramidRequest.parseStreamer(dayrequest.getStreamer());
-//            Map<Date, String> indexDays = getDayTree(headWeeks[0], headWeeks[1]);
-//            it = indexDays.entrySet().iterator();
-//            while (it.hasNext()) {
-//                Map.Entry entry = (Map.Entry) it.next();
-//                System.out.println("#Start Reading index of " + entry.getKey().toString());
-//                dayrequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
-//            }
-//        } else {
-////                //If there is no week and only days
-////                pyramidRequest.parseStreamer(dayrequest.getStreamer());
-////                Map<Date, String> indexDays = getDayTree(args[8], headWeeks[0], headWeeks[1]);
-////                it = indexDays.entrySet().iterator();
-////                while (it.hasNext()) {
-////                    Map.Entry entry = (Map.Entry) it.next();
-////                    System.out.println("#Start Reading index of " + entry.getKey().toString());
-////                    int count = dayrequest.GetSmartOutput(args[2], args[3], args[4], args[5], entry.getValue().toString() + "/");
-////                    Date date = (Date) entry.getKey();
-////                    pyramidRequest.addTweetVolume(date, count);
-////                }
-//        }
-//        //Query Tail week
-//        if (queryTail) {
-//            String[] tailWeeks = lookup.getTailofSubMonth(serverRequest.getStartDate(),
-//                    serverRequest.getEndDate());
-//            if (tailWeeks[0] != null && tailWeeks[1] != null) {
-//                Map<Week, String> index = getWeekTree(tailWeeks[0], tailWeeks[1]);
-//                System.out.println("#number of dates found: " + index.size());
-//                it = index.entrySet().iterator();
-//                while (it.hasNext()) {
-//                    Map.Entry entry = (Map.Entry) it.next();
-//                    Week week = (Week) entry.getKey();
-//                    System.out.println("#Start Reading index of " + week.getStart() + "-" + week.getEnd());
-//                    pyramidRequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
-//                }
-//                //Query missing days in head week
-//                pyramidRequest.parseStreamer(dayrequest.getStreamer());
-//                Map<Date, String> indexDays = getDayTree(tailWeeks[0], tailWeeks[1]);
-//                it = indexDays.entrySet().iterator();
-//                while (it.hasNext()) {
-//                    Map.Entry entry = (Map.Entry) it.next();
-//                    System.out.println("#Start Reading index of " + entry.getKey().toString());
-//                    dayrequest.GetSmartOutput(entry.getKey().toString(),entry.getValue().toString());
-//                }
-//            }
-//        }
-//
-//        double endTime = System.currentTimeMillis();
-//        System.out.println("query time = " + (endTime - startTime) + " ms");
-//        dayrequest.closeStreamer();
-//        pyramidRequest.closeStreamer();
-//        return pyramidRequest.getTweetVolume();
+        for(RunningJob j : rangeJobs){
+        	j.waitForCompletion();
+        }
+        double endTime = System.currentTimeMillis();
+        System.out.println("query time = " + (endTime - startTime) + " ms");
+        return 0;
 
     }
     
-   
-
-   
-
-//    private static Map<String, String> getDayTree(String start, String end) throws ParseException {
-//            return lookup.getTweetMissingDaysinWeek(start, end);
-//       
-//    }
-
-    private static Map<String, String> getMonthTree() throws ParseException, IOException {
-        
-            return lookup.getTweetsMonthsIndex(serverRequest.getStartDate(),
-                    serverRequest.getEndDate());
-        
+    private String getindexPath(String index,queryLevel level){
+    	return this.conf.getHadoopHDFSPath()+level.toString()+"/index."+index;
     }
+    
+    /**
+	 * This method execute the range query from the disk. 
+	 * @param mbr
+	 * @param path
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
+	private static RunningJob executeRangeQuery(Rectangle mbr, String path)
+			throws IllegalArgumentException, IOException {
+		long count;
+		OperationsParams operationsParams = new OperationsParams();
+		operationsParams.setClass("shape", Tweets.class, Shape.class);
+		operationsParams.setShape(operationsParams, "rect", mbr);
+		RunningJob job = RangeQuery.rangeQueryMapReduce(new Path(path), null, operationsParams);
+		return job;
+	}
+    
+    
 
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, IOException, ParseException {
 //        args = new String[11];

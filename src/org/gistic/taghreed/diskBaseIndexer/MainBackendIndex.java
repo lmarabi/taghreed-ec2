@@ -25,7 +25,7 @@ public class MainBackendIndex {
 
 	private String tweetsFile, hashtagsFile;
 	private static Commons config;
-	private BuildIndex indexer;
+	private static BuildIndex indexer;
 	private BuildPyramidIndex pyramidIndexer;
 
 	public MainBackendIndex(String tweetsFile, String hashtagsFile)
@@ -47,6 +47,66 @@ public class MainBackendIndex {
 		this.indexer = new BuildIndex();
 		this.indexer.setTweetFile(this.tweetsFile);
 	}
+	
+	/***
+	 * Invoke this methods by -index day
+	 * @throws IOException
+	 */
+	public static void indexDayLevel() throws IOException{
+		config = new Commons();
+		System.out.println(config.getTweetFlushDir());
+		File tweetsFile = new File(config.getTweetFlushDir());
+		System.out.println(tweetsFile.getAbsolutePath());
+		List<String> sortedtweetsFile;
+		sortedtweetsFile = new ArrayList<String>();
+		for (String file : tweetsFile.list()) {
+			if (!file.equals(".DS_Store")
+					&& !file.equals("inputDataStatistics.txt")
+					&& !file.equals("inputDataStatistics_Day.cluster")
+					&& !file.equals("inputDataStatistics_Week.cluster")
+					&& !file.equals("inputDataStatistics_Month.cluster")) {
+				sortedtweetsFile.add(config.getTweetFlushDir() + file);
+			}
+		}
+		Collections.sort(sortedtweetsFile);
+		
+		System.out.println(sortedtweetsFile.size());
+		for (int i = 0; i < sortedtweetsFile.size(); i++) {
+			try {
+				BuildIndex indexer = new BuildIndex();
+				indexer.setTweetFile(sortedtweetsFile.get(i));
+				System.out.println("indexing: "+sortedtweetsFile.get(i));
+				indexer.CreateRtreeTweetIndex();
+			} catch (InterruptedException ex) {
+				Logger.getLogger(MainBackendIndex.class.getName()).log(
+						Level.SEVERE, null, ex);
+			}
+		}
+		
+	}
+	
+	/***
+	 * Invoke this method -index week
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ParseException
+	 */
+	public static void indexWeekLevel() throws IOException, InterruptedException, ParseException{
+		BuildPyramidIndex index = new BuildPyramidIndex();
+		index.CreateRtreeTweetWeekIndex();
+	}
+	
+	
+	/***
+	 * Invoke this -index month
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ParseException
+	 */
+	public static void indexMonthLevel() throws IOException, InterruptedException, ParseException{
+		BuildPyramidIndex index = new BuildPyramidIndex();
+		index.createRtreeTweetMonths();
+	}
 
 	public void run(String args[]) throws FileNotFoundException, IOException,
 			CompressorException {
@@ -60,9 +120,6 @@ public class MainBackendIndex {
 			// update lookupTable
 			System.out.println("Update the lookup table");
 			pyramidIndexer.CreateIndex();
-			indexer.UpdatelookupTable(BuildIndex.Level.Day);
-			indexer.UpdatelookupTable(BuildIndex.Level.Week);
-			indexer.UpdatelookupTable(BuildIndex.Level.Month);
 		} catch (FileNotFoundException ex) {
 			Logger.getLogger(MainBackendIndex.class.getName()).log(
 					Level.SEVERE, null, ex);
@@ -129,7 +186,6 @@ public class MainBackendIndex {
 						Level.SEVERE, null, ex);
 			}
 		}
-		indexer.UpdatelookupTable(BuildIndex.Level.Day);
 		MainBackendIndex index = new MainBackendIndex();
 		index.setTweetsFile(sortedtweetsFile.get(0));
 		index.run(args);
