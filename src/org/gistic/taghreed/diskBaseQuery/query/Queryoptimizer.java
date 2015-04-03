@@ -176,7 +176,10 @@ public class Queryoptimizer {
 		public void run() {
 			try {
 				commandExecuter(command);
-			} catch (IOException | InterruptedException e) {
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

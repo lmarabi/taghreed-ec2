@@ -20,9 +20,9 @@ public class Main {
 
 	public static void main(String[] args) throws IOException,
 			InterruptedException, ParseException {
-		args = new String[2];
-		args[0] = "query";
-		args[1] = "temporal";
+//		args = new String[2];
+//		args[0] = "query";
+//		args[1] = "temporal";
 		// TODO Auto-generated method stub
 		if (args.length == 2) {
 			String operation = args[0];
