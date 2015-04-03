@@ -23,7 +23,7 @@ import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.collections.PyramidMonth;
 import org.gistic.taghreed.collections.PyramidWeek;
-import org.gistic.taghreed.diskBaseIndexer.BuildIndex.Level;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 
 /**
  *
@@ -321,11 +321,11 @@ public class BuildPyramidIndex {
 					+ "tweets/Week/index." + hadoopOutputFolder);
 			if (!indexFolder.exists()) {
 				// Create folder in hdfs with hadoopoutputFolder
-				indexer.CreateHdfsFolder(hadoopOutputFolder);
+				indexer.CreateHdfsFolder(hadoopOutputFolder,queryLevel.Week);
 				// Copy data to hdfs under hadoopoutputfolder
 				for (File day : week.getValue()) {
 					indexer.CopytoHdfsFolder(hadoopOutputFolder,
-							day.getAbsolutePath());
+							day.getAbsolutePath(),queryLevel.Week);
 					System.out.println("copy to hdfs : "+day);
 				}
 				// build the index for tweets and copy to local
@@ -446,9 +446,9 @@ public class BuildPyramidIndex {
             //Create folder in hdfs with hadoopoutputFolder
             File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Month/index." + hadoopOutputFolder);
             if (!indexFolder.exists() && !currentMonth.equals(hadoopOutputFolder)) {
-                indexer.CreateHdfsFolder(hadoopOutputFolder);
+                indexer.CreateHdfsFolder(hadoopOutputFolder,queryLevel.Month);
                 for (File day : month.getFiles()) {
-                    indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath());
+                    indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath(),queryLevel.Month);
                 }
                 //build the index for tweets and copy to local
                 indexer.BuildTweetHdfsIndex(hadoopOutputFolder, "Month");

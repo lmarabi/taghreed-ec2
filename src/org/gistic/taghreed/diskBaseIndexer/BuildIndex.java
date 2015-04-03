@@ -16,19 +16,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.servlet.jsp.jstl.core.Config;
 
 import org.apache.commons.compress.compressors.CompressorException;
 import org.gistic.invertedIndex.KWIndexBuilder;
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
-import org.gistic.taghreed.collections.Partition;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 
 /**
  *
@@ -41,10 +36,7 @@ public class BuildIndex {
 	private String tweetFile, hashtagFile;
 	
 
-	public enum Level {
-
-		Day, Week, Month;
-	}
+	
 
 	public BuildIndex(String tweetFile, String hashtagFile) throws IOException {
 		this.config = new Commons();
@@ -148,73 +140,12 @@ public class BuildIndex {
 	 */
 	public synchronized void CreateRtreeTweetIndex() throws IOException,
 			InterruptedException {
-		this.UpdatelookupTable(Level.Day, this.tweetFile);
-		Thread t = new Thread(new BuildIndexThreads("",Level.Day));
+		this.UpdatelookupTable(queryLevel.Day, this.tweetFile);
+		Thread t = new Thread(new BuildIndexThreads("",queryLevel.Day));
 		t.start();
 	}
 
-	/**
-	 * this method build the index of one day crawler
-	 *
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public void CreateRtreeHashtagIndex() throws IOException,
-			InterruptedException {
-		File file = new File(hashtagFile);
-		File tweetFolder = new File(config.getQueryRtreeIndex()
-				+ "hashtags/Day/");
-		if (!tweetFolder.exists()) {
-			tweetFolder.mkdirs();
-		}
-		if (new File(config.getQueryRtreeIndex() + "hashtags/Day/index."
-				+ file.getName()).exists()) {
-			return;
-		}
-		// copy to hdfs
-		command = config.getHadoopDir() + "hadoop fs -copyFromLocal "
-				+ hashtagFile + " " + config.getHadoopHDFSPath();
-
-		commandExecuter(command);
-		// Build index
-		command = config.getHadoopDir()
-				+ "hadoop jar "
-				// + config.getHadoopDir()
-				// + "/"
-				+ config.getShadoopJar()
-				+ " partition -D dfs.block.size="
-				+ (128 * 1024 * 1024)
-				+ " "
-				+ "-libjars "
-				// + config.getHadoopDir()
-				// + "/"
-				+ config.getLibJars() + " " + config.getHadoopHDFSPath()
-				+ file.getName() + " " + config.getHadoopHDFSPath() + "index."
-				+ file.getName().replace(".bz2", "") + " -overwrite  sindex:"
-				+ config.getSpatialIndex() + " "
-				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags "
-				+ " -no-local";
-
-		commandExecuter(command);
-		// Copy to local
-		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
-				+ config.getHadoopHDFSPath() + "index." + file.getName() + " "
-				+ config.getQueryRtreeIndex() + "hashtags/Day/" + "index."
-				+ file.getName().replace(".bz2", "") + "/";
-
-		commandExecuter(command);
-		// remove from hdfs
-		command = config.getHadoopDir() + "hadoop fs -rmr "
-				+ config.getHadoopHDFSPath() + file.getName();
-
-		commandExecuter(command);
-		command = config.getHadoopDir() + "hadoop fs -rmr "
-				+ config.getHadoopHDFSPath() + "index."
-				+ file.getName().replace(".bz2", "");
-
-		commandExecuter(command);
-
-	}
+	
 
 	/**
 	 * This method create folder in hdfs
@@ -223,11 +154,11 @@ public class BuildIndex {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void CreateHdfsFolder(String folderName) throws IOException,
+	public void CreateHdfsFolder(String folderName,queryLevel level) throws IOException,
 			InterruptedException {
 		command = config.getHadoopDir() + "hadoop fs -mkdir "
 				+ config.getHadoopHDFSPath() + folderName;
-		commandExecuter(command);
+		commandExecuter(command,level);
 	}
 
 	/**
@@ -238,11 +169,11 @@ public class BuildIndex {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void CopytoHdfsFolder(String folderName, String fileDir)
+	public void CopytoHdfsFolder(String folderName, String fileDir,queryLevel level)
 			throws IOException, InterruptedException {
 		command = config.getHadoopDir() + "hadoop fs -copyFromLocal " + fileDir
 				+ " " + config.getHadoopHDFSPath() + folderName + "/";
-		commandExecuter(command);
+		commandExecuter(command,level);
 	}
 
 	/**
@@ -278,23 +209,23 @@ public class BuildIndex {
 				+ config.getSpatialIndex() + " "
 				+ "shape:org.gistic.taghreed.spatialHadoop.HashTags"
 				+ "  -no-local";
-		commandExecuter(command);
+		commandExecuter(command,queryLevel.valueOf(level));
 		// Copy to local
 		command = config.getHadoopDir() + "hadoop fs -copyToLocal "
 				+ config.getHadoopHDFSPath() + "index." + folderName + " "
 				+ config.getQueryRtreeIndex() + "hashtags/" + level + "/"
 				+ "index." + folderName + "/";
 
-		commandExecuter(command);
+		commandExecuter(command,queryLevel.valueOf(level));
 		// remove from hdfs
 		command = config.getHadoopDir() + "hadoop fs -rmr "
 				+ config.getHadoopHDFSPath() + folderName;
 
-		commandExecuter(command);
+		commandExecuter(command,queryLevel.valueOf(level));
 		command = config.getHadoopDir() + "hadoop fs -rmr "
 				+ config.getHadoopHDFSPath() + "index." + folderName;
 
-		commandExecuter(command);
+		commandExecuter(command,queryLevel.valueOf(level));
 
 	}
 
@@ -308,8 +239,8 @@ public class BuildIndex {
 	 */
 	public void BuildTweetHdfsIndex(String folderName, String level)
 			throws IOException, InterruptedException {
-		this.UpdatelookupTable(Level.valueOf(level), folderName);
-		Thread t = new Thread(new BuildIndexThreads(folderName,Level.valueOf(level)));
+		this.UpdatelookupTable(queryLevel.valueOf(level), folderName);
+		Thread t = new Thread(new BuildIndexThreads(folderName,queryLevel.valueOf(level)));
 		t.start();
 		
 	}
@@ -321,7 +252,7 @@ public class BuildIndex {
 	 * @param level
 	 * @throws IOException
 	 */
-	public void UpdatelookupTable(Level level,String IndexName) throws IOException {
+	public void UpdatelookupTable(queryLevel level,String IndexName) throws IOException {
 		UpdatelookupTable("tweets", level, config.getQueryRtreeIndex(),IndexName);
 		// UpdatelookupTable("hashtags", level, config.getQueryRtreeIndex());
 		// UpdatelookupTable("tweets", level, config.getQueryInvertedIndex());
@@ -329,7 +260,7 @@ public class BuildIndex {
 
 	}
 
-	private void UpdatelookupTable(String type, Level level, String directory,String IndexName)
+	private void UpdatelookupTable(String type, queryLevel level, String directory,String IndexName)
 			throws IOException {
 		
 		System.out.println("Update lookupTable Type:" + type + " level:"
@@ -403,17 +334,17 @@ public class BuildIndex {
 
 	
 
-	public static void commandExecuter(String command) throws IOException,
+	public static void commandExecuter(String command,queryLevel level) throws IOException,
 			InterruptedException {
 		System.out.println(command);
 		Process myProcess = Runtime.getRuntime().exec(command);
 
 		StreamGobbler errorGobbler = new StreamGobbler(
-				myProcess.getErrorStream(), System.out);
+				myProcess.getErrorStream(), System.out,level);
 
 		// Any output?
 		StreamGobbler outputGobbler = new StreamGobbler(
-				myProcess.getInputStream(), System.err);
+				myProcess.getInputStream(), System.err,level);
 
 		errorGobbler.start();
 		outputGobbler.start();
@@ -447,10 +378,10 @@ public class BuildIndex {
 
 	class BuildIndexThreads implements Runnable {
 		String fileName;
-		Level level;
+		queryLevel level;
 		OutputStreamWriter writer;
 
-		public BuildIndexThreads(String fileName,Level level) throws UnsupportedEncodingException, FileNotFoundException {
+		public BuildIndexThreads(String fileName,queryLevel level) throws UnsupportedEncodingException, FileNotFoundException {
 			this.level = level;
 			this.fileName = fileName;
 //			this.writer =  new OutputStreamWriter(
@@ -461,7 +392,7 @@ public class BuildIndex {
 		@Override
 		public void run() {
 			try {
-				if(level.equals(Level.Day)){
+				if(level.equals(queryLevel.Day)){
 					File file = new File(tweetFile);
 					File tweetFolder = new File(config.getQueryRtreeIndex() + "tweets/Day/");
 					if (!tweetFolder.exists()) {
@@ -474,27 +405,29 @@ public class BuildIndex {
 					// copy to hdfs
 					command = config.getHadoopDir() + "hadoop fs -copyFromLocal "
 							+ tweetFile + " " + config.getHadoopHDFSPath();
-					commandExecuter(command);
+					commandExecuter(command,level);
 					// Build index
 					command = config.getHadoopDir()
 							+ "hadoop jar "
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getShadoopJar()
-							+ " partition -D dfs.block.size="
+							+ " partition "
+							+ config.getEc2AccessCode()
+							+ " -D dfs.block.size="
 							+ (128 * 1024 * 1024)
 							+ " "
 							+ "-libjars "
 							// + config.getHadoopDir()
 							// + "/"
-							+ config.getLibJars() + " " + config.getHadoopHDFSPath()
+							+ config.getLibJars() + " " + config.getS3Dir()
 							+ file.getName() + " " + config.getHadoopHDFSPath() + "Day/index."
 							+ file.getName().replace(".bz2", "") + " -overwrite  sindex:"
 							+ config.getSpatialIndex() + " shape:"
 							+ "org.gistic.taghreed.spatialHadoop.Tweets" + "  -no-local";
 
 					long starttime = System.currentTimeMillis();
-					commandExecuter(command);
+					commandExecuter(command,level);
 					long endtime = System.currentTimeMillis() - starttime;
 					synchronized(this){
 						this.writer = new OutputStreamWriter(
@@ -534,19 +467,21 @@ public class BuildIndex {
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getShadoopJar()
-							+ " partition -D dfs.block.size="
+							+ " partition "
+							+ config.getEc2AccessCode()
+							+ " -D dfs.block.size="
 							+ (128 * 1024 * 1024)
 							+ " "
 							+ "-libjars "
 							// + config.getHadoopDir()
 							// + "/"
-							+ config.getLibJars() + " " + config.getHadoopHDFSPath()
+							+ config.getLibJars() + " " + config.getS3Dir()
 							+ this.fileName + " " + config.getHadoopHDFSPath() + level+"/index."
 							+ this.fileName + " -overwrite  sindex:"
 							+ config.getSpatialIndex() + " shape:"
 							+ "org.gistic.taghreed.spatialHadoop.Tweets" + "  -no-local";
 					long starttime = System.currentTimeMillis();
-					commandExecuter(command);
+					commandExecuter(command,level);
 					long endtime = System.currentTimeMillis() - starttime;
 					synchronized(this){
 						this.writer = new OutputStreamWriter(
@@ -595,14 +530,15 @@ class StreamGobbler extends Thread {
 	PrintStream os;
 	OutputStreamWriter writer;
 
-	StreamGobbler(InputStream is, PrintStream os) throws UnsupportedEncodingException, FileNotFoundException {
+	StreamGobbler(InputStream is, PrintStream os,queryLevel level) throws UnsupportedEncodingException, FileNotFoundException {
 		this.is = is;
 		this.os = os;
 		this.writer = new OutputStreamWriter(
 				new FileOutputStream(
 						System.getProperty("user.dir")
-								+ "/outstream.log", true),
+								+ "/IndexTime_"+level.toString()+".log", true),
 				"UTF-8");
+		
 	}
 
 	public void run() {
@@ -619,16 +555,6 @@ class StreamGobbler extends Thread {
 		}catch (IOException ioe) {
 			//handel error.
 		}
-		
-		
-		
-//		try {
-//			int c;
-//			while ((c = is.read()) != -1)
-//				os.print((char) c);
-//		} catch (IOException x) {
-//			// handle error
-//		}
 		
 	}
 }

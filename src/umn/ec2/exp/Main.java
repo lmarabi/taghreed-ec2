@@ -78,8 +78,9 @@ public class Main {
 	 * @throws InterruptedException 
 	 */
 	private static void temporalRangeQueryExpr() throws FileNotFoundException, IOException, ParseException, InterruptedException{
+		Responder respondHandler = new Responder();
 		ServerRequest req = new ServerRequest();
-		req.setStartDate("2014-04-27");
+		req.setStartDate("2014-03-01");
 		req.setEndDate("2014-04-27");
 		req.setType(queryType.tweet);
 		req.setIndex(queryIndex.rtree);
@@ -90,7 +91,11 @@ public class Main {
 		MBR mbr = new MBR(new Point(maxlat, maxlon), new Point(minlat, minlon));
 		req.setMBR(mbr);
 		Queryoptimizer queryExec = new Queryoptimizer(req);
+		queryExec.addHandler(respondHandler);
+		queryExec.setExpName("temporalExp1");
 		queryExec.executeQuery();
+		System.out.println("Main>>>> "+respondHandler.getExecutionTimes());
+		
 		
 	}
 

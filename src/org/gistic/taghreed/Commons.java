@@ -39,6 +39,10 @@ public class Commons {
     
     public static String spatialIndex;
     
+    public static String ec2AccessCode;
+    
+    public static String S3Dir;
+    
 
     public Commons() throws IOException {
         this.loadConfigFile();
@@ -161,6 +165,15 @@ public class Commons {
 		return spatialIndex;
 	}
     
+    public static String getEc2AccessCode() {
+		return ec2AccessCode;
+	}
+    
+    public static String getS3Dir() {
+		return S3Dir;
+	}
+    
+    
     private void loadConfigFile() throws IOException {
 
         Properties prop = new Properties();
@@ -180,7 +193,9 @@ public class Commons {
         Commons.queryInvertedIndex = prop.getProperty("queryInvertedIndex");
         Commons.queryRtreeIndex = prop.getProperty("queryRtreeIndex");
         Commons.tweetFlushDir = prop.getProperty("tweetFlushDir");
-        Commons.spatialIndex = prop.getProperty("shape");
+        Commons.spatialIndex = prop.getProperty("spatialIndex");
+        Commons.ec2AccessCode = prop.getProperty("ec2AccessCode");
+        Commons.S3Dir = prop.getProperty("S3Dir");
         System.out.println("Config file Loaded");
 
 

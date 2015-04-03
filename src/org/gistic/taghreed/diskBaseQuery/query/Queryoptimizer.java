@@ -4,35 +4,31 @@
  */
 package org.gistic.taghreed.diskBaseQuery.query;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.RunningJob;
 import org.gistic.taghreed.Commons;
-import org.gistic.taghreed.collections.TopTweetResult;
-import org.gistic.taghreed.collections.Tweet;
+import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.collections.TweetVolumes;
 import org.gistic.taghreed.collections.Week;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
-import org.gistic.taghreed.diskBaseQueryOptimizer.GridCell;
-import org.gistic.taghreed.spatialHadoop.Tweets;
 
-import edu.umn.cs.spatialHadoop.OperationsParams;
+import umn.ec2.exp.Initiater;
+import umn.ec2.exp.Responder;
 import edu.umn.cs.spatialHadoop.core.Rectangle;
-import edu.umn.cs.spatialHadoop.core.ResultCollector;
-import edu.umn.cs.spatialHadoop.core.Shape;
-import edu.umn.cs.spatialHadoop.operations.RangeQuery;
-import edu.umn.cs.spatialHadoop.operations.RangeQuery.RangeQueryMap;
-import edu.umn.cs.spatialHadoop.osm.OSMPolygon;
 
 /**
  *
@@ -46,6 +42,8 @@ public class Queryoptimizer {
     public static List<TweetVolumes> dayVolume;
     private static ServerRequest serverRequest;
     private static Commons conf;
+    private static Initiater trigger;
+    private static String expName;
 
     public Queryoptimizer(ServerRequest serverRequest) throws IOException, FileNotFoundException, ParseException {
         this.serverRequest = serverRequest;
@@ -53,7 +51,17 @@ public class Queryoptimizer {
         dayrequest = new QueryExecutor(serverRequest);
         lookup = serverRequest.getLookup();
         conf = new Commons();
-
+        this.trigger = new Initiater();
+        this.expName = "";
+    }
+    
+    
+    public void setExpName(String Name){
+    	this.expName = Name;
+    }
+    
+    public void addHandler(Responder handler){
+    	this.trigger.addListener(handler);
     }
 
     /**
@@ -63,11 +71,7 @@ public class Queryoptimizer {
     public long executeQuery() throws FileNotFoundException,
             UnsupportedEncodingException, IOException, ParseException, InterruptedException {
         boolean queryTail = false;
-        List<RunningJob> rangeJobs = new ArrayList<RunningJob>();
-        Rectangle mbr = new Rectangle(serverRequest.getMbr().getMin().getLat(),
-				serverRequest.getMbr().getMin().getLon(), serverRequest
-						.getMbr().getMax().getLat(), serverRequest.getMbr()
-						.getMax().getLon());
+        List<Thread> threads = new ArrayList<Thread>();
         double startTime = System.currentTimeMillis();
         //Query From Months
         Map<String, String> indexMonths = lookup.getTweetsMonthsIndex(serverRequest.getStartDate(), serverRequest.getEndDate());
@@ -78,7 +82,7 @@ public class Queryoptimizer {
             Map.Entry entry = (Map.Entry) it.next();
             System.out.println("#Start Reading index of " + entry.getKey().toString());
             months.add(entry.getKey().toString());
-            rangeJobs.add(executeRangeQuery(mbr, getindexPath(entry.getKey().toString(),queryLevel.Month)));
+           threads.add(executeRangeQuery(serverRequest.getMbr(), entry.getKey().toString(),queryLevel.Month));
         }
             Map<Week, String> index = lookup.getTweetsWeekIndex(serverRequest.getStartDate(),serverRequest.getEndDate(),months);
             System.out.println("#number of Weeks found: " + index.size());
@@ -89,7 +93,7 @@ public class Queryoptimizer {
                 Week week = (Week) entry.getKey();
                 System.out.println("#Start Reading Week " + week.getWeekName());
                 weeks.add(week.getWeekName());
-                rangeJobs.add(executeRangeQuery(mbr, getindexPath(entry.getKey().toString(),queryLevel.Week)));
+                threads.add(executeRangeQuery(serverRequest.getMbr(),entry.getKey().toString(),queryLevel.Week));
             }
             //Query missing days in head week
             Map<String, String> indexDays = lookup.getTweetsDayIndex(serverRequest.getStartDate(),serverRequest.getEndDate(),weeks,months);
@@ -98,22 +102,28 @@ public class Queryoptimizer {
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 System.out.println("#Start Reading index of " + entry.getKey().toString());
-                rangeJobs.add(executeRangeQuery(mbr, getindexPath(entry.getKey().toString(),queryLevel.Day)));
+                threads.add(executeRangeQuery(serverRequest.getMbr(), entry.getKey().toString(),queryLevel.Day));
             }
          
-        
-
-        for(RunningJob j : rangeJobs){
-        	j.waitForCompletion();
+        for(Thread t : threads){
+        	t.join();
         }
+        
         double endTime = System.currentTimeMillis();
         System.out.println("query time = " + (endTime - startTime) + " ms");
         return 0;
 
     }
     
-    private String getindexPath(String index,queryLevel level){
-    	return this.conf.getHadoopHDFSPath()+level.toString()+"/index."+index;
+    private String getCommand(MBR mbr,String index,queryLevel level){
+    	String ec2AccessCode = this.conf.getEc2AccessCode();
+    	String indexDir=  this.conf.getHadoopHDFSPath()+level.toString()+"/index."+index;
+    	String shape = "org.gistic.taghreed.spatialHadoop.Tweets";
+    	Rectangle rectangle = new Rectangle(mbr.getMin().getLat(),
+    			mbr.getMin().getLon(), mbr.getMax().getLat(), mbr.getMax().getLon());
+    	String rect =  "rect:"+rectangle.x1+","+rectangle.y1+","+rectangle.x2+","+rectangle.y2;
+    	String cmd =  this.conf.getHadoopDir()+"hadoop jar " + this.conf.getShadoopJar() +" rangequery "+ "-libjars "+this.conf.getLibJars()+" "+ec2AccessCode+" "+indexDir+" "+rect+" shape:"+shape+"  -no-local";
+    	return cmd;
     }
     
     /**
@@ -124,14 +134,54 @@ public class Queryoptimizer {
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
-	private static RunningJob executeRangeQuery(Rectangle mbr, String path)
-			throws IllegalArgumentException, IOException {
-		long count;
-		OperationsParams operationsParams = new OperationsParams();
-		operationsParams.setClass("shape", Tweets.class, Shape.class);
-		operationsParams.setShape(operationsParams, "rect", mbr);
-		RunningJob job = RangeQuery.rangeQueryMapReduce(new Path(path), null, operationsParams);
-		return job;
+	private Thread executeRangeQuery(MBR mbr, String index,queryLevel level) {
+		String command = getCommand(mbr,index,level);
+		Thread t = new Thread(new rangeQueryHDFS(command));
+		t.start();
+		return t;
+		
+	}
+	
+	public static void commandExecuter(String command) throws IOException,
+			InterruptedException {
+		System.out.println(command);
+		Process myProcess = Runtime.getRuntime().exec(command);
+
+		StreamGobbler errorGobbler = new StreamGobbler(
+				myProcess.getErrorStream(), System.out,trigger,expName);
+
+		// Any output?
+		StreamGobbler outputGobbler = new StreamGobbler(
+				myProcess.getInputStream(), System.err,trigger,expName);
+
+		errorGobbler.start();
+		outputGobbler.start();
+
+		// Any error
+		int exitVal = myProcess.waitFor();
+		errorGobbler.join(); // Handle condition where the
+		outputGobbler.join(); // process ends before the threads finish
+	}
+	
+	
+	class rangeQueryHDFS implements Runnable{
+		String command;
+		
+		
+		public rangeQueryHDFS(String command) {
+			this.command = command;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				commandExecuter(command);
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 	}
     
     
@@ -157,4 +207,44 @@ public class Queryoptimizer {
 //            System.out.println(result.get(i).dayName + "-" + result.get(i).volume);
 //        }
     }
+}
+
+
+class StreamGobbler extends Thread {
+	InputStream is;
+	PrintStream os;
+	OutputStreamWriter writer;
+	Initiater trigger;
+
+	StreamGobbler(InputStream is, PrintStream os,Initiater trigger,String exprName) throws UnsupportedEncodingException, FileNotFoundException {
+		this.is = is;
+		this.os = os;
+		this.writer = new OutputStreamWriter(
+				new FileOutputStream(
+						System.getProperty("user.dir")
+								+ "/"+exprName+".log", true),
+				"UTF-8");
+		this.trigger = trigger;
+		
+	}
+
+	public void run() {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(is));
+			 String line = null;
+			 while ((line = reader.readLine()) != null) {
+				 os.println(line);
+				 writer.write(line+"\n");
+				 writer.flush();
+				 if(line.contains("Time")){
+					 this.trigger.notifyExecutionTime(line);
+				 }
+			 }
+			 writer.close();
+		}catch (IOException ioe) {
+			//handel error.
+		}
+		
+	}
 }
