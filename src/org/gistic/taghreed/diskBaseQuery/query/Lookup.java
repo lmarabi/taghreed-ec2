@@ -376,8 +376,15 @@ public class Lookup {
 		cstart.setTime(start);
 		weekdate.setTime(start);
 		cend.setTime(end);
+		
 		Map<Week, String> result = new HashMap<Week, String>();
 		List<String> intermediateResult = new ArrayList<String>();
+		if(startDate.equals(endDate)){
+			String weekofDay = weekdate.get(Calendar.YEAR) + "-"
+					+ (weekdate.get(Calendar.MONTH) + 1) + "-"
+					+ weekdate.get(Calendar.WEEK_OF_MONTH);
+			intermediateResult.add(weekofDay);
+		}
 		while (!(weekdate.get(Calendar.YEAR) == cend.get(Calendar.YEAR)
 				&& (weekdate.get(Calendar.MONTH) == cend.get(Calendar.MONTH)) && (weekdate
 					.get(Calendar.DATE) == cend.get(Calendar.DATE)))) {

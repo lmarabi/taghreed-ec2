@@ -171,6 +171,13 @@ public class BuildIndex {
 		commandExecuter(command,level);
 	}
 
+	public void removeDistcpFolders(String path, queryLevel level)
+			throws IOException, InterruptedException {
+		command = config.getHadoopDir() + "hadoop fs -rmr "
+				+ config.getHadoopHDFSPath() + path + "_distcp*";
+		commandExecuter(command, level);
+	}
+
 	/**
 	 * This copy file in hdfs under the given folder name
 	 *
@@ -210,7 +217,7 @@ public class BuildIndex {
 				// + "/"
 				+ config.getShadoopJar()
 				+ " partition -D dfs.block.size="
-				+ (128 * 1024 * 1024)
+				+ (64 * 1024 * 1024)
 				+ " "
 				+ "-libjars "
 				// + config.getHadoopDir()
@@ -249,10 +256,10 @@ public class BuildIndex {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void BuildTweetHdfsIndex(String folderName, String level)
+	public void BuildTweetHdfsIndex(String folderName, queryLevel level)
 			throws IOException, InterruptedException {
-		this.UpdatelookupTable(queryLevel.valueOf(level), folderName);
-		Thread t = new Thread(new BuildIndexThreads(folderName,queryLevel.valueOf(level)));
+		this.UpdatelookupTable(level, folderName);
+		Thread t = new Thread(new BuildIndexThreads(folderName,level));
 		t.start();
 		
 	}
@@ -439,12 +446,12 @@ public class BuildIndex {
 							+ " "+indexCommand+" "
 							+ config.getEc2AccessCode()
 							+ " -D dfs.block.size="
-							+ (128 * 1024 * 1024)
+							+ (64 * 1024 * 1024)
 							+ " "
 							+ "-libjars "
 							// + config.getHadoopDir()
 							// + "/"
-							+ config.getLibJars() + " " + config.getS3Dir()
+							+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 							+ file.getName() + " " + config.getHadoopHDFSPath() + "Day/index."
 							+ file.getName().replace(".bz2", "") + " -overwrite  sindex:"
 							+ config.getSpatialIndex() + " shape:"
@@ -470,11 +477,11 @@ public class BuildIndex {
 //							+ file.getName().replace(".bz2", "") + "/";
 //
 //					commandExecuter(command);
-//					// remove from hdfs
+					// remove from hdfs
 //					command = config.getHadoopDir() + "hadoop fs -rmr "
 //							+ config.getHadoopHDFSPath() + file.getName();
-//
-//					commandExecuter(command);
+
+//					commandExecuter(command,level);
 //					command = config.getHadoopDir() + "hadoop fs -rmr "
 //							+ config.getHadoopHDFSPath() + "index."
 //							+ file.getName().replace(".bz2", "");
@@ -494,12 +501,12 @@ public class BuildIndex {
 							+ " "+indexCommand+" "
 							+ config.getEc2AccessCode()
 							+ " -D dfs.block.size="
-							+ (128 * 1024 * 1024)
+							+ (64 * 1024 * 1024)
 							+ " "
 							+ "-libjars "
 							// + config.getHadoopDir()
 							// + "/"
-							+ config.getLibJars() + " " + config.getS3Dir()
+							+ config.getLibJars() + " " + config.getHadoopHDFSPath()
 							+ this.fileName + " " + config.getHadoopHDFSPath() + level+"/index."
 							+ this.fileName + " -overwrite  sindex:"
 							+ config.getSpatialIndex() + " shape:"

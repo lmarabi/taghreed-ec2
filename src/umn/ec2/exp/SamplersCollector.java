@@ -10,12 +10,12 @@ public class SamplersCollector implements TimeListener {
 	public void reportTime(String result) {
 		sample.add(getRectangle(result));
 //		this.executionTimes.add(Integer.parseInt(token[token.length-2]));
-		System.out.println(result);
+//		System.out.println(result);
 	}
 	
 	private String getRectangle(String point){
 		
-		double area_ratio = (double)0.01/1000;
+		double area_ratio = (double)0.0001/1000;
 		String[] token = point.split(",");
 		double x = Double.parseDouble(token[0]);
 		double y = Double.parseDouble(token[1]);

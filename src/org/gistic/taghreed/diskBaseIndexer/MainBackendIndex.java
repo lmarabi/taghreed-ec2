@@ -118,6 +118,12 @@ public class MainBackendIndex {
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.createRtreeTweetMonths();
 	}
+	
+	
+	public static void indexWholeOneIndex() throws IOException, InterruptedException{
+		BuildPyramidIndex index = new BuildPyramidIndex();
+		index.createWholeDataIndex();
+	}
 
 	public void run(String args[]) throws FileNotFoundException, IOException,
 			CompressorException {

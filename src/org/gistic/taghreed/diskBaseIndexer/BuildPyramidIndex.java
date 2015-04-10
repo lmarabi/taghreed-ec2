@@ -324,12 +324,14 @@ public class BuildPyramidIndex {
 				indexer.CreateHdfsFolder(hadoopOutputFolder,queryLevel.Week);
 				// Copy data to hdfs under hadoopoutputfolder
 				for (File day : week.getValue()) {
+					System.out.println("copy to hdfs : "+day);
 					indexer.CopytoHdfsFolder(hadoopOutputFolder,
 							day.getAbsolutePath(),queryLevel.Week);
-					System.out.println("copy to hdfs : "+day);
+					
 				}
+				indexer.removeDistcpFolders(hadoopOutputFolder+"/", queryLevel.Week);
 				// build the index for tweets and copy to local
-				indexer.BuildTweetHdfsIndex(hadoopOutputFolder, "Week");
+				indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Week);
 				System.out.println("Build the index of "+ week.getKey());
 			}
 
@@ -409,6 +411,16 @@ public class BuildPyramidIndex {
         Collections.sort(resultList);
         return resultList;
     }
+    
+    public void createWholeDataIndex() throws IOException, InterruptedException{
+    	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
+    	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
+    	for(File f : outputFiles){
+    		indexer.CopytoHdfsFolder("all/", f.getAbsolutePath(),queryLevel.Whole);
+    	}
+    	indexer.removeDistcpFolders("all/", queryLevel.Whole);
+    	indexer.BuildTweetHdfsIndex("all/", queryLevel.Whole);
+    }
 
     public void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
         System.out.println("Create Tweets Months Index ");
@@ -451,7 +463,7 @@ public class BuildPyramidIndex {
                     indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath(),queryLevel.Month);
                 }
                 //build the index for tweets and copy to local
-                indexer.BuildTweetHdfsIndex(hadoopOutputFolder, "Month");
+                indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Month);
             } else {
                 System.out.println("Index exist " + hadoopOutputFolder);
             }

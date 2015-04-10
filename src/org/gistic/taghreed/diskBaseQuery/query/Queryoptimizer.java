@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.basicgeom.MBR;
 import org.gistic.taghreed.collections.TweetVolumes;
@@ -45,6 +46,7 @@ public class Queryoptimizer {
 	private static Commons conf;
 	private static Initiater trigger;
 	private static String expName;
+	static OutputStreamWriter writerTime;
 
 	public Queryoptimizer(ServerRequest serverRequest) throws IOException,
 			FileNotFoundException, ParseException {
@@ -55,6 +57,9 @@ public class Queryoptimizer {
 		conf = new Commons();
 		this.trigger = new Initiater();
 		this.expName = "";
+		this.writerTime = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
+		this.writerTime.write("startTime,endTime,q-multi,q-month,q-week,q-day,query-plan(Month-Week-Day)");
 	}
 
 	public void setExpName(String Name) {
@@ -107,9 +112,7 @@ public class Queryoptimizer {
 	public long executeQuery() throws FileNotFoundException,
 			UnsupportedEncodingException, IOException, ParseException,
 			InterruptedException {
-		OutputStreamWriter writer = new OutputStreamWriter(
-				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
-		writer.write("startTime,endTime,q-multi,q-month,q-week,q-day,query-plan");
+		
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		boolean queryTail = false;
@@ -173,17 +176,19 @@ public class Queryoptimizer {
 				+"\n Plan: Months:"+months.size()+" Week:"+weeks.size()+" Day:"+ indexDays.size()
 				+"\n Execution: Months:"+monthCost+" Week:"+weekCost+" Day:"+ daysCost
 				+"\n*****************************************************");
-		writer.write("\n"+serverRequest.getStartDate()
+		writerTime.write("\n"+serverRequest.getStartDate()
 				+","+serverRequest.getEndDate()
 				+","+multiCost
 				+","+monthCost+","+weekCost+","+daysCost
 				+","+months.size()+"-"+weeks.size()+"-"+ indexDays.size());
-		writer.flush();
-		writer.close();
+		writerTime.flush();
 		return 0;
 
 	}
 	
+	public static void closewriter() throws IOException{
+		writerTime.close();
+	}
 	/**
 	 * This query from days level only
 	 * @return

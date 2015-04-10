@@ -23,8 +23,8 @@ public class Main {
 	public static void main(String[] args) throws IOException,
 			InterruptedException, ParseException {
 //		args = new String[2];
-//		args[0] = "query";
-//		args[1] = "temporal";
+//		args[0] = "index";
+//		args[1] = "week";
 		// TODO Auto-generated method stub
 		if (args.length == 2) {
 			String operation = args[0];
@@ -32,19 +32,22 @@ public class Main {
 			if (operation.equals("index")) {
 				System.out.println("Indexing operation is running Now");
 				OutputStreamWriter writer = new OutputStreamWriter(
-						new FileOutputStream(System.getProperty("user.dir") + "/"+ "IndexOperation_time.log", true), "UTF-8");
+						new FileOutputStream(System.getProperty("user.dir") + "/"+ "IndexOperation_time.log", false), "UTF-8");
 				MainBackendIndex indexOp = new MainBackendIndex();
 				Responder respondHandler = new Responder();
 				indexOp.setHandler(respondHandler);
 				if (level.equals("day")) {
 					indexOp.indexDayLevel();
-					writer.write("day,"+respondHandler.getTotalExecutionTimes());
+					writer.write("\nday,"+respondHandler.getTotalExecutionTimes());
 				} else if (level.equals("week")) {
 					indexOp.indexWeekLevel();
-					writer.write("week,"+respondHandler.getTotalExecutionTimes());
-				} else {
+					writer.write("\nweek,"+respondHandler.getTotalExecutionTimes());
+				} else if(level.equals("month")){
 					indexOp.indexMonthLevel();
-					writer.write("month,"+respondHandler.getTotalExecutionTimes());
+					writer.write("\nmonth,"+respondHandler.getTotalExecutionTimes());
+				}else{
+					indexOp.indexWholeOneIndex();
+					writer.write("\nallIndex,"+respondHandler.getTotalExecutionTimes());
 				}
 				writer.close();
 
@@ -100,7 +103,7 @@ public class Main {
 //		double minlon = -93.3176528416748;
 //		MBR mbr = new MBR(new Point(maxlat, maxlon), new Point(minlat, minlon));
 //		req.setMBR(mbr);
-		req.setNumSamples(1);
+		req.setNumSamples(20);
 		/*
 		 * Read A sample from Index 
 		 * */
@@ -115,6 +118,8 @@ public class Main {
 		
 		String startTime = "2014-05-01";
 		String endTime = "2014-05-";
+		queryExec = new Queryoptimizer(req);
+		queryExec.setExpName("temporalExp1");
 		for(int i=1 ; i<31; i++){
 			if(i < 10){
 				endTime = "2014-05-0"+i;
@@ -123,8 +128,6 @@ public class Main {
 			}
 			req.setStartDate(startTime);
 			req.setEndDate(endTime);
-			queryExec = new Queryoptimizer(req);
-			queryExec.setExpName("temporalExp1");
 			queryExec.executeQuery();
 			
 		}

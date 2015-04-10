@@ -64,7 +64,7 @@ public class ServerRequest {
 	
 	public enum queryLevel {
 
-		Day,Week,Month
+		Day,Week,Month,Whole
 	};
 
 	public ServerRequest() throws FileNotFoundException, IOException,
