@@ -18,8 +18,6 @@ public class Initiater {
  }
 
  public void notifyExecutionTime(String time) {
-     System.out.println("Hello!!");
-
      // Notify everybody that may be interested.
      for (TimeListener hl : listeners)
          hl.reportTime(time);

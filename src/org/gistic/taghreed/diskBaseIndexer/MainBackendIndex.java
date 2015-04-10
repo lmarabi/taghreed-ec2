@@ -15,7 +15,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.compress.compressors.CompressorException;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.gistic.taghreed.Commons;
+
+import umn.ec2.exp.Initiater;
+import umn.ec2.exp.Responder;
 
 /**
  *
@@ -27,6 +31,7 @@ public class MainBackendIndex {
 	private static Commons config;
 	private static BuildIndex indexer;
 	private BuildPyramidIndex pyramidIndexer;
+	private static Responder handler;
 
 	public MainBackendIndex(String tweetsFile, String hashtagsFile)
 			throws IOException {
@@ -47,6 +52,11 @@ public class MainBackendIndex {
 		this.indexer = new BuildIndex();
 		this.indexer.setTweetFile(this.tweetsFile);
 	}
+	
+	public void setHandler(Responder handler) {
+		this.handler = handler;
+	}
+	
 	
 	/***
 	 * Invoke this methods by -index day
@@ -74,6 +84,7 @@ public class MainBackendIndex {
 		for (int i = 0; i < sortedtweetsFile.size(); i++) {
 			try {
 				BuildIndex indexer = new BuildIndex();
+				indexer.setTrigger(handler);
 				indexer.setTweetFile(sortedtweetsFile.get(i));
 				System.out.println("indexing: "+sortedtweetsFile.get(i));
 				indexer.CreateRtreeTweetIndex();

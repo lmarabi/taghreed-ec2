@@ -1,7 +1,9 @@
 package umn.ec2.exp;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.ParseException;
 
 import org.gistic.taghreed.basicgeom.MBR;
@@ -29,14 +31,22 @@ public class Main {
 			String level = args[1];
 			if (operation.equals("index")) {
 				System.out.println("Indexing operation is running Now");
+				OutputStreamWriter writer = new OutputStreamWriter(
+						new FileOutputStream(System.getProperty("user.dir") + "/"+ "IndexOperation_time.log", true), "UTF-8");
 				MainBackendIndex indexOp = new MainBackendIndex();
+				Responder respondHandler = new Responder();
+				indexOp.setHandler(respondHandler);
 				if (level.equals("day")) {
 					indexOp.indexDayLevel();
+					writer.write("day,"+respondHandler.getTotalExecutionTimes());
 				} else if (level.equals("week")) {
 					indexOp.indexWeekLevel();
+					writer.write("week,"+respondHandler.getTotalExecutionTimes());
 				} else {
 					indexOp.indexMonthLevel();
+					writer.write("month,"+respondHandler.getTotalExecutionTimes());
 				}
+				writer.close();
 
 			} else if (operation.equals("query")) {
 				System.out.println("Query operation is running Now");
@@ -78,25 +88,48 @@ public class Main {
 	 * @throws InterruptedException 
 	 */
 	private static void temporalRangeQueryExpr() throws FileNotFoundException, IOException, ParseException, InterruptedException{
-		Responder respondHandler = new Responder();
+		SamplersCollector sampleHandler = new SamplersCollector();
 		ServerRequest req = new ServerRequest();
-		req.setStartDate("2014-03-01");
-		req.setEndDate("2014-04-27");
+		req.setStartDate("2014-05-01");
+		req.setEndDate("2014-05-31");
 		req.setType(queryType.tweet);
 		req.setIndex(queryIndex.rtree);
-		double maxlon = -93.18933596240234;
-		double minlat = 44.94941027490235;
-		double maxlat = 45.01670153466797;
-		double minlon = -93.3176528416748;
-		MBR mbr = new MBR(new Point(maxlat, maxlon), new Point(minlat, minlon));
-		req.setMBR(mbr);
+//		double maxlon = -93.18933596240234;
+//		double minlat = 44.94941027490235;
+//		double maxlat = 45.01670153466797;
+//		double minlon = -93.3176528416748;
+//		MBR mbr = new MBR(new Point(maxlat, maxlon), new Point(minlat, minlon));
+//		req.setMBR(mbr);
+		req.setNumSamples(1);
+		/*
+		 * Read A sample from Index 
+		 * */
 		Queryoptimizer queryExec = new Queryoptimizer(req);
-		queryExec.addHandler(respondHandler);
-		queryExec.setExpName("temporalExp1");
-		queryExec.executeQuery();
-		System.out.println("Main>>>> "+respondHandler.getExecutionTimes());
+		queryExec.setExpName("TakeSamples");
+		queryExec.addSampleHandler(sampleHandler);
+		queryExec.readSamplesMBR();
+		req.setRect(sampleHandler.getSamples());
+		/*
+		 * Now Execute the Range Query
+		 * */
 		
+		String startTime = "2014-05-01";
+		String endTime = "2014-05-";
+		for(int i=1 ; i<31; i++){
+			if(i < 10){
+				endTime = "2014-05-0"+i;
+			}else{
+				endTime = "2014-05-"+i;
+			}
+			req.setStartDate(startTime);
+			req.setEndDate(endTime);
+			queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("temporalExp1");
+			queryExec.executeQuery();
+			
+		}
 		
 	}
+	
 
 }

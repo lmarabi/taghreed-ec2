@@ -20,10 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.compress.compressors.CompressorException;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.gistic.invertedIndex.KWIndexBuilder;
 import org.gistic.invertedIndex.MetaData;
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
+
+import umn.ec2.exp.Initiater;
+import umn.ec2.exp.Responder;
 
 /**
  *
@@ -34,6 +38,7 @@ public class BuildIndex {
 	private Commons config;
 	private String command;
 	private String tweetFile, hashtagFile;
+	private static Initiater trigger;
 	
 
 	
@@ -47,6 +52,11 @@ public class BuildIndex {
 
 	public BuildIndex() throws IOException {
 		this.config = new Commons();
+	}
+	
+	public void setTrigger(Responder handler) {
+		this.trigger = new Initiater();
+		this.trigger.addListener(handler);
 	}
 
 	public void setHashtagFile(String hashtagFile) {
@@ -171,7 +181,9 @@ public class BuildIndex {
 	 */
 	public void CopytoHdfsFolder(String folderName, String fileDir,queryLevel level)
 			throws IOException, InterruptedException {
-		command = config.getHadoopDir() + "hadoop fs -copyFromLocal " + fileDir
+		String[] fileName = fileDir.split("/");
+		command = config.getHadoopDir() + "hadoop distcp " +config.getEc2AccessCode()
+				+" "+config.getS3Dir()+ fileName[fileName.length-1]
 				+ " " + config.getHadoopHDFSPath() + folderName + "/";
 		commandExecuter(command,level);
 	}
@@ -340,11 +352,11 @@ public class BuildIndex {
 		Process myProcess = Runtime.getRuntime().exec(command);
 
 		StreamGobbler errorGobbler = new StreamGobbler(
-				myProcess.getErrorStream(), System.out,level);
+				myProcess.getErrorStream(), System.out,level,trigger);
 
 		// Any output?
 		StreamGobbler outputGobbler = new StreamGobbler(
-				myProcess.getInputStream(), System.err,level);
+				myProcess.getInputStream(), System.err,level,trigger);
 
 		errorGobbler.start();
 		outputGobbler.start();
@@ -392,6 +404,15 @@ public class BuildIndex {
 		@Override
 		public void run() {
 			try {
+				String indexCommand = "index";
+				if(config.getSpatialIndex().equals("str") ||
+						config.getSpatialIndex().equals("str+") || 
+						config.getSpatialIndex().equals("zcurve") ||
+						config.getSpatialIndex().equals("kdtree") ||
+						config.getSpatialIndex().equals("hilbert") || 
+						config.getSpatialIndex().equals("quadtree")){
+					indexCommand = "partition";
+				}
 				if(level.equals(queryLevel.Day)){
 					File file = new File(tweetFile);
 					File tweetFolder = new File(config.getQueryRtreeIndex() + "tweets/Day/");
@@ -403,8 +424,11 @@ public class BuildIndex {
 						return;
 					}
 					// copy to hdfs
-					command = config.getHadoopDir() + "hadoop fs -copyFromLocal "
-							+ tweetFile + " " + config.getHadoopHDFSPath();
+//					command = config.getHadoopDir() + "hadoop fs -copyFromLocal "
+//							+ tweetFile + " " + config.getHadoopHDFSPath();
+					command = config.getHadoopDir() + "hadoop distcp " +config.getEc2AccessCode()
+							+" "+config.getS3Dir()+ file.getName()
+							+ " " + config.getHadoopHDFSPath();
 					commandExecuter(command,level);
 					// Build index
 					command = config.getHadoopDir()
@@ -412,7 +436,7 @@ public class BuildIndex {
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getShadoopJar()
-							+ " partition "
+							+ " "+indexCommand+" "
 							+ config.getEc2AccessCode()
 							+ " -D dfs.block.size="
 							+ (128 * 1024 * 1024)
@@ -467,7 +491,7 @@ public class BuildIndex {
 							// + config.getHadoopDir()
 							// + "/"
 							+ config.getShadoopJar()
-							+ " partition "
+							+ " "+indexCommand+" "
 							+ config.getEc2AccessCode()
 							+ " -D dfs.block.size="
 							+ (128 * 1024 * 1024)
@@ -529,8 +553,9 @@ class StreamGobbler extends Thread {
 	InputStream is;
 	PrintStream os;
 	OutputStreamWriter writer;
+	Initiater trigger;
 
-	StreamGobbler(InputStream is, PrintStream os,queryLevel level) throws UnsupportedEncodingException, FileNotFoundException {
+	StreamGobbler(InputStream is, PrintStream os,queryLevel level,Initiater trigger) throws UnsupportedEncodingException, FileNotFoundException {
 		this.is = is;
 		this.os = os;
 		this.writer = new OutputStreamWriter(
@@ -538,6 +563,7 @@ class StreamGobbler extends Thread {
 						System.getProperty("user.dir")
 								+ "/IndexTime_"+level.toString()+".log", true),
 				"UTF-8");
+		this.trigger = trigger;
 		
 	}
 
@@ -550,6 +576,9 @@ class StreamGobbler extends Thread {
 				 os.println(line);
 				 writer.write(line+"\n");
 				 writer.flush();
+				 if(line.matches("Total indexing time in millis \\d+")){
+					 trigger.notifyExecutionTime(line);
+				 }
 			 }
 			 writer.close();
 		}catch (IOException ioe) {

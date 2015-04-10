@@ -12,11 +12,26 @@ public class Responder implements TimeListener {
 	@Override
 	public void reportTime(String time) {
 		String[] token = time.split(" ");
-		this.executionTimes.add(Integer.parseInt(token[token.length-2]));
-		System.out.println("$$$$$$$$$$$$$$$$$$$$$Execution time:" + token[token.length-2]);
+		Integer t = 0;
+		if(time.matches("Total indexing time in millis \\d+")){
+			t = Integer.parseInt(token[token.length-1]);
+		}else{
+			t = Integer.parseInt(token[token.length-2]);
+		}
+		
+		this.executionTimes.add(t);
+		System.out.println("$$$$$$$$$$$$$$$$$$$$$Execution time:" + t);
 	}
 	
-	public int getExecutionTimes() {
+	public double getAvgExecutionTimes() {
+		int sum = 0;
+		for(int v  : this.executionTimes){
+			sum += v;
+		}
+		return (double)sum/executionTimes.size();
+	}
+	
+	public double getTotalExecutionTimes() {
 		int sum = 0;
 		for(int v  : this.executionTimes){
 			sum += v;

@@ -44,6 +44,8 @@ public class ServerRequest {
 	private String endDate;
 	private String query;
 	private MBR mbr;
+	private String rect;
+	private int numSamples;
 	private queryType type;
 	private queryIndex index;
 	private queryLevel queryResolution;
@@ -92,6 +94,14 @@ public class ServerRequest {
 
 	public queryType getType() {
 		return type;
+	}
+	
+	public void setRect(String rect) {
+		this.rect = rect;
+	}
+	
+	public String getRect() {
+		return rect;
 	}
 
 	/**
@@ -161,6 +171,14 @@ public class ServerRequest {
 	
 	public queryLevel getQueryResolution() {
 		return queryResolution;
+	}
+	
+	public void setNumSamples(int numSamples) {
+		this.numSamples = numSamples;
+	}
+	
+	public int getNumSamples() {
+		return numSamples;
 	}
 	
 //	/**
