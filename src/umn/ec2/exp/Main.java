@@ -48,7 +48,7 @@ public class Main {
 					writer.write("\nmonth,"+cost);
 				}else{
 					cost = indexOp.indexWholeOneIndex();
-					System.out.println(cost);
+					System.out.println("Main ******* : "+ cost);
 					writer.write("\nallIndex,"+cost);
 				}
 				writer.close();

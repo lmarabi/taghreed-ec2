@@ -426,13 +426,15 @@ public class BuildPyramidIndex {
     }
     
     public double createWholeDataIndex() throws IOException, InterruptedException{
-    	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
-    	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
-    	for(File f : outputFiles){
-    		indexer.CopytoHdfsFolder("all/", f.getAbsolutePath(),queryLevel.Whole);
-    	}
-    	indexer.removeDistcpFolders("all/", queryLevel.Whole);
+//    	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
+//    	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
+//    	for(File f : outputFiles){
+//    		indexer.CopytoHdfsFolder("all/", f.getAbsolutePath(),queryLevel.Whole);
+//    	}
+//    	indexer.removeDistcpFolders("all/", queryLevel.Whole);
     	indexer.BuildTweetHdfsIndex("all/", queryLevel.Whole);
+    	System.out.println("BuildPyramid ***** "+this.handlerResponder.getTotalExecutionTimes());
+    	System.out.println("BuildPyramid- BuildIndex ***** "+this.indexer.getReporter().getTotalExecutionTimes());
     	return this.handlerResponder.getTotalExecutionTimes();
     	
     }

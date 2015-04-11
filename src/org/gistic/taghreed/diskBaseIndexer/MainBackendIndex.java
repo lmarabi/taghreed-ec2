@@ -93,7 +93,7 @@ public class MainBackendIndex {
 						Level.SEVERE, null, ex);
 			}
 		}
-		return indexer.getReporter().getTotalExecutionTimes();
+		return handler.getTotalExecutionTimes();
 	}
 	
 	/***
@@ -125,6 +125,7 @@ public class MainBackendIndex {
 	public static double indexWholeOneIndex() throws IOException, InterruptedException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.setHandler(handler);
+		System.out.println("MainBackEndIndex *********** "+handler.getTotalExecutionTimes());
 		return index.createWholeDataIndex();
 	}
 
