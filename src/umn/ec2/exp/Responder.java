@@ -23,6 +23,7 @@ public class Responder implements TimeListener {
 
 			this.executionTimes.add(t);
 			System.out.println("$$$$$$$$$$$$$$$$$$$$$Execution time:" + t);
+			System.out.println("###### Volume in report time: "+this.executionTimes.size());
 		} catch (Exception ex) {
 			// handel error.
 		}
@@ -37,6 +38,7 @@ public class Responder implements TimeListener {
 	}
 
 	public double getTotalExecutionTimes() {
+		System.out.println("###### Volume in getTotlaTime: "+this.executionTimes.size());
 		int sum = 0;
 		for (int v : this.executionTimes) {
 			sum += v;

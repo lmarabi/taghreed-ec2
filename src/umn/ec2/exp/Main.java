@@ -47,6 +47,7 @@ public class Main {
 					writer.write("\nmonth,"+respondHandler.getTotalExecutionTimes());
 				}else{
 					indexOp.indexWholeOneIndex();
+					System.out.println("####### repond Handler Main(): "+respondHandler.getTotalExecutionTimes());
 					writer.write("\nallIndex,"+respondHandler.getTotalExecutionTimes());
 				}
 				writer.close();
