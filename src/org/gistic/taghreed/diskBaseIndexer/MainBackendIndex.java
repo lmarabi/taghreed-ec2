@@ -45,6 +45,7 @@ public class MainBackendIndex {
 	public MainBackendIndex() throws IOException {
 		this.config = new Commons();
 		this.pyramidIndexer = new BuildPyramidIndex();
+		this.indexer = new BuildIndex();
 	}
 
 	public void setTweetsFile(String tweetsFile) throws IOException {
