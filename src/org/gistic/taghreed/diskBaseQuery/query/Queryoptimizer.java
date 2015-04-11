@@ -59,7 +59,7 @@ public class Queryoptimizer {
 		this.expName = "";
 		this.writerTime = new OutputStreamWriter(
 				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
-		this.writerTime.write("startTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
+		this.writerTime.write("\nstartTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
 	}
 
 	public void setExpName(String Name) {
