@@ -39,6 +39,7 @@ public class BuildIndex {
 	private String command;
 	private String tweetFile, hashtagFile;
 	private static Initiater trigger;
+	private static Responder reporter;
 	
 
 	
@@ -56,7 +57,12 @@ public class BuildIndex {
 	
 	public void setTrigger(Responder handler) {
 		this.trigger = new Initiater();
+		this.reporter = handler;
 		this.trigger.addListener(handler);
+	}
+	
+	public static Responder getReporter() {
+		return reporter;
 	}
 
 	public void setHashtagFile(String hashtagFile) {

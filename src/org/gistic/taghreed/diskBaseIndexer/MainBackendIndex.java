@@ -63,7 +63,7 @@ public class MainBackendIndex {
 	 * Invoke this methods by -index day
 	 * @throws IOException
 	 */
-	public static void indexDayLevel() throws IOException{
+	public static double indexDayLevel() throws IOException{
 		config = new Commons();
 		System.out.println(config.getTweetFlushDir());
 		File tweetsFile = new File(config.getTweetFlushDir());
@@ -80,12 +80,11 @@ public class MainBackendIndex {
 			}
 		}
 		Collections.sort(sortedtweetsFile);
-		
+
+		indexer.setTrigger(handler);
 		System.out.println(sortedtweetsFile.size());
 		for (int i = 0; i < sortedtweetsFile.size(); i++) {
 			try {
-				BuildIndex indexer = new BuildIndex();
-				indexer.setTrigger(handler);
 				indexer.setTweetFile(sortedtweetsFile.get(i));
 				System.out.println("indexing: "+sortedtweetsFile.get(i));
 				indexer.CreateRtreeTweetIndex();
@@ -94,7 +93,7 @@ public class MainBackendIndex {
 						Level.SEVERE, null, ex);
 			}
 		}
-		
+		return indexer.getReporter().getTotalExecutionTimes();
 	}
 	
 	/***
@@ -103,10 +102,10 @@ public class MainBackendIndex {
 	 * @throws InterruptedException
 	 * @throws ParseException
 	 */
-	public static void indexWeekLevel() throws IOException, InterruptedException, ParseException{
+	public static double indexWeekLevel() throws IOException, InterruptedException, ParseException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.setHandler(handler);
-		index.CreateRtreeTweetWeekIndex();
+		return index.CreateRtreeTweetWeekIndex();
 	}
 	
 	
@@ -116,17 +115,17 @@ public class MainBackendIndex {
 	 * @throws InterruptedException
 	 * @throws ParseException
 	 */
-	public static void indexMonthLevel() throws IOException, InterruptedException, ParseException{
+	public static double indexMonthLevel() throws IOException, InterruptedException, ParseException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.setHandler(handler);
-		index.createRtreeTweetMonths();
+		return index.createRtreeTweetMonths();
 	}
 	
 	
-	public static void indexWholeOneIndex() throws IOException, InterruptedException{
+	public static double indexWholeOneIndex() throws IOException, InterruptedException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.setHandler(handler);
-		index.createWholeDataIndex();
+		return index.createWholeDataIndex();
 	}
 
 	public void run(String args[]) throws FileNotFoundException, IOException,

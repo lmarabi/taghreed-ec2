@@ -36,6 +36,7 @@ public class BuildPyramidIndex {
 
     //Server directory
 	private Commons config;
+	private static Responder handlerResponder; 
 	
     
     //Local test
@@ -53,6 +54,7 @@ public class BuildPyramidIndex {
     }
     
     public void setHandler(Responder handler) {
+    	this.handlerResponder = handler;
 		this.indexer.setTrigger(handler);
 		
 	}
@@ -311,7 +313,7 @@ public class BuildPyramidIndex {
     /**
      * This method create tweets indexMonth only
      */
-    public void CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
+    public double CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
     	System.out.println("Create Tweets Week Index ");
 		List<File> outputFiles = ListFiles(config.getTweetFlushDir());
 		Collections.sort(outputFiles);
@@ -345,6 +347,8 @@ public class BuildPyramidIndex {
 			}
 
 		}
+		
+		return indexer.getReporter().getTotalExecutionTimes();
     }
     
 	
@@ -421,7 +425,7 @@ public class BuildPyramidIndex {
         return resultList;
     }
     
-    public void createWholeDataIndex() throws IOException, InterruptedException{
+    public double createWholeDataIndex() throws IOException, InterruptedException{
     	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
     	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
     	for(File f : outputFiles){
@@ -429,9 +433,11 @@ public class BuildPyramidIndex {
     	}
     	indexer.removeDistcpFolders("all/", queryLevel.Whole);
     	indexer.BuildTweetHdfsIndex("all/", queryLevel.Whole);
+    	return indexer.getReporter().getTotalExecutionTimes();
+    	
     }
 
-    public void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
+    public double createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -478,6 +484,8 @@ public class BuildPyramidIndex {
             }
 
         }
+        
+        return indexer.getReporter().getTotalExecutionTimes();
     }
 
     /*
