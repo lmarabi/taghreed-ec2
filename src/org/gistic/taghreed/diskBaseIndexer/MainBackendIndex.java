@@ -65,7 +65,7 @@ public class MainBackendIndex {
 	 * @throws InterruptedException 
 	 */
 	public static void indexDayLevel() throws IOException, InterruptedException{
-		List<Thread> threads = new ArrayList<>();
+		List<Thread> threads = new ArrayList<Thread>();
 		config = new Commons();
 		System.out.println(config.getTweetFlushDir());
 		File tweetsFile = new File(config.getTweetFlushDir());
