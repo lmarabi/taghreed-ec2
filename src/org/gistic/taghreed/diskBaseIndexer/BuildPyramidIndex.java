@@ -25,6 +25,9 @@ import org.gistic.taghreed.collections.PyramidMonth;
 import org.gistic.taghreed.collections.PyramidWeek;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 
+import umn.ec2.exp.Initiater;
+import umn.ec2.exp.Responder;
+
 /**
  *
  * @author turtle
@@ -33,6 +36,8 @@ public class BuildPyramidIndex {
 
     //Server directory
 	private Commons config;
+	private static Responder handler;
+	
     
     //Local test
 //    private String hadoopDir = "/home/turtle/workspace/hadoop-1.2.1/";
@@ -47,6 +52,10 @@ public class BuildPyramidIndex {
         this.config = new Commons();
         
     }
+    
+    public static void setHandler(Responder handler) {
+		BuildPyramidIndex.handler = handler;
+	}
     
 
     /**

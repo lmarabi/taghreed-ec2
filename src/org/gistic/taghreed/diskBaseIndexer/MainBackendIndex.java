@@ -104,6 +104,7 @@ public class MainBackendIndex {
 	 */
 	public static void indexWeekLevel() throws IOException, InterruptedException, ParseException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
+		index.setHandler(handler);
 		index.CreateRtreeTweetWeekIndex();
 	}
 	
@@ -116,12 +117,14 @@ public class MainBackendIndex {
 	 */
 	public static void indexMonthLevel() throws IOException, InterruptedException, ParseException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
+		index.setHandler(handler);
 		index.createRtreeTweetMonths();
 	}
 	
 	
 	public static void indexWholeOneIndex() throws IOException, InterruptedException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
+		index.setHandler(handler);
 		index.createWholeDataIndex();
 	}
 
