@@ -36,20 +36,21 @@ public class Main {
 				MainBackendIndex indexOp = new MainBackendIndex();
 				Responder respondHandler = new Responder();
 				indexOp.setHandler(respondHandler);
-				double cost = 0;
 				if (level.equals("day")) {
-					cost =  indexOp.indexDayLevel();
-					writer.write("\nday,"+cost);
+					indexOp.indexDayLevel();
+//					writer.write("\nday,"+cost);
 				} else if (level.equals("week")) {
-					cost = indexOp.indexWeekLevel();
-					writer.write("\nweek,"+cost);
+					indexOp.indexWeekLevel();
+//					writer.write("\nweek,"+cost);
 				} else if(level.equals("month")){
-					cost = indexOp.indexMonthLevel();
-					writer.write("\nmonth,"+cost);
+					indexOp.indexMonthLevel();
+					
+//					writer.write("\nmonth,"+cost);
 				}else{
-					cost = indexOp.indexWholeOneIndex();
-					System.out.println("Main ******* : "+ cost);
-					writer.write("\nallIndex,"+cost);
+					indexOp.indexWholeOneIndex();
+					Thread.currentThread().join();
+					System.out.println("Main ********** "+respondHandler.getTotalExecutionTimes());
+					writer.write("\nallIndex,"+respondHandler.getTotalExecutionTimes());
 				}
 				writer.close();
 

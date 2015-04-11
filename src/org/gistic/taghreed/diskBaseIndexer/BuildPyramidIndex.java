@@ -313,7 +313,7 @@ public class BuildPyramidIndex {
     /**
      * This method create tweets indexMonth only
      */
-    public double CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
+    public void CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
     	System.out.println("Create Tweets Week Index ");
 		List<File> outputFiles = ListFiles(config.getTweetFlushDir());
 		Collections.sort(outputFiles);
@@ -348,7 +348,6 @@ public class BuildPyramidIndex {
 
 		}
 		
-		return this.handlerResponder.getTotalExecutionTimes();
     }
     
 	
@@ -425,7 +424,7 @@ public class BuildPyramidIndex {
         return resultList;
     }
     
-    public double createWholeDataIndex() throws IOException, InterruptedException{
+    public void createWholeDataIndex() throws IOException, InterruptedException{
 //    	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
 //    	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
 //    	for(File f : outputFiles){
@@ -433,13 +432,10 @@ public class BuildPyramidIndex {
 //    	}
 //    	indexer.removeDistcpFolders("all/", queryLevel.Whole);
     	indexer.BuildTweetHdfsIndex("all/", queryLevel.Whole);
-    	System.out.println("BuildPyramid ***** "+this.handlerResponder.getTotalExecutionTimes());
-    	System.out.println("BuildPyramid- BuildIndex ***** "+this.indexer.getReporter().getTotalExecutionTimes());
-    	return this.handlerResponder.getTotalExecutionTimes();
     	
     }
 
-    public double createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
+    public void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -487,7 +483,6 @@ public class BuildPyramidIndex {
 
         }
         
-        return this.handlerResponder.getTotalExecutionTimes();
     }
 
     /*
