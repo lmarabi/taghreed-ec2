@@ -38,19 +38,15 @@ public class Main {
 				indexOp.setHandler(respondHandler);
 				if (level.equals("day")) {
 					indexOp.indexDayLevel();
-//					writer.write("\nday,"+cost);
 				} else if (level.equals("week")) {
 					indexOp.indexWeekLevel();
-//					writer.write("\nweek,"+cost);
 				} else if(level.equals("month")){
 					indexOp.indexMonthLevel();
-					
-//					writer.write("\nmonth,"+cost);
 				}else{
 					indexOp.indexWholeOneIndex();
-					System.out.println("Main ********** "+respondHandler.getTotalExecutionTimes());
-					writer.write("\nallIndex,"+respondHandler.getTotalExecutionTimes());
 				}
+				System.out.println("Total Indexing Time ("+level+") ********** "+respondHandler.getTotalExecutionTimes());
+				writer.write("\n"+level+","+respondHandler.getTotalExecutionTimes());
 				writer.close();
 
 			} else if (operation.equals("query")) {

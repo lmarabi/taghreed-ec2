@@ -431,18 +431,19 @@ public class BuildPyramidIndex {
     
     public void createWholeDataIndex() throws IOException, InterruptedException{
     	Thread t = new Thread();
-//    	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
-//    	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
-//    	for(File f : outputFiles){
-//    		indexer.CopytoHdfsFolder("all/", f.getAbsolutePath(),queryLevel.Whole);
-//    	}
-//    	indexer.removeDistcpFolders("all/", queryLevel.Whole);
+    	List<File> outputFiles = ListFiles(config.getTweetFlushDir());
+    	indexer.CreateHdfsFolder("all/",queryLevel.Whole);
+    	for(File f : outputFiles){
+    		indexer.CopytoHdfsFolder("all/", f.getAbsolutePath(),queryLevel.Whole);
+    	}
+    	indexer.removeDistcpFolders("all/", queryLevel.Whole);
     	t = indexer.BuildTweetHdfsIndex("all/", queryLevel.Whole);
     	t.join();
     	
     }
 
     public void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
+    	List<Thread> threads = new ArrayList<Thread>();
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -483,13 +484,15 @@ public class BuildPyramidIndex {
                     indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath(),queryLevel.Month);
                 }
                 //build the index for tweets and copy to local
-                indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Month);
+                threads.add(indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Month));
             } else {
                 System.out.println("Index exist " + hadoopOutputFolder);
             }
 
         }
-        
+        for(Thread t : threads){
+        	t.join();
+        }
     }
 
     /*
