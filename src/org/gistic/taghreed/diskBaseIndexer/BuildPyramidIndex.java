@@ -44,7 +44,7 @@ public class BuildPyramidIndex {
 //    private String tweetsDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/tweets/";
 //    private String hashtagsDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/hashtags/";
 //    private String rtreeindexDir = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/result/invertedindex/";
-    BuildIndex indexer ;
+    private static BuildIndex indexer ;
     private Map<Integer, PyramidMonth> indexMonth = new HashMap<Integer, PyramidMonth>();
 
     public BuildPyramidIndex() throws IOException {
@@ -53,8 +53,10 @@ public class BuildPyramidIndex {
         
     }
     
-    public static void setHandler(Responder handler) {
-		BuildPyramidIndex.handler = handler;
+    public void setHandler(Responder handler) {
+		this.handler = handler;
+		this.indexer.setTrigger(handler);
+		
 	}
     
 
