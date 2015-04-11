@@ -48,6 +48,7 @@ public class Main {
 					writer.write("\nmonth,"+cost);
 				}else{
 					cost = indexOp.indexWholeOneIndex();
+					System.out.println(cost);
 					writer.write("\nallIndex,"+cost);
 				}
 				writer.close();
@@ -78,8 +79,50 @@ public class Main {
 	/***
 	 * In this method we change the spatial Range of the query
 	 * And fix the following: Temporal , And Query Processing.
+	 * @throws InterruptedException 
+	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	private static void spatialRangeQueryExpr(){
+	private static void spatialRangeQueryExpr() throws ParseException, IOException, InterruptedException{
+		double[] area = {0.0001,0.001,0.01};
+		for(int i=0 ; i< area.length; i++){
+			
+			SamplersCollector sampleHandler = new SamplersCollector();
+			ServerRequest req = new ServerRequest();
+			req.setStartDate("2014-05-01");
+			req.setEndDate("2014-05-31");
+			req.setType(queryType.tweet);
+			req.setIndex(queryIndex.rtree);
+			req.setNumSamples(20);
+			/*
+			 * Read A sample from Index 
+			 * */
+			Queryoptimizer queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("TakeSamples");
+			queryExec.addSampleHandler(sampleHandler);
+			queryExec.readSamplesMBR();
+			req.setRect(sampleHandler.getSamples(),area[i]);
+			/*
+			 * Now Execute the Range Query
+			 * */
+			
+			String startTime = "2014-05-01";
+			String endTime = "2014-05-";
+			queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("temporalExp1");
+			for(int d=1 ; d<31; d++){
+				if(d < 10){
+					endTime = "2014-05-0"+d;
+				}else{
+					endTime = "2014-05-"+d;
+				}
+				req.setStartDate(startTime);
+				req.setEndDate(endTime);
+				queryExec.executeQuery();
+				
+			}
+			
+		}
 		
 	}
 	
@@ -112,7 +155,7 @@ public class Main {
 		queryExec.setExpName("TakeSamples");
 		queryExec.addSampleHandler(sampleHandler);
 		queryExec.readSamplesMBR();
-		req.setRect(sampleHandler.getSamples());
+		req.setRect(sampleHandler.getSamples(),(double)0.0001);
 		/*
 		 * Now Execute the Range Query
 		 * */

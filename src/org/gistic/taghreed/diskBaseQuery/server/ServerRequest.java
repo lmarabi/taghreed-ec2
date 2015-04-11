@@ -96,8 +96,31 @@ public class ServerRequest {
 		return type;
 	}
 	
-	public void setRect(String rect) {
-		this.rect = rect;
+	public void setRect(List<String> points,double areaRatio) {
+		this.rect = getRectangleCommandFormat(points,areaRatio);
+	}
+	
+	private String getRectangleCommandFormat(List<String> points, double areaRatio){
+		String cmd="";
+		for(String point :points){
+			cmd += getRectangle(point, areaRatio);
+		}
+		return cmd;
+	}
+	
+	private String getRectangle(String point,double areaRatio){
+		double area_ratio = (double)areaRatio/1000;
+//		double area_ratio = (double)0.0001/1000;
+		String[] token = point.split(",");
+		double x = Double.parseDouble(token[0]);
+		double y = Double.parseDouble(token[1]);
+		int total_width = 360;
+		int total_height = 180;
+		double w = Math.sqrt(area_ratio) * total_width;
+		double h = Math.sqrt(area_ratio) * total_height;
+		double max_x = x + w;
+		double max_y = y + h;
+		return " rect:"+ x+","+y+","+max_x+","+max_y;
 	}
 	
 	public String getRect() {
