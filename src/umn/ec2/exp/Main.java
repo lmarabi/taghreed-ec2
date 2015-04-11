@@ -32,7 +32,7 @@ public class Main {
 			if (operation.equals("index")) {
 				System.out.println("Indexing operation is running Now");
 				OutputStreamWriter writer = new OutputStreamWriter(
-						new FileOutputStream(System.getProperty("user.dir") + "/"+ "IndexOperation_time.log", false), "UTF-8");
+						new FileOutputStream(System.getProperty("user.dir") + "/"+ "IndexOperation_time.log", true), "UTF-8");
 				MainBackendIndex indexOp = new MainBackendIndex();
 				Responder respondHandler = new Responder();
 				indexOp.setHandler(respondHandler);

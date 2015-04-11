@@ -59,7 +59,7 @@ public class Queryoptimizer {
 		this.expName = "";
 		this.writerTime = new OutputStreamWriter(
 				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
-		this.writerTime.write("startTime,endTime,q-multi,q-month,q-week,q-day,query-plan(Month-Week-Day)");
+		this.writerTime.write("startTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
 	}
 
 	public void setExpName(String Name) {
@@ -168,18 +168,19 @@ public class Queryoptimizer {
 	    double daysCost = executeDayLevelOnly();
 	    double weekCost = executeWeekLevelOnly();
 	    double monthCost = executeMonthLevelOnly();
+	    double allCost = executeAllIndex();
 
 		System.out.println("*****************************************************\n"
 				+ "StartTime:"+serverRequest.getStartDate()
 				+" Endtime:"+serverRequest.getEndDate()
 				+ " executionTime:" +respondHandler.getAvgExecutionTimes()
 				+"\n Plan: Months:"+months.size()+" Week:"+weeks.size()+" Day:"+ indexDays.size()
-				+"\n Execution: Months:"+monthCost+" Week:"+weekCost+" Day:"+ daysCost
+				+"\n Execution: Months:"+monthCost+" Week:"+weekCost+" Day:"+ daysCost+ "All:"+ allCost
 				+"\n*****************************************************");
 		writerTime.write("\n"+serverRequest.getStartDate()
 				+","+serverRequest.getEndDate()
 				+","+multiCost
-				+","+monthCost+","+weekCost+","+daysCost
+				+","+monthCost+","+weekCost+","+daysCost+","+allCost
 				+","+months.size()+"-"+weeks.size()+"-"+ indexDays.size());
 		writerTime.flush();
 		return 0;
@@ -189,6 +190,20 @@ public class Queryoptimizer {
 	public static void closewriter() throws IOException{
 		writerTime.close();
 	}
+	
+	/***
+	 * This query execute the one all index
+	 * @return
+	 * @throws ParseException
+	 * @throws InterruptedException
+	 */
+	public double executeAllIndex() throws ParseException, InterruptedException {
+		Responder respondHandler = new Responder();
+		this.addHandler(respondHandler);
+		executeRangeQuery(serverRequest.getRect(),"all", queryLevel.Whole);
+		return respondHandler.getAvgExecutionTimes();
+	}
+	
 	/**
 	 * This query from days level only
 	 * @return
