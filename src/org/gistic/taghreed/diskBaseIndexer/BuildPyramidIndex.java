@@ -348,7 +348,7 @@ public class BuildPyramidIndex {
 
 		}
 		
-		return indexer.getReporter().getTotalExecutionTimes();
+		return this.handlerResponder.getTotalExecutionTimes();
     }
     
 	
@@ -433,7 +433,7 @@ public class BuildPyramidIndex {
     	}
     	indexer.removeDistcpFolders("all/", queryLevel.Whole);
     	indexer.BuildTweetHdfsIndex("all/", queryLevel.Whole);
-    	return indexer.getReporter().getTotalExecutionTimes();
+    	return this.handlerResponder.getTotalExecutionTimes();
     	
     }
 
@@ -485,7 +485,7 @@ public class BuildPyramidIndex {
 
         }
         
-        return indexer.getReporter().getTotalExecutionTimes();
+        return this.handlerResponder.getTotalExecutionTimes();
     }
 
     /*
