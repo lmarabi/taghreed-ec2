@@ -154,11 +154,12 @@ public class BuildIndex {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public synchronized void CreateRtreeTweetIndex() throws IOException,
+	public synchronized Thread CreateRtreeTweetIndex() throws IOException,
 			InterruptedException {
 		this.UpdatelookupTable(queryLevel.Day, this.tweetFile);
 		Thread t = new Thread(new BuildIndexThreads("",queryLevel.Day,this.reporter));
 		t.start();
+		return t;
 	}
 
 	
@@ -262,13 +263,12 @@ public class BuildIndex {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void BuildTweetHdfsIndex(String folderName, queryLevel level)
+	public Thread BuildTweetHdfsIndex(String folderName, queryLevel level)
 			throws IOException, InterruptedException {
 		this.UpdatelookupTable(level, folderName);
 		Thread t = new Thread(new BuildIndexThreads(folderName,level,this.reporter));
 		t.start();
-		t.join();
-		
+		return t;
 	}
 
 	/**
