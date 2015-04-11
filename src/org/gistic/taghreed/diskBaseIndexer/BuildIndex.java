@@ -157,7 +157,7 @@ public class BuildIndex {
 	public synchronized void CreateRtreeTweetIndex() throws IOException,
 			InterruptedException {
 		this.UpdatelookupTable(queryLevel.Day, this.tweetFile);
-		Thread t = new Thread(new BuildIndexThreads("",queryLevel.Day));
+		Thread t = new Thread(new BuildIndexThreads("",queryLevel.Day,this.reporter));
 		t.start();
 	}
 
@@ -265,7 +265,7 @@ public class BuildIndex {
 	public void BuildTweetHdfsIndex(String folderName, queryLevel level)
 			throws IOException, InterruptedException {
 		this.UpdatelookupTable(level, folderName);
-		Thread t = new Thread(new BuildIndexThreads(folderName,level));
+		Thread t = new Thread(new BuildIndexThreads(folderName,level,this.reporter));
 		t.start();
 		
 	}
@@ -405,10 +405,12 @@ public class BuildIndex {
 		String fileName;
 		queryLevel level;
 		OutputStreamWriter writer;
+		Responder handler;
 
-		public BuildIndexThreads(String fileName,queryLevel level) throws UnsupportedEncodingException, FileNotFoundException {
+		public BuildIndexThreads(String fileName,queryLevel level,Responder handler) throws UnsupportedEncodingException, FileNotFoundException {
 			this.level = level;
 			this.fileName = fileName;
+			this.handler = handler;
 //			this.writer =  new OutputStreamWriter(
 //					new FileOutputStream(System.getProperty("user.dir")
 //							+ "/indexTime.log", true), "UTF-8");

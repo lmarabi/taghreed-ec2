@@ -125,8 +125,9 @@ public class MainBackendIndex {
 	public static double indexWholeOneIndex() throws IOException, InterruptedException{
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.setHandler(handler);
+		double cost = index.createWholeDataIndex();
 		System.out.println("MainBackEndIndex *********** "+handler.getTotalExecutionTimes());
-		return index.createWholeDataIndex();
+		return cost;
 	}
 
 	public void run(String args[]) throws FileNotFoundException, IOException,
