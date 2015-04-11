@@ -48,7 +48,6 @@ public class Main {
 //					writer.write("\nmonth,"+cost);
 				}else{
 					indexOp.indexWholeOneIndex();
-					Thread.currentThread().join();
 					System.out.println("Main ********** "+respondHandler.getTotalExecutionTimes());
 					writer.write("\nallIndex,"+respondHandler.getTotalExecutionTimes());
 				}

@@ -125,7 +125,6 @@ public class MainBackendIndex {
 		BuildPyramidIndex index = new BuildPyramidIndex();
 		index.setHandler(handler);
 		index.createWholeDataIndex();
-		System.out.println("MainBackEndIndex *********** "+handler.getTotalExecutionTimes());
 	}
 
 	public void run(String args[]) throws FileNotFoundException, IOException,

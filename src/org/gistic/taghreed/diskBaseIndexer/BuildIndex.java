@@ -267,6 +267,7 @@ public class BuildIndex {
 		this.UpdatelookupTable(level, folderName);
 		Thread t = new Thread(new BuildIndexThreads(folderName,level,this.reporter));
 		t.start();
+		t.join();
 		
 	}
 
