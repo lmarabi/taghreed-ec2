@@ -55,6 +55,7 @@ public class MainBackendIndex {
 	
 	public void setHandler(Responder handler) {
 		this.handler = handler;
+		this.indexer.setTrigger(handler);
 	}
 	
 	

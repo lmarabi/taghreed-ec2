@@ -36,7 +36,6 @@ public class BuildPyramidIndex {
 
     //Server directory
 	private Commons config;
-	private static Responder handler;
 	
     
     //Local test
@@ -54,7 +53,6 @@ public class BuildPyramidIndex {
     }
     
     public void setHandler(Responder handler) {
-		this.handler = handler;
 		this.indexer.setTrigger(handler);
 		
 	}
