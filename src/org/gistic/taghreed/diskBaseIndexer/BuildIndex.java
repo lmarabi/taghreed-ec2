@@ -478,10 +478,10 @@ public class BuildIndex {
 //
 //					commandExecuter(command);
 					// remove from hdfs
-					command = config.getHadoopDir() + "hadoop fs -rmr "
-							+ config.getHadoopHDFSPath() + file.getName();
-
-					commandExecuter(command,level);
+//					command = config.getHadoopDir() + "hadoop fs -rmr "
+//							+ config.getHadoopHDFSPath() + file.getName();
+//
+//					commandExecuter(command,level);
 //					command = config.getHadoopDir() + "hadoop fs -rmr "
 //							+ config.getHadoopHDFSPath() + "index."
 //							+ file.getName().replace(".bz2", "");
@@ -531,10 +531,10 @@ public class BuildIndex {
 //
 //						commandExecuter(command);
 						// remove from hdfs
-						command = config.getHadoopDir() + "hadoop fs -rmr "
-								+ config.getHadoopHDFSPath() + this.fileName;
-
-						commandExecuter(command,level);
+//						command = config.getHadoopDir() + "hadoop fs -rmr "
+//								+ config.getHadoopHDFSPath() + this.fileName;
+//
+//						commandExecuter(command,level);
 //						command = config.getHadoopDir() + "hadoop fs -rmr "
 //								+ config.getHadoopHDFSPath() + "index." + this.fileName;
 //
