@@ -47,6 +47,7 @@ public class Queryoptimizer {
 	private static Initiater trigger;
 	private static String expName;
 	static OutputStreamWriter writerTime;
+	private static double spatialRatio;
 
 	public Queryoptimizer(ServerRequest serverRequest) throws IOException,
 			FileNotFoundException, ParseException {
@@ -59,11 +60,18 @@ public class Queryoptimizer {
 		this.expName = "";
 		this.writerTime = new OutputStreamWriter(
 				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
-		this.writerTime.write("\nstartTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
 	}
 
 	public void setExpName(String Name) {
 		this.expName = Name;
+	}
+	
+	public static double getSpatialRatio() {
+		return spatialRatio;
+	}
+	
+	public static void setSpatialRatio(double spatialRatio) {
+		Queryoptimizer.spatialRatio = spatialRatio;
 	}
 
 	public void addHandler(Responder handler) {
@@ -112,7 +120,7 @@ public class Queryoptimizer {
 	public long executeQuery() throws FileNotFoundException,
 			UnsupportedEncodingException, IOException, ParseException,
 			InterruptedException {
-		
+		this.writerTime.write("\n"+this.spatialRatio+"_startTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		boolean queryTail = false;

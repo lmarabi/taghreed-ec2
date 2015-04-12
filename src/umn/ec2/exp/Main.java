@@ -105,6 +105,7 @@ public class Main {
 			String startTime = "2014-05-01";
 			String endTime = "2014-05-";
 			queryExec = new Queryoptimizer(req);
+			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial");
 			for(int d=1 ; d<31; d++){
 				if(d < 10){
@@ -159,6 +160,7 @@ public class Main {
 		String startTime = "2014-05-01";
 		String endTime = "2014-05-";
 		queryExec = new Queryoptimizer(req);
+		queryExec.setSpatialRatio((double)0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
 		for(int i=1 ; i<31; i++){
 			if(i < 10){
