@@ -83,10 +83,12 @@ public class MainBackendIndex {
 		}
 		Collections.sort(sortedtweetsFile);
 
-		indexer.setTrigger(handler);
+		
 		System.out.println(sortedtweetsFile.size());
 		for (int i = 0; i < sortedtweetsFile.size(); i++) {
 			try {
+				BuildIndex indexer = new  BuildIndex();
+				indexer.setTrigger(handler);
 				indexer.setTweetFile(sortedtweetsFile.get(i));
 				System.out.println("indexing: "+sortedtweetsFile.get(i));
 				threads.add(indexer.CreateRtreeTweetIndex());
