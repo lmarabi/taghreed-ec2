@@ -200,7 +200,8 @@ public class Queryoptimizer {
 	public double executeAllIndex() throws ParseException, InterruptedException {
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
-		executeRangeQuery(serverRequest.getRect(),"all", queryLevel.Whole);
+		Thread t = executeRangeQuery(serverRequest.getRect(),"all", queryLevel.Whole);
+		t.join();
 		return respondHandler.getAvgExecutionTimes();
 	}
 	
