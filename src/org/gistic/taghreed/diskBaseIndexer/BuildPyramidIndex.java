@@ -314,7 +314,7 @@ public class BuildPyramidIndex {
      * This method create tweets indexMonth only
      */
     public void CreateRtreeTweetWeekIndex() throws IOException, InterruptedException, ParseException {
-    	List<Thread> threads = new ArrayList<Thread>();
+//    	List<Thread> threads = new ArrayList<Thread>();
     	System.out.println("Create Tweets Week Index ");
 		List<File> outputFiles = ListFiles(config.getTweetFlushDir());
 		Collections.sort(outputFiles);
@@ -343,15 +343,17 @@ public class BuildPyramidIndex {
 				}
 				indexer.removeDistcpFolders(hadoopOutputFolder+"/", queryLevel.Week);
 				// build the index for tweets and copy to local
-				threads.add(indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Week));
+				//threads.add(indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Week));
+				Thread t = indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Week);
+				t.join();
 				System.out.println("Build the index of "+ week.getKey());
 			}
 
 		}
 		
-		for(Thread t : threads){
-			t.join();
-		}
+//		for(Thread t : threads){
+//			t.join();
+//		}
 		
     }
     
@@ -443,7 +445,7 @@ public class BuildPyramidIndex {
     }
 
     public void createRtreeTweetMonths() throws IOException, InterruptedException, ParseException {
-    	List<Thread> threads = new ArrayList<Thread>();
+//    	List<Thread> threads = new ArrayList<Thread>();
         System.out.println("Create Tweets Months Index ");
         List<File> outputFiles = ListFiles(config.getTweetFlushDir());
         Collections.sort(outputFiles);
@@ -479,20 +481,26 @@ public class BuildPyramidIndex {
             //Create folder in hdfs with hadoopoutputFolder
             File indexFolder = new File(config.getQueryRtreeIndex() + "tweets/Month/index." + hadoopOutputFolder);
             if (!indexFolder.exists() && !currentMonth.equals(hadoopOutputFolder)) {
-                indexer.CreateHdfsFolder(hadoopOutputFolder,queryLevel.Month);
+            	try{
+            		indexer.CreateHdfsFolder(hadoopOutputFolder,queryLevel.Month);
+            	}catch(Exception e){
+            		System.out.println("***** Folder Exist !  -- "+hadoopOutputFolder);
+            	}
                 for (File day : month.getFiles()) {
                     indexer.CopytoHdfsFolder(hadoopOutputFolder, day.getAbsolutePath(),queryLevel.Month);
                 }
                 //build the index for tweets and copy to local
-                threads.add(indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Month));
+                //threads.add(indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Month));
+               Thread t = indexer.BuildTweetHdfsIndex(hadoopOutputFolder, queryLevel.Month);
+               t.join();
             } else {
                 System.out.println("Index exist " + hadoopOutputFolder);
             }
 
         }
-        for(Thread t : threads){
-        	t.join();
-        }
+//        for(Thread t : threads){
+//        	t.join();
+//        }
     }
 
     /*

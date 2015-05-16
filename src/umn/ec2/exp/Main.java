@@ -6,16 +6,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 
-import org.gistic.taghreed.basicgeom.MBR;
-import org.gistic.taghreed.basicgeom.Point;
 import org.gistic.taghreed.diskBaseIndexer.MainBackendIndex;
 import org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
-import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
-
-import Pyramid.QueryProcessor;
 
 public class Main {
 
@@ -23,8 +18,8 @@ public class Main {
 	public static void main(String[] args) throws IOException,
 			InterruptedException, ParseException {
 //		args = new String[2];
-//		args[0] = "index";
-//		args[1] = "week";
+//		args[0] = "query";
+//		args[1] = "spatial";
 		// TODO Auto-generated method stub
 		if (args.length == 2) {
 			String operation = args[0];
@@ -80,7 +75,8 @@ public class Main {
 	 * @throws ParseException 
 	 */
 	private static void spatialRangeQueryExpr() throws ParseException, IOException, InterruptedException{
-		double[] area = {0.0001,0.001,0.01};
+//		double[] area = {0.0001,0.001,0.01};
+		double[] area = {0.000001,0.0001,0.01,0.1};
 		for(int i=0 ; i< area.length; i++){
 			
 			SamplersCollector sampleHandler = new SamplersCollector();
@@ -89,7 +85,7 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(20);
+			req.setNumSamples(2);
 			/*
 			 * Read A sample from Index 
 			 * */
@@ -107,7 +103,7 @@ public class Main {
 			queryExec = new Queryoptimizer(req);
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial");
-			for(int d=1 ; d<31; d++){
+			for(int d=1 ; d<3; d++){
 				if(d < 10){
 					endTime = "2014-05-0"+d;
 				}else{

@@ -101,9 +101,11 @@ public class Queryoptimizer {
 		}
 
 		String cmd = "";
+		String ec2AccessCode = "-D fs.s3n.awsAccessKeyId=" +conf.getEc2AccessCode()
+				+" -D fs.s3n.awsSecretAccessKey="+ conf.getEc2SecretCode();
 		cmd = conf.getHadoopDir() + "hadoop jar " + conf.getShadoopJar()
 				+ " sample " + "-libjars " + this.conf.getLibJars()
-				+ conf.getEc2AccessCode() + " " + conf.getHadoopHDFSPath()
+				+ ec2AccessCode + " " + conf.getHadoopHDFSPath()
 				+ "/Day/index." + indexDir + " count:"
 				+ serverRequest.getNumSamples()
 				+ " shape:org.gistic.taghreed.spatialHadoop.Tweets"
@@ -306,7 +308,8 @@ public class Queryoptimizer {
 	}
 
 	private String getCommand(String rect, String index, queryLevel level) {
-		String ec2AccessCode = this.conf.getEc2AccessCode();
+		String ec2AccessCode = "-Dfs.s3n.awsAccessKeyId=" +conf.getEc2AccessCode()
+				+" -Dfs.s3n.awsSecretAccessKey="+ conf.getEc2SecretCode();
 		String indexDir = this.conf.getHadoopHDFSPath() + level.toString()
 				+ "/index." + index;
 		String shape = "org.gistic.taghreed.spatialHadoop.Tweets";

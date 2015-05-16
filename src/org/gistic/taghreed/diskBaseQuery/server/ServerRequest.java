@@ -112,15 +112,40 @@ public class ServerRequest {
 		double area_ratio = (double)areaRatio/1000;
 //		double area_ratio = (double)0.0001/1000;
 		String[] token = point.split(",");
-		double x = Double.parseDouble(token[0]);
-		double y = Double.parseDouble(token[1]);
+		double rx = Double.parseDouble(token[0]);
+		double ry = Double.parseDouble(token[1]);
 		int total_width = 360;
 		int total_height = 180;
 		double w = Math.sqrt(area_ratio) * total_width;
 		double h = Math.sqrt(area_ratio) * total_height;
-		double max_x = x + w;
-		double max_y = y + h;
-		return " rect:"+ x+","+y+","+max_x+","+max_y;
+		double x1 = rx - w / 2;
+		double x2 = rx + w / 2;
+		double y1 = ry - h / 2;
+		double y2 = ry + h / 2;
+		if (x2 > 180){
+		 double dx = x2 - 180;
+		 x2 -= dx;
+		 x1 -= dx;
+		}
+
+		if( x1 < -180){
+		 double dx = -180 - x1;
+		 x1 += dx;
+		 x2 += dx;
+		}
+
+		if (y2 > 90){
+		 double dy = y2 - 90;
+		 y1 -= dy;
+		 y2 -= dy;
+		}
+
+		if( y1 < -90){
+		 double dy = -90 - y1;
+		 y1 += dy;
+		 y2 += dy;
+		}
+		return " rect:"+ x1+","+y1+","+x2+","+y2;	
 	}
 	
 	public String getRect() {

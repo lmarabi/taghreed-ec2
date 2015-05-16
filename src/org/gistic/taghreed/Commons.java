@@ -1,6 +1,7 @@
 package org.gistic.taghreed;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -40,11 +41,14 @@ public class Commons {
 	public static String spatialIndex;
 
 	public static String ec2AccessCode;
+	
+	public static String ec2SecretCode;
 
 	public static String S3Dir;
 
 	public Commons() throws IOException {
 		this.loadConfigFile();
+		
 
 	}
 
@@ -165,41 +169,64 @@ public class Commons {
 	}
 
 	public static String getEc2AccessCode() {
-		return ec2AccessCode;
+		return "\'"+ec2AccessCode+"\'";
 	}
 
 	public static String getS3Dir() {
 		return S3Dir;
 	}
+	
+	public static String getEc2SecretCode() {
+		return "\'"+ec2SecretCode+"\'";
+	}
 
 	private void loadConfigFile() throws IOException {
+		
+		FileInputStream inStream = null;
+	    try {
+	        inStream = new FileInputStream("config.properties");
+	        Properties prop = new Properties();
+			prop.load(inStream);
+			// prop.load(new FileInputStream("config_testOnly.properties"));
+			Commons.accessToken = prop.getProperty("accessToken");
+			Commons.accessTokenSecret = prop.getProperty("accessTokenSecret");
+			Commons.consumerKey = prop.getProperty("consumerKey");
+			Commons.consumerSecret = prop.getProperty("consumerSecret");
+			Commons.filterLocationsFile = prop.getProperty("filterLocationsFile");
+			Commons.hadoopDir = prop.getProperty("hadoopDir");
+			Commons.shadoopJar = prop.getProperty("shadoopJar");
+			Commons.libJars = prop.getProperty("libJars");
+			Commons.hadoopHDFSPath = prop.getProperty("hadoopHDFSPath");
+			Commons.hashtagFlushDir = prop.getProperty("hashtagFlushDir");
+			Commons.portNumber = Integer.parseInt(prop.getProperty("portNumber"));
+			Commons.queryInvertedIndex = prop.getProperty("queryInvertedIndex");
+			Commons.queryRtreeIndex = (prop.getProperty("queryRtreeIndex") == null) ? ""
+					: prop.getProperty("queryRtreeIndex");
+			Commons.tweetFlushDir = (prop.getProperty("tweetFlushDir") == null) ? ""
+					: prop.getProperty("tweetFlushDir");
+			Commons.spatialIndex = (prop.getProperty("spatialIndex") == null) ? ""
+					: prop.getProperty("spatialIndex");
+			Commons.ec2AccessCode = (prop.getProperty("ec2AccessCode") == null) ? ""
+					: prop.getProperty("ec2AccessCode");
+			Commons.ec2SecretCode = (prop.getProperty("ec2SecretCode") == null) ? ""
+					: prop.getProperty("ec2SecretCode");
+			Commons.S3Dir = (prop.getProperty("S3Dir") == null) ? "" : prop
+					.getProperty("S3Dir");
+			System.out.println("Config file Loaded");
+	        
+	    } catch (FileNotFoundException e) {
+	        System.out.println("FileNotFound");
+	    } catch (IOException e) {
+	        System.out.println("IOEXCeption");
+	    } finally {
+	        try {
+	            inStream.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
 
-		Properties prop = new Properties();
-		prop.load(new FileInputStream("config.properties"));
-		// prop.load(new FileInputStream("config_testOnly.properties"));
-		Commons.accessToken = prop.getProperty("accessToken");
-		Commons.accessTokenSecret = prop.getProperty("accessTokenSecret");
-		Commons.consumerKey = prop.getProperty("consumerKey");
-		Commons.consumerSecret = prop.getProperty("consumerSecret");
-		Commons.filterLocationsFile = prop.getProperty("filterLocationsFile");
-		Commons.hadoopDir = prop.getProperty("hadoopDir");
-		Commons.shadoopJar = prop.getProperty("shadoopJar");
-		Commons.libJars = prop.getProperty("libJars");
-		Commons.hadoopHDFSPath = prop.getProperty("hadoopHDFSPath");
-		Commons.hashtagFlushDir = prop.getProperty("hashtagFlushDir");
-		Commons.portNumber = Integer.parseInt(prop.getProperty("portNumber"));
-		Commons.queryInvertedIndex = prop.getProperty("queryInvertedIndex");
-		Commons.queryRtreeIndex = (prop.getProperty("queryRtreeIndex") == null) ? ""
-				: prop.getProperty("queryRtreeIndex");
-		Commons.tweetFlushDir = (prop.getProperty("tweetFlushDir") == null) ? ""
-				: prop.getProperty("tweetFlushDir");
-		Commons.spatialIndex = (prop.getProperty("spatialIndex") == null) ? ""
-				: prop.getProperty("spatialIndex");
-		Commons.ec2AccessCode = (prop.getProperty("ec2AccessCode") == null) ? ""
-				: prop.getProperty("ec2AccessCode");
-		Commons.S3Dir = (prop.getProperty("S3Dir") == null) ? "" : prop
-				.getProperty("S3Dir");
-		System.out.println("Config file Loaded");
+		
 
 	}
 

@@ -65,7 +65,7 @@ public class MainBackendIndex {
 	 * @throws InterruptedException 
 	 */
 	public static void indexDayLevel() throws IOException, InterruptedException{
-		List<Thread> threads = new ArrayList<Thread>();
+//		List<Thread> threads = new ArrayList<Thread>();
 		config = new Commons();
 		System.out.println(config.getTweetFlushDir());
 		File tweetsFile = new File(config.getTweetFlushDir());
@@ -91,16 +91,18 @@ public class MainBackendIndex {
 				indexer.setTrigger(handler);
 				indexer.setTweetFile(sortedtweetsFile.get(i));
 				System.out.println("indexing: "+sortedtweetsFile.get(i));
-				threads.add(indexer.CreateRtreeTweetIndex());
+				//threads.add(indexer.CreateRtreeTweetIndex());
+				Thread t = indexer.CreateRtreeTweetIndex();
+				t.join();
 			} catch (InterruptedException ex) {
 				Logger.getLogger(MainBackendIndex.class.getName()).log(
 						Level.SEVERE, null, ex);
 			}
 		}
 		
-		for(Thread t : threads){
-			t.join();
-		}
+//		for(Thread t : threads){
+//			t.join();
+//		}
 	}
 	
 	/***
