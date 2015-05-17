@@ -104,7 +104,7 @@ public class Queryoptimizer {
 		String ec2AccessCode = "-D fs.s3n.awsAccessKeyId=" +conf.getEc2AccessCode()
 				+" -D fs.s3n.awsSecretAccessKey="+ conf.getEc2SecretCode();
 		cmd = conf.getHadoopDir() + "hadoop jar " + conf.getShadoopJar()
-				+ " sample " + "-libjars " + this.conf.getLibJars()
+				+ " sample " + "-libjars " + conf.getLibJars()+ " "
 				+ ec2AccessCode + " " + conf.getHadoopHDFSPath()
 				+ "/Day/index." + indexDir + " count:"
 				+ serverRequest.getNumSamples()
