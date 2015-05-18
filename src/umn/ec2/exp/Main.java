@@ -85,7 +85,7 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(2);
+			req.setNumSamples(10);
 			/*
 			 * Read A sample from Index 
 			 * */
@@ -103,7 +103,7 @@ public class Main {
 			queryExec = new Queryoptimizer(req);
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial");
-			for(int d=1 ; d<3; d++){
+			for(int d=1 ; d<32; d++){
 				if(d < 10){
 					endTime = "2014-05-0"+d;
 				}else{
@@ -158,7 +158,7 @@ public class Main {
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double)0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
-		for(int i=1 ; i<31; i++){
+		for(int i=1 ; i<32; i++){
 			if(i < 10){
 				endTime = "2014-05-0"+i;
 			}else{
