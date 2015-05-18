@@ -85,7 +85,7 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(10);
+			req.setNumSamples(20);
 			/*
 			 * Read A sample from Index 
 			 * */
