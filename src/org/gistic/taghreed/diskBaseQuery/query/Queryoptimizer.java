@@ -106,7 +106,7 @@ public class Queryoptimizer {
 		cmd = conf.getHadoopDir() + "hadoop jar " + conf.getShadoopJar()
 				+ " sample " + "-libjars " + conf.getLibJars()+ " "
 				+ ec2AccessCode + " " + conf.getHadoopHDFSPath()
-				+ "/Day/index." + indexDir + " count:"
+				+ "Day/index." + indexDir + " count:"
 				+ serverRequest.getNumSamples()
 				+ " shape:org.gistic.taghreed.spatialHadoop.Tweets"
 				+ " outshape:point ";
