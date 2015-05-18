@@ -15,8 +15,7 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 public class Main {
 
 
-	public static void main(String[] args) throws IOException,
-			InterruptedException, ParseException {
+	public static void main(String[] args) throws Exception {
 //		args = new String[2];
 //		args[0] = "query";
 //		args[1] = "spatial";
@@ -57,7 +56,7 @@ public class Main {
 		}
 	}
 	
-	private static void RangeQueryExperiments(String parameter) throws FileNotFoundException, IOException, ParseException, InterruptedException{
+	private static void RangeQueryExperiments(String parameter) throws Exception{
 		if(parameter.equals("spatial")){
 			spatialRangeQueryExpr();
 		}else if(parameter.equals("temporal")){
@@ -70,11 +69,9 @@ public class Main {
 	/***
 	 * In this method we change the spatial Range of the query
 	 * And fix the following: Temporal , And Query Processing.
-	 * @throws InterruptedException 
-	 * @throws IOException 
-	 * @throws ParseException 
+	 * @throws Exception 
 	 */
-	private static void spatialRangeQueryExpr() throws ParseException, IOException, InterruptedException{
+	private static void spatialRangeQueryExpr() throws Exception{
 //		double[] area = {0.0001,0.001,0.01};
 		double[] area = {0.000001,0.0001,0.01,0.1};
 		for(int i=0 ; i< area.length; i++){
@@ -122,12 +119,9 @@ public class Main {
 	/***
 	 * In this method we change the temporal Range of the query
 	 * And fix the following: spatial, and query processing technique
-	 * @throws ParseException 
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
-	 * @throws InterruptedException 
+	 * @throws Exception 
 	 */
-	private static void temporalRangeQueryExpr() throws FileNotFoundException, IOException, ParseException, InterruptedException{
+	private static void temporalRangeQueryExpr() throws Exception{
 		SamplersCollector sampleHandler = new SamplersCollector();
 		ServerRequest req = new ServerRequest();
 		req.setStartDate("2014-05-01");

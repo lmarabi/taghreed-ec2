@@ -440,14 +440,9 @@ public class ServerRequest {
 	 * This method query Tweets from several level {Day,Week,Month}
 	 *
 	 * @return List<Tweet>
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws ParseException
-	 * @throws InterruptedException 
+	 * @throws Exception 
 	 */
-	public TopTweetResult getTweetsRtreePyramid() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
+	public TopTweetResult getTweetsRtreePyramid() throws Exception {
 		this.type = type.tweet;
 		this.index = index.rtree;
 		Queryoptimizer queryoptimizer = new Queryoptimizer(this);
@@ -494,14 +489,9 @@ public class ServerRequest {
 	 * inverted index
 	 * 
 	 * @return List<Tweet>
-	 * @throws FileNotFoundException
-	 * @throws UnsupportedEncodingException
-	 * @throws IOException
-	 * @throws ParseException
-	 * @throws InterruptedException 
+	 * @throws Exception 
 	 */
-	public TopTweetResult getTweetsInvertedPyramid() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException, InterruptedException {
+	public TopTweetResult getTweetsInvertedPyramid() throws Exception {
 		this.type = type.tweet;
 		this.index = index.inverted;
 		Queryoptimizer queryoptimizer = new Queryoptimizer(this);

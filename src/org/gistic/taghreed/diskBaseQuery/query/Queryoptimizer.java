@@ -58,8 +58,6 @@ public class Queryoptimizer {
 		conf = new Commons();
 		this.trigger = new Initiater();
 		this.expName = "";
-		this.writerTime = new OutputStreamWriter(
-				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
 	}
 
 	public void setExpName(String Name) {
@@ -70,8 +68,11 @@ public class Queryoptimizer {
 		return spatialRatio;
 	}
 	
-	public static void setSpatialRatio(double spatialRatio) {
+	public static void setSpatialRatio(double spatialRatio) throws Exception {
 		Queryoptimizer.spatialRatio = spatialRatio;
+		initWriter();
+		writerTime.write("\n"+spatialRatio+"_startTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
+		closewriter();
 	}
 
 	public void addHandler(Responder handler) {
@@ -117,12 +118,10 @@ public class Queryoptimizer {
 	/**
 	 * @param args
 	 *            the command line arguments
-	 * @throws InterruptedException
+	 * @throws Exception 
 	 */
-	public long executeQuery() throws FileNotFoundException,
-			UnsupportedEncodingException, IOException, ParseException,
-			InterruptedException {
-		this.writerTime.write("\n"+this.spatialRatio+"_startTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
+	public long executeQuery() throws Exception {
+		initWriter();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		boolean queryTail = false;
@@ -193,8 +192,14 @@ public class Queryoptimizer {
 				+","+monthCost+","+weekCost+","+daysCost+","+allCost
 				+","+months.size()+"-"+weeks.size()+"-"+ indexDays.size());
 		writerTime.flush();
+		closewriter();
 		return 0;
 
+	}
+	
+	public static void initWriter() throws Exception, FileNotFoundException{
+		writerTime = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time.log", true), "UTF-8");
 	}
 	
 	public static void closewriter() throws IOException{
