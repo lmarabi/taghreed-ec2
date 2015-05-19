@@ -12,6 +12,8 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
+import com.sun.rmi.rmid.ExecPermission;
+
 public class Main {
 
 
@@ -108,7 +110,11 @@ public class Main {
 				}
 				req.setStartDate(startTime);
 				req.setEndDate(endTime);
-				queryExec.executeQuery();
+				try{
+					queryExec.executeQuery();	
+				}catch(Exception ex){
+					
+				}
 				
 			}
 			
@@ -160,7 +166,12 @@ public class Main {
 			}
 			req.setStartDate(startTime);
 			req.setEndDate(endTime);
-			queryExec.executeQuery();
+			try{
+				queryExec.executeQuery();	
+			}catch(Exception ex){
+				
+			}
+			
 			
 		}
 		
