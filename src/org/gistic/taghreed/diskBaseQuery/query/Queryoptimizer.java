@@ -193,6 +193,17 @@ public class Queryoptimizer {
 				+","+months.size()+"-"+weeks.size()+"-"+ indexDays.size());
 		writerTime.flush();
 		closewriter();
+		
+		try{
+			for (Thread t : threads) {
+				System.out.println("Threads "+t.getName().toString()+" has been stopped");
+				t.stop();
+			}
+			threads.clear();	
+		}catch(Exception e){
+			System.out.println("Error happen while stoping threads");
+		}
+		
 		return 0;
 
 	}
@@ -373,6 +384,7 @@ public class Queryoptimizer {
 		public rangeQueryHDFS(String command) {
 			this.command = command;
 		}
+		
 
 		@Override
 		public void run() {
