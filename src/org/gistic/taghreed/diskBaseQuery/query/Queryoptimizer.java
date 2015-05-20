@@ -352,11 +352,11 @@ public class Queryoptimizer {
 		Process myProcess = Runtime.getRuntime().exec(command);
 
 		StreamGobbler errorGobbler = new StreamGobbler(
-				myProcess.getErrorStream(), System.out, trigger, expName);
+				myProcess.getErrorStream(), System.out, trigger, expName,command);
 
 		// Any output?
 		StreamGobbler outputGobbler = new StreamGobbler(
-				myProcess.getInputStream(), System.err, trigger, expName);
+				myProcess.getInputStream(), System.err, trigger, expName,command);
 
 		errorGobbler.start();
 		outputGobbler.start();
@@ -423,9 +423,10 @@ class StreamGobbler extends Thread {
 	OutputStreamWriter writer;
 	Initiater trigger;
 	boolean isSample;
+	String command; 
 
 	StreamGobbler(InputStream is, PrintStream os, Initiater trigger,
-			String exprName) throws UnsupportedEncodingException,
+			String exprName,String command) throws UnsupportedEncodingException,
 			FileNotFoundException {
 		this.is = is;
 		this.os = os;
@@ -434,6 +435,14 @@ class StreamGobbler extends Thread {
 						+ exprName + ".log", true), "UTF-8");
 		this.trigger = trigger;
 		isSample = (exprName.contains("Sample")) ? true : false;
+		this.command = command;
+		
+		try {
+			this.writer.write("\n"+command+"\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
