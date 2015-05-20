@@ -102,7 +102,7 @@ public class Main {
 			queryExec = new Queryoptimizer(req);
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial");
-			for(int d=19 ; d<32; d++){
+			for(int d=1 ; d<32; d++){
 				if(d < 10){
 					endTime = "2014-05-0"+d;
 				}else{
@@ -158,7 +158,7 @@ public class Main {
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double)0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
-		for(int i=19 ; i<32; i++){
+		for(int i=1 ; i<32; i++){
 			if(i < 10){
 				endTime = "2014-05-0"+i;
 			}else{

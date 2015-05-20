@@ -197,7 +197,7 @@ public class Queryoptimizer {
 		try{
 			for (Thread t : threads) {
 				System.out.println("Threads "+t.getName().toString()+" has been stopped");
-				t.stop();
+				t.interrupt();
 			}
 			threads.clear();	
 		}catch(Exception e){
