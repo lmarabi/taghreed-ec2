@@ -45,24 +45,31 @@ public class Main {
 				writer.write("\n"+level+","+respondHandler.getTotalExecutionTimes());
 				writer.close();
 
-			} else if (operation.equals("query")) {
+			} 
+		}else if (args.length == 3)
+		{
+			String operation = args[0];
+			String parameter = args[1];
+			int startDay = Integer.parseInt(args[2]);
+			if (operation.equals("query")) {
 				System.out.println("Query operation is running Now");
-				RangeQueryExperiments(level);
+				RangeQueryExperiments(parameter,startDay);
 			}
+			
 		} else {
 			System.out
 					.println("To use this program you must pass the following arguments\n*********\n"
 							+ "index [level(day,week,month)]\n"
 							+ "query [level(day,week,month)]\n"
-							+ "query temporal\t this is will query from all levels");
+							+ "query [spatial|temporal]\tstartDay - int number only for example 1 or 13");
 		}
 	}
 	
-	private static void RangeQueryExperiments(String parameter) throws Exception{
+	private static void RangeQueryExperiments(String parameter, int startDay) throws Exception{
 		if(parameter.equals("spatial")){
-			spatialRangeQueryExpr();
+			spatialRangeQueryExpr(startDay);
 		}else if(parameter.equals("temporal")){
-			temporalRangeQueryExpr();
+			temporalRangeQueryExpr(startDay);
 		}else{
 			// this change the query execution techniques. 
 		}
@@ -73,7 +80,7 @@ public class Main {
 	 * And fix the following: Temporal , And Query Processing.
 	 * @throws Exception 
 	 */
-	private static void spatialRangeQueryExpr() throws Exception{
+	private static void spatialRangeQueryExpr(int startDay) throws Exception{
 //		double[] area = {0.0001,0.001,0.01};
 		double[] area = {0.000001,0.0001,0.01,0.1};
 		for(int i=0 ; i< area.length; i++){
@@ -102,7 +109,7 @@ public class Main {
 			queryExec = new Queryoptimizer(req);
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial");
-			for(int d=1 ; d<32; d++){
+			for(int d=startDay ; d<32; d++){
 				if(d < 10){
 					endTime = "2014-05-0"+d;
 				}else{
@@ -127,7 +134,7 @@ public class Main {
 	 * And fix the following: spatial, and query processing technique
 	 * @throws Exception 
 	 */
-	private static void temporalRangeQueryExpr() throws Exception{
+	private static void temporalRangeQueryExpr(int startDay) throws Exception{
 		SamplersCollector sampleHandler = new SamplersCollector();
 		ServerRequest req = new ServerRequest();
 		req.setStartDate("2014-05-01");
@@ -158,7 +165,7 @@ public class Main {
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double)0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
-		for(int i=1 ; i<32; i++){
+		for(int i=startDay ; i<32; i++){
 			if(i < 10){
 				endTime = "2014-05-0"+i;
 			}else{
