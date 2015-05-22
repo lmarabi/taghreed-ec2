@@ -125,7 +125,7 @@ public class Queryoptimizer {
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		boolean queryTail = false;
-		List<Thread> threads = new ArrayList<Thread>();
+//		List<Thread> threads = new ArrayList<Thread>();
 		double startTime = System.currentTimeMillis();
 		// Query From Months
 		Map<String, String> indexMonths = lookup.getTweetsMonthsIndex(
@@ -138,8 +138,10 @@ public class Queryoptimizer {
 			System.out.println("#Start Reading index of "
 					+ entry.getKey().toString());
 			months.add(entry.getKey().toString());
-			threads.add(executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Month));
+//			threads.add(executeRangeQuery(serverRequest.getRect(), entry
+//					.getKey().toString(), queryLevel.Month));
+			executeRangeQuery(serverRequest.getRect(), entry
+					.getKey().toString(), queryLevel.Month);
 		}
 		Map<Week, String> index = lookup.getTweetsWeekIndex(
 				serverRequest.getStartDate(), serverRequest.getEndDate(),
@@ -152,8 +154,10 @@ public class Queryoptimizer {
 			Week week = (Week) entry.getKey();
 			System.out.println("#Start Reading Week " + week.getWeekName());
 			weeks.add(week.getWeekName());
-			threads.add(executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Week));
+//			threads.add(executeRangeQuery(serverRequest.getRect(), entry
+//					.getKey().toString(), queryLevel.Week));
+			executeRangeQuery(serverRequest.getRect(), entry
+					.getKey().toString(), queryLevel.Week);
 		}
 		// Query missing days in head week
 		Map<String, String> indexDays = lookup.getTweetsDayIndex(
@@ -165,13 +169,15 @@ public class Queryoptimizer {
 			Map.Entry entry = (Map.Entry) it.next();
 			System.out.println("#Start Reading index of "
 					+ entry.getKey().toString());
-			threads.add(executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Day));
+//			threads.add(executeRangeQuery(serverRequest.getRect(), entry
+//					.getKey().toString(), queryLevel.Day));
+			executeRangeQuery(serverRequest.getRect(), entry
+					.getKey().toString(), queryLevel.Day);
 		}
 
-		for (Thread t : threads) {
-			t.join();
-		}
+//		for (Thread t : threads) {
+//			t.join();
+//		}
 		
 		double multiCost = respondHandler.getAvgExecutionTimes();
 	    double daysCost = executeDayLevelOnly();
@@ -194,15 +200,15 @@ public class Queryoptimizer {
 		writerTime.flush();
 		closewriter();
 		
-		try{
-			for (Thread t : threads) {
-				System.out.println("Threads "+t.getName().toString()+" has been stopped");
-				t.interrupt();
-			}
-			threads.clear();	
-		}catch(Exception e){
-			System.out.println("Error happen while stoping threads");
-		}
+//		try{
+//			for (Thread t : threads) {
+//				System.out.println("Threads "+t.getName().toString()+" has been stopped");
+//				t.interrupt();
+//			}
+//			threads.clear();	
+//		}catch(Exception e){
+//			System.out.println("Error happen while stoping threads");
+//		}
 		
 		return 0;
 
@@ -220,10 +226,9 @@ public class Queryoptimizer {
 	/***
 	 * This query execute the one all index
 	 * @return
-	 * @throws ParseException
-	 * @throws InterruptedException
+	 * @throws Exception 
 	 */
-	public double executeAllIndex() throws ParseException, InterruptedException {
+	public double executeAllIndex() throws Exception {
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		Thread t = executeRangeQuery(serverRequest.getRect(),"all", queryLevel.Whole);
@@ -234,11 +239,10 @@ public class Queryoptimizer {
 	/**
 	 * This query from days level only
 	 * @return
-	 * @throws ParseException
-	 * @throws InterruptedException
+	 * @throws Exception 
 	 */
-	public double executeDayLevelOnly() throws ParseException, InterruptedException {
-		List<Thread> threads = new ArrayList<Thread>();
+	public double executeDayLevelOnly() throws Exception {
+//		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		List<String> weeks = new ArrayList<String>();
@@ -253,13 +257,15 @@ public class Queryoptimizer {
 			Map.Entry entry = (Map.Entry) it.next();
 			System.out.println("#Start Reading index of "
 					+ entry.getKey().toString());
-			threads.add(executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Day));
+//			threads.add(executeRangeQuery(serverRequest.getRect(), entry
+//					.getKey().toString(), queryLevel.Day));
+			executeRangeQuery(serverRequest.getRect(), entry
+					.getKey().toString(), queryLevel.Day);
 		}
 		
-		for (Thread t : threads) {
-			t.join();
-		}
+//		for (Thread t : threads) {
+//			t.join();
+//		}
 		
 		return respondHandler.getAvgExecutionTimes();
 				
@@ -268,11 +274,10 @@ public class Queryoptimizer {
 	/***
 	 * This query from Week only
 	 * @return
-	 * @throws ParseException
-	 * @throws InterruptedException
+	 * @throws Exception 
 	 */
-	public double executeMonthLevelOnly() throws ParseException, InterruptedException {
-		List<Thread> threads = new ArrayList<Thread>();
+	public double executeMonthLevelOnly() throws Exception {
+//		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		// Query From Months
@@ -281,12 +286,13 @@ public class Queryoptimizer {
 		System.out.println("#number of Months found: " + indexMonths.size());
 		 for(String m : indexMonths) {
 			System.out.println("#Start Reading index of "+m);
-			threads.add(executeRangeQuery(serverRequest.getRect(), m, queryLevel.Month));
+//			threads.add(executeRangeQuery(serverRequest.getRect(), m, queryLevel.Month));
+			executeRangeQuery(serverRequest.getRect(), m, queryLevel.Month);
 		}
 		
-		for (Thread t : threads) {
-			t.join();
-		}
+//		for (Thread t : threads) {
+//			t.join();
+//		}
 		
 		return respondHandler.getAvgExecutionTimes();
 				
@@ -296,11 +302,10 @@ public class Queryoptimizer {
 	/***
 	 * This query from Week only
 	 * @return
-	 * @throws ParseException
-	 * @throws InterruptedException
+	 * @throws Exception 
 	 */
-	public double executeWeekLevelOnly() throws ParseException, InterruptedException {
-		List<Thread> threads = new ArrayList<Thread>();
+	public double executeWeekLevelOnly() throws Exception {
+//		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		Map<Week, String> index = lookup.getTweetsFromWeekIndex(
@@ -311,13 +316,15 @@ public class Queryoptimizer {
 			Map.Entry entry = (Map.Entry) it.next();
 			Week week = (Week) entry.getKey();
 			System.out.println("#Start Reading Week " + week.getWeekName());
-			threads.add(executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Week));
+//			threads.add(executeRangeQuery(serverRequest.getRect(), entry
+//					.getKey().toString(), queryLevel.Week));
+			executeRangeQuery(serverRequest.getRect(), entry
+					.getKey().toString(), queryLevel.Week);
 		}
 		
-		for (Thread t : threads) {
-			t.join();
-		}
+//		for (Thread t : threads) {
+//			t.join();
+//		}
 		
 		return respondHandler.getAvgExecutionTimes();
 				
@@ -345,14 +352,16 @@ public class Queryoptimizer {
 	 * 
 	 * @param mbr
 	 * @param path
-	 * @return
+	 * @return 
+	 * @throws Exception 
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
-	private Thread executeRangeQuery(String rect, String index, queryLevel level) {
+	private Thread executeRangeQuery(String rect, String index, queryLevel level) throws Exception{
 		String command = getCommand(rect, index, level);
 		Thread t = new Thread(new rangeQueryHDFS(command));
 		t.start();
+		t.join();
 		return t;
 
 	}
