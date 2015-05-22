@@ -57,14 +57,22 @@ public class Main {
 				writer.close();
 
 			}
+<<<<<<< HEAD
 		} else if (args.length == 4) {
+=======
+		} else if (args.length == 3) {
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 			String operation = args[0];
 			String parameter = args[1];
 			String startDay = args[2];
 			String endDay = args[3];
 			if (operation.equals("query")) {
 				System.out.println("Query operation is running Now");
+<<<<<<< HEAD
 				RangeQueryExperiments(parameter, startDay, endDay);
+=======
+				RangeQueryExperiments(parameter, startDay);
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 			}
 
 		} else {
@@ -75,12 +83,21 @@ public class Main {
 		}
 	}
 
+<<<<<<< HEAD
 	private static void RangeQueryExperiments(String parameter,
 			String startDay, String endDay) throws Exception {
 		if (parameter.equals("spatial")) {
 			spatialRangeQueryExpr(startDay, endDay);
 		} else if (parameter.equals("temporal")) {
 			temporalRangeQueryExpr(startDay, endDay);
+=======
+	private static void RangeQueryExperiments(String parameter, int startDay)
+			throws Exception {
+		if (parameter.equals("spatial")) {
+			spatialRangeQueryExpr(startDay);
+		} else if (parameter.equals("temporal")) {
+			temporalRangeQueryExpr(startDay);
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		} else {
 			// this change the query execution techniques.
 		}
@@ -92,8 +109,12 @@ public class Main {
 	 * 
 	 * @throws Exception
 	 */
+<<<<<<< HEAD
 	private static void spatialRangeQueryExpr(String startDay, String endDay)
 			throws Exception {
+=======
+	private static void spatialRangeQueryExpr(int startDay) throws Exception {
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		// double[] area = {0.0001,0.001,0.01};
 		double[] area = { 0.000001, 0.0001, 0.01, 0.1 };
 		for (int i = 0; i < area.length; i++) {
@@ -116,6 +137,7 @@ public class Main {
 			/*
 			 * Now Execute the Range Query
 			 */
+<<<<<<< HEAD
 			queryExec = new Queryoptimizer(req);
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial");
@@ -139,6 +161,32 @@ public class Main {
 				}
 			}
 
+=======
+
+			String startTime = "2014-05-01";
+			String endTime = "2014-05-";
+			queryExec = new Queryoptimizer(req);
+			queryExec.setSpatialRatio(area[i]);
+			queryExec.setExpName("RangeQueryExp_Spatial");
+			for (int d = startDay; d < 32; d++) {
+				if (d == 1 || d == 3 || d == 4 || d == 10 || d == 11 || d == 17
+						|| d == 18 || d == 24 || d == 25 | d == 31) {
+					if (d < 10) {
+						endTime = "2014-05-0" + d;
+					} else {
+						endTime = "2014-05-" + d;
+					}
+					req.setStartDate(startTime);
+					req.setEndDate(endTime);
+					try {
+						queryExec.executeQuery();
+					} catch (Exception ex) {
+
+					}
+
+				}
+			}
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		}
 
 	}
@@ -149,8 +197,12 @@ public class Main {
 	 * 
 	 * @throws Exception
 	 */
+<<<<<<< HEAD
 	private static void temporalRangeQueryExpr(String startDay, String endDay)
 			throws Exception {
+=======
+	private static void temporalRangeQueryExpr(int startDay) throws Exception {
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		SamplersCollector sampleHandler = new SamplersCollector();
 		ServerRequest req = new ServerRequest();
 		req.setStartDate("2014-05-01");
@@ -182,6 +234,7 @@ public class Main {
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double) 0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
+<<<<<<< HEAD
 		Map<String, String> days = req.getLookup().getTweetsDayIndex(startDay,
 				endDay);
 		List<String> sortedDays = new ArrayList<String>();
@@ -195,11 +248,25 @@ public class Main {
 		for (String end : sortedDays) {
 			req.setStartDate(startDay);
 			req.setEndDate(end);
+=======
+		for (int i = startDay; i < 32; i++) {
+			if (i < 10) {
+				endTime = "2014-05-0" + i;
+			} else {
+				endTime = "2014-05-" + i;
+			}
+			req.setStartDate(startTime);
+			req.setEndDate(endTime);
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 			try {
 				queryExec.executeQuery();
 			} catch (Exception ex) {
 
 			}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		}
 
 	}
