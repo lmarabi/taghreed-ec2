@@ -5,18 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.gistic.taghreed.diskBaseIndexer.MainBackendIndex;
 import org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
-import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 import com.sun.rmi.rmid.ExecPermission;
@@ -57,47 +50,30 @@ public class Main {
 				writer.close();
 
 			}
-<<<<<<< HEAD
-		} else if (args.length == 4) {
-=======
 		} else if (args.length == 3) {
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 			String operation = args[0];
 			String parameter = args[1];
-			String startDay = args[2];
-			String endDay = args[3];
+			int startDay = Integer.parseInt(args[2]);
 			if (operation.equals("query")) {
 				System.out.println("Query operation is running Now");
-<<<<<<< HEAD
-				RangeQueryExperiments(parameter, startDay, endDay);
-=======
 				RangeQueryExperiments(parameter, startDay);
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 			}
 
 		} else {
 			System.out
 					.println("To use this program you must pass the following arguments\n*********\n"
 							+ "index [level(day,week,month)]\n"
-							+ "query [spatial|temporal] startDate endDate\t spatial constains all ratios while temporal contains only the default");
+							+ "query [level(day,week,month)]\n"
+							+ "query [spatial|temporal]\tstartDay - int number only for example 1 or 13");
 		}
 	}
 
-<<<<<<< HEAD
-	private static void RangeQueryExperiments(String parameter,
-			String startDay, String endDay) throws Exception {
-		if (parameter.equals("spatial")) {
-			spatialRangeQueryExpr(startDay, endDay);
-		} else if (parameter.equals("temporal")) {
-			temporalRangeQueryExpr(startDay, endDay);
-=======
 	private static void RangeQueryExperiments(String parameter, int startDay)
 			throws Exception {
 		if (parameter.equals("spatial")) {
 			spatialRangeQueryExpr(startDay);
 		} else if (parameter.equals("temporal")) {
 			temporalRangeQueryExpr(startDay);
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		} else {
 			// this change the query execution techniques.
 		}
@@ -109,12 +85,7 @@ public class Main {
 	 * 
 	 * @throws Exception
 	 */
-<<<<<<< HEAD
-	private static void spatialRangeQueryExpr(String startDay, String endDay)
-			throws Exception {
-=======
 	private static void spatialRangeQueryExpr(int startDay) throws Exception {
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		// double[] area = {0.0001,0.001,0.01};
 		double[] area = { 0.000001, 0.0001, 0.01, 0.1 };
 		for (int i = 0; i < area.length; i++) {
@@ -137,31 +108,6 @@ public class Main {
 			/*
 			 * Now Execute the Range Query
 			 */
-<<<<<<< HEAD
-			queryExec = new Queryoptimizer(req);
-			queryExec.setSpatialRatio(area[i]);
-			queryExec.setExpName("RangeQueryExp_Spatial");
-			Map<String, String> days = req.getLookup().getTweetsDayIndex(
-					startDay, endDay);
-			List<String> sortedDays = new ArrayList<String>();
-			Iterator it = days.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, String> entry = (Map.Entry) it.next();
-				sortedDays.add(entry.getKey());
-			}
-			Collections.sort(sortedDays);
-			sortedDays.remove(0);
-			for (String end : sortedDays) {
-				req.setStartDate(startDay);
-				req.setEndDate(end);
-				try {
-					queryExec.executeQuery();
-				} catch (Exception ex) {
-
-				}
-			}
-
-=======
 
 			String startTime = "2014-05-01";
 			String endTime = "2014-05-";
@@ -186,7 +132,6 @@ public class Main {
 
 				}
 			}
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		}
 
 	}
@@ -197,12 +142,7 @@ public class Main {
 	 * 
 	 * @throws Exception
 	 */
-<<<<<<< HEAD
-	private static void temporalRangeQueryExpr(String startDay, String endDay)
-			throws Exception {
-=======
 	private static void temporalRangeQueryExpr(int startDay) throws Exception {
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		SamplersCollector sampleHandler = new SamplersCollector();
 		ServerRequest req = new ServerRequest();
 		req.setStartDate("2014-05-01");
@@ -234,21 +174,6 @@ public class Main {
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double) 0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
-<<<<<<< HEAD
-		Map<String, String> days = req.getLookup().getTweetsDayIndex(startDay,
-				endDay);
-		List<String> sortedDays = new ArrayList<String>();
-		Iterator it = days.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, String> entry = (Map.Entry) it.next();
-			sortedDays.add(entry.getKey());
-		}
-		Collections.sort(sortedDays);
-		sortedDays.remove(0);
-		for (String end : sortedDays) {
-			req.setStartDate(startDay);
-			req.setEndDate(end);
-=======
 		for (int i = startDay; i < 32; i++) {
 			if (i < 10) {
 				endTime = "2014-05-0" + i;
@@ -257,16 +182,12 @@ public class Main {
 			}
 			req.setStartDate(startTime);
 			req.setEndDate(endTime);
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 			try {
 				queryExec.executeQuery();
 			} catch (Exception ex) {
 
 			}
-<<<<<<< HEAD
-=======
 
->>>>>>> 6cc5a514f89a1869d2c0cb4ab4aa11d30bdd429a
 		}
 
 	}
