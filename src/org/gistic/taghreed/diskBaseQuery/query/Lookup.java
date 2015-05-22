@@ -20,7 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.login.Configuration;
+
+import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.collections.Week;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 
 /**
  *
@@ -435,18 +439,21 @@ public class Lookup {
 
 	private boolean isFullWeekIncluded(Date start, Date end, Calendar week) {
 		// boolean status;
-		// System.out.println("firstDay of the week:" + firstDayOfWeek(week)
-		// + "\n" + "lastDay of the week:" + lastDayOfWeek(week) + "\n"
-		// + "startDate:" + start + "\n" + "endDate: " + end);
-		if ((start.before(firstDayOfWeek(week)) || start
-				.equals(firstDayOfWeek(week)))
-				&& (end.after(lastDayOfWeek(week)))) {
-			// status = true;
-			// System.out.println("status 1:" + status +
-			// "\n*******************");
-			return true;
-		} else if ((start.equals(firstDayOfWeek(week)))
-				&& (end.equals(lastDayOfWeek(week)))) {
+//		 System.out.println("firstDay of the week:" + firstDayOfWeek(week)
+//		 + "\n" + "lastDay of the week:" + lastDayOfWeek(week) + "\n"
+//		 + "startDate:" + start + "\n" + "endDate: " + end);
+//		if ((start.before(firstDayOfWeek(week)) || start
+//				.equals(firstDayOfWeek(week)))
+//				&& (end.after(lastDayOfWeek(week)))) {
+//			// status = true;
+//			// System.out.println("status 1:" + status +
+//			// "\n*******************");
+//			return true;
+//		} else if	
+		if ( (start.before(firstDayOfWeek(week)) || start.equals(firstDayOfWeek(week))) 
+				&& (end.after(lastDayOfWeek(week)) || end.equals(lastDayOfWeek(week)))
+				)
+				 {
 			// status = true;
 			// System.out.println("status 2:" + status +
 			// "\n*******************");
@@ -815,39 +822,75 @@ public class Lookup {
 		return missingDays.contains(temp);
 	}
 
+	
+	/***
+	 * The main method is only used for testing this class. 
+	 * @param args
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	public static void main(String[] args) throws FileNotFoundException,
 			IOException, ParseException {
-		Lookup l = new Lookup();
-		String path = "/home/turtle/UQUGIS/taghreed/Tools/twittercrawlermavenproject/output/result/";
-		l.loadLookupTableToArrayList(path);
-		String start = "2013-10-01";
-		String end = "2013-12-01";
-		Map<String, String> result = l.getTweetsMonthsIndex(start, end);
-		System.out.println("Selected Months");
-		Iterator it = result.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry obj = (Map.Entry) it.next();
-			System.out.println(obj.getValue());
-		}
-
-		System.out
-				.println("********* Missing Head non month Range *************");
-		for (String t : l.getHeadofSubMonth(start, end)) {
-			System.out.println(t);
-		}
-
-		System.out
-				.println("********* Missing  tail non month range *************");
-		for (String t : l.getTailofSubMonth(start, end)) {
-			System.out.println(t);
-		}
-		// Map<Date,String> days = l.getTweetMissingDaysinWeek(start, end);
-		// Iterator itdyas = days.entrySet().iterator();
-		// while(itdyas.hasNext()){
-		// Map.Entry obj = (Map.Entry)itdyas.next();
-		// Date temp = (Date) obj.getKey();
-		// System.out.println(temp+"\n"+obj.getValue());
-		// }
+		Commons config = new Commons();
+		Lookup lookup = new Lookup();
+		lookup.loadLookupTableToArrayList(config.getQueryRtreeIndex());
+		String start = "2014-05-01";
+		String end = "2014-05-13";
+//		//TEST optimized plan.
+//		Map<String, String> indexMonths = lookup.getTweetsMonthsIndex(
+//				start, end);
+//		List<String> months = new ArrayList<String>();
+//		System.out.println("#number of Months found: " + indexMonths.size());
+//		Iterator it = indexMonths.entrySet().iterator();
+//		while (it.hasNext()) {
+//			Map.Entry entry = (Map.Entry) it.next();
+//			System.out.println("#Start Reading index of "
+//					+ entry.getKey().toString());
+//			months.add(entry.getKey().toString());
+//		}
+//		Map<Week, String> index = lookup.getTweetsWeekIndex(start, end,months);
+//		System.out.println("#number of Weeks found: " + index.size());
+//		List<String> weeks = new ArrayList<String>();
+//		it = index.entrySet().iterator();
+//		while (it.hasNext()) {
+//			Map.Entry entry = (Map.Entry) it.next();
+//			Week week = (Week) entry.getKey();
+//			System.out.println("#Start Reading Week " + week.getWeekName());
+//			weeks.add(week.getWeekName());
+//		}
+//		// Query missing days in head week
+//		Map<String, String> indexDays = lookup.getTweetsDayIndex(
+//				start,end,weeks, months);
+//		System.out.println("#number of Days found: " + indexDays.size());
+//		it = indexDays.entrySet().iterator();
+//		while (it.hasNext()) {
+//			Map.Entry entry = (Map.Entry) it.next();
+//			System.out.println("#Start Reading index of "
+//					+ entry.getKey().toString());
+//		}
+		
+//		// Test query only from Week
+//		Map<Week, String> index = lookup.getTweetsFromWeekIndex(
+//				start,end);
+//		System.out.println("#number of Weeks found: " + index.size());
+//		Iterator it = index.entrySet().iterator();
+//		while (it.hasNext()) {
+//			Map.Entry entry = (Map.Entry) it.next();
+//			Week week = (Week) entry.getKey();
+//			System.out.println("#Start Reading Week " + week.getWeekName());
+//		}
+		
+//		//Test Query only from Months
+//		List<String> indexMonths = lookup.getTweetsMonth(
+//				start,end);
+//		System.out.println("#number of Months found: " + indexMonths.size());
+//		 for(String m : indexMonths) {
+//			System.out.println("#Start Reading index of "+m);
+//		}
+		 
+		 
+		
 
 	}
 }
