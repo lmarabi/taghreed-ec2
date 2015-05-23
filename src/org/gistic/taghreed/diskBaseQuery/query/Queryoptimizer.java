@@ -179,7 +179,7 @@ public class Queryoptimizer {
 //			t.join();
 //		}
 		
-		double multiCost = respondHandler.getAvgExecutionTimes();
+		double multiCost = respondHandler.getTotalExecutionTimes();
 	    double daysCost = executeDayLevelOnly();
 	    double weekCost = executeWeekLevelOnly();
 	    double monthCost = executeMonthLevelOnly();
@@ -267,7 +267,7 @@ public class Queryoptimizer {
 //			t.join();
 //		}
 		
-		return respondHandler.getAvgExecutionTimes();
+		return respondHandler.getTotalExecutionTimes();
 				
 	}
 	
@@ -294,7 +294,7 @@ public class Queryoptimizer {
 //			t.join();
 //		}
 		
-		return respondHandler.getAvgExecutionTimes();
+		return respondHandler.getTotalExecutionTimes();
 				
 	}
 	
@@ -326,7 +326,7 @@ public class Queryoptimizer {
 //			t.join();
 //		}
 		
-		return respondHandler.getAvgExecutionTimes();
+		return respondHandler.getTotalExecutionTimes();
 				
 	}
 
