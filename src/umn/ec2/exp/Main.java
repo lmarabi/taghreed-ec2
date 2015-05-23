@@ -117,10 +117,6 @@ public class Main {
 			for (int d = startDay; d < 32; d++) {
 				if (d == 1 || d == 3 || d == 4 || d == 10 || d == 11 || d == 17
 						|| d == 18 || d == 24 || d == 25 | d == 31) {
-					if((area[i] == 0.000001) && (d == 1 || d == 3 || d == 4 || d == 10 || d == 11 || d == 17
-						|| d == 18)){
-						continue;
-					}
 					if (d < 10) {
 						endTime = "2014-05-0" + d;
 					} else {
