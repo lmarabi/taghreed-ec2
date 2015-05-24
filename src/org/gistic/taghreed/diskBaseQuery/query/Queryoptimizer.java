@@ -180,7 +180,7 @@ public class Queryoptimizer {
 //		}
 		
 		double multiCost = respondHandler.getTotalExecutionTimes();
-	    double daysCost = executeDayLevelOnly();
+	    double daysCost = 0;//executeDayLevelOnly();
 	    double weekCost = executeWeekLevelOnly();
 	    double monthCost = executeMonthLevelOnly();
 	    double allCost = executeAllIndex();
@@ -222,6 +222,7 @@ public class Queryoptimizer {
 	public static void closewriter() throws IOException{
 		writerTime.close();
 	}
+	
 	
 	/***
 	 * This query execute the one all index

@@ -5,11 +5,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.gistic.taghreed.diskBaseIndexer.MainBackendIndex;
 import org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
+import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 import com.sun.rmi.rmid.ExecPermission;
@@ -146,7 +152,7 @@ public class Main {
 		SamplersCollector sampleHandler = new SamplersCollector();
 		ServerRequest req = new ServerRequest();
 		req.setStartDate("2014-05-01");
-		req.setEndDate("2014-05-31");
+		req.setEndDate("2014-09-30");
 		req.setType(queryType.tweet);
 		req.setIndex(queryIndex.rtree);
 		// double maxlon = -93.18933596240234;
@@ -170,25 +176,24 @@ public class Main {
 		 */
 
 		String startTime = "2014-05-01";
-		String endTime = "2014-05-";
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double) 0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
-		for (int i = startDay; i < 32; i++) {
-			if (i < 10) {
-				endTime = "2014-05-0" + i;
-			} else {
-				endTime = "2014-05-" + i;
-			}
+		String[] endTime = {"2014-05-31","2014-06-15","2014-06-30","2014-07-15","2014-07-31","2014-08-15","2014-08-31","2014-09-15","2014-09-30"};
+		for( int i = 0 ; i< endTime.length; i++){
 			req.setStartDate(startTime);
-			req.setEndDate(endTime);
+			req.setEndDate(endTime[i]);
 			try {
 				queryExec.executeQuery();
 			} catch (Exception ex) {
 
 			}
-
 		}
+
+
+			
+			
+		
 
 	}
 
