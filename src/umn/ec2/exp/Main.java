@@ -1,24 +1,13 @@
 package umn.ec2.exp;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.gistic.taghreed.diskBaseIndexer.MainBackendIndex;
 import org.gistic.taghreed.diskBaseQuery.query.Queryoptimizer;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
-import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryLevel;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
-
-import com.sun.rmi.rmid.ExecPermission;
 
 public class Main {
 
