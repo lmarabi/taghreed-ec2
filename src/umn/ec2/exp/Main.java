@@ -151,14 +151,14 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(20);
+			req.setNumSamples(1);
 			/*
 			 * Read A sample from Index
 			 */
 			Queryoptimizer queryExec = new Queryoptimizer(req);
 			queryExec.setExpName("TakeSamples");
 			queryExec.addSampleHandler(sampleHandler);
-			queryExec.readSamplesMBR();
+			//queryExec.readSamplesMBR();
 			req.setRect(sampleHandler.getSamples(), area[i]);
 			/*
 			 * Now Execute the Range Query
@@ -194,14 +194,14 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(20);
+			req.setNumSamples(1);
 			/*
 			 * Read A sample from Index
 			 */
 			Queryoptimizer queryExec = new Queryoptimizer(req);
 			queryExec.setExpName("TakeSamples");
 			queryExec.addSampleHandler(sampleHandler);
-			queryExec.readSamplesMBR();
+			//queryExec.readSamplesMBR();
 			req.setRect(sampleHandler.getSamples(), area[i]);
 			/*
 			 * Now Execute the Range Query
@@ -237,14 +237,14 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(20);
+			req.setNumSamples(1);
 			/*
 			 * Read A sample from Index
 			 */
 			Queryoptimizer queryExec = new Queryoptimizer(req);
 			queryExec.setExpName("TakeSamples");
 			queryExec.addSampleHandler(sampleHandler);
-			queryExec.readSamplesMBR();
+			//queryExec.readSamplesMBR();
 			req.setRect(sampleHandler.getSamples(), area[i]);
 			/*
 			 * Now Execute the Range Query
@@ -279,14 +279,14 @@ public class Main {
 			req.setEndDate("2014-05-31");
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
-			req.setNumSamples(20);
+			req.setNumSamples(1);
 			/*
 			 * Read A sample from Index
 			 */
 			Queryoptimizer queryExec = new Queryoptimizer(req);
 			queryExec.setExpName("TakeSamples");
 			queryExec.addSampleHandler(sampleHandler);
-			queryExec.readSamplesMBR();
+			//queryExec.readSamplesMBR();
 			req.setRect(sampleHandler.getSamples(), area[i]);
 			/*
 			 * Now Execute the Range Query
