@@ -30,11 +30,12 @@ public class Responder implements TimeListener {
 	}
 
 	public double getAvgExecutionTimes() {
-		int sum = 0;
-		for (int v : this.executionTimes) {
-			sum += v;
-		}
-		return (double) sum / executionTimes.size();
+//		int sum = 0;
+//		for (int v : this.executionTimes) {
+//			sum += v;
+//		}
+//		return (double) sum / executionTimes.size();
+		return 0;
 	}
 
 	public double getTotalExecutionTimes() {
@@ -43,6 +44,7 @@ public class Responder implements TimeListener {
 		for (int v : this.executionTimes) {
 			sum += v;
 		}
+		this.executionTimes.clear();
 		return sum;
 	}
 

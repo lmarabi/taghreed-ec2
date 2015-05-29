@@ -70,7 +70,10 @@ public class Main {
 		} else if (parameter.equals("temporal")) {
 			temporalRangeQueryExpr(startDay);
 		} else {
-			// this change the query execution techniques.
+			spatialRangeQueryDays(startDay);
+			spatialRangeQueryWeek(startDay);
+			spatialRangeQueryMonth(startDay);
+			spatialRangeQueryWhole(startDay);
 		}
 	}
 
@@ -132,6 +135,177 @@ public class Main {
 	}
 
 	/***
+	 * In this method we change the spatial Range of the query And fix the
+	 * following: Temporal , And Query Processing.
+	 * 
+	 * @throws Exception
+	 */
+	private static void spatialRangeQueryDays(int startDay) throws Exception {
+		// double[] area = {0.0001,0.001,0.01};
+		double[] area = { 0.000001, 0.0001, 0.01, 0.1 };
+		for (int i = 0; i < area.length; i++) {
+
+			SamplersCollector sampleHandler = new SamplersCollector();
+			ServerRequest req = new ServerRequest();
+			req.setStartDate("2014-05-01");
+			req.setEndDate("2014-05-31");
+			req.setType(queryType.tweet);
+			req.setIndex(queryIndex.rtree);
+			req.setNumSamples(20);
+			/*
+			 * Read A sample from Index
+			 */
+			Queryoptimizer queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("TakeSamples");
+			queryExec.addSampleHandler(sampleHandler);
+			queryExec.readSamplesMBR();
+			req.setRect(sampleHandler.getSamples(), area[i]);
+			/*
+			 * Now Execute the Range Query
+			 */
+			queryExec = new Queryoptimizer(req);
+			queryExec.setSpatialRatio(area[i]);
+			queryExec.setExpName("RangeQueryExp_Spatial_day"+area[i]);
+			try {
+				queryExec.executeDayLevelOnly();
+			} catch (Exception ex) {
+
+			}
+
+		}
+
+	}
+	
+	
+	/***
+	 * In this method we change the spatial Range of the query And fix the
+	 * following: Temporal , And Query Processing.
+	 * 
+	 * @throws Exception
+	 */
+	private static void spatialRangeQueryWeek(int startDay) throws Exception {
+		// double[] area = {0.0001,0.001,0.01};
+		double[] area = { 0.000001, 0.0001, 0.01, 0.1 };
+		for (int i = 0; i < area.length; i++) {
+
+			SamplersCollector sampleHandler = new SamplersCollector();
+			ServerRequest req = new ServerRequest();
+			req.setStartDate("2014-05-01");
+			req.setEndDate("2014-05-31");
+			req.setType(queryType.tweet);
+			req.setIndex(queryIndex.rtree);
+			req.setNumSamples(20);
+			/*
+			 * Read A sample from Index
+			 */
+			Queryoptimizer queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("TakeSamples");
+			queryExec.addSampleHandler(sampleHandler);
+			queryExec.readSamplesMBR();
+			req.setRect(sampleHandler.getSamples(), area[i]);
+			/*
+			 * Now Execute the Range Query
+			 */
+			queryExec = new Queryoptimizer(req);
+			queryExec.setSpatialRatio(area[i]);
+			queryExec.setExpName("RangeQueryExp_Spatial_week"+area[i]);
+			try {
+				queryExec.executeWeekLevelOnly();
+			} catch (Exception ex) {
+
+			}
+
+		}
+
+	}
+	
+	
+	/***
+	 * In this method we change the spatial Range of the query And fix the
+	 * following: Temporal , And Query Processing.
+	 * 
+	 * @throws Exception
+	 */
+	private static void spatialRangeQueryMonth(int startDay) throws Exception {
+		// double[] area = {0.0001,0.001,0.01};
+		double[] area = { 0.000001, 0.0001, 0.01, 0.1 };
+		for (int i = 0; i < area.length; i++) {
+
+			SamplersCollector sampleHandler = new SamplersCollector();
+			ServerRequest req = new ServerRequest();
+			req.setStartDate("2014-05-01");
+			req.setEndDate("2014-05-31");
+			req.setType(queryType.tweet);
+			req.setIndex(queryIndex.rtree);
+			req.setNumSamples(20);
+			/*
+			 * Read A sample from Index
+			 */
+			Queryoptimizer queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("TakeSamples");
+			queryExec.addSampleHandler(sampleHandler);
+			queryExec.readSamplesMBR();
+			req.setRect(sampleHandler.getSamples(), area[i]);
+			/*
+			 * Now Execute the Range Query
+			 */
+			queryExec = new Queryoptimizer(req);
+			queryExec.setSpatialRatio(area[i]);
+			queryExec.setExpName("RangeQueryExp_Spatial_month"+area[i]);
+			try {
+				queryExec.executeMonthLevelOnly();
+			} catch (Exception ex) {
+
+			}
+
+		}
+
+	}
+	
+	/***
+	 * In this method we change the spatial Range of the query And fix the
+	 * following: Temporal , And Query Processing.
+	 * 
+	 * @throws Exception
+	 */
+	private static void spatialRangeQueryWhole(int startDay) throws Exception {
+		// double[] area = {0.0001,0.001,0.01};
+		double[] area = { 0.000001, 0.0001, 0.01, 0.1 };
+		for (int i = 0; i < area.length; i++) {
+
+			SamplersCollector sampleHandler = new SamplersCollector();
+			ServerRequest req = new ServerRequest();
+			req.setStartDate("2014-05-01");
+			req.setEndDate("2014-05-31");
+			req.setType(queryType.tweet);
+			req.setIndex(queryIndex.rtree);
+			req.setNumSamples(20);
+			/*
+			 * Read A sample from Index
+			 */
+			Queryoptimizer queryExec = new Queryoptimizer(req);
+			queryExec.setExpName("TakeSamples");
+			queryExec.addSampleHandler(sampleHandler);
+			queryExec.readSamplesMBR();
+			req.setRect(sampleHandler.getSamples(), area[i]);
+			/*
+			 * Now Execute the Range Query
+			 */
+			queryExec = new Queryoptimizer(req);
+			queryExec.setSpatialRatio(area[i]);
+			queryExec.setExpName("RangeQueryExp_Spatial_Whole"+area[i]);
+			try {
+				queryExec.executeAllIndex();
+			} catch (Exception ex) {
+
+			}
+
+		}
+
+	}
+	
+
+	/***
 	 * In this method we change the temporal Range of the query And fix the
 	 * following: spatial, and query processing technique
 	 * 
@@ -168,8 +342,10 @@ public class Main {
 		queryExec = new Queryoptimizer(req);
 		queryExec.setSpatialRatio((double) 0.0001);
 		queryExec.setExpName("RangeQueryExp_temporal");
-		String[] endTime = {"2014-05-31","2014-06-15","2014-06-30","2014-07-15","2014-07-31","2014-08-15","2014-08-31","2014-09-15","2014-09-30"};
-		for( int i = 0 ; i< endTime.length; i++){
+		String[] endTime = { "2014-05-31", "2014-06-15", "2014-06-30",
+				"2014-07-15", "2014-07-31", "2014-08-15", "2014-08-31",
+				"2014-09-15", "2014-09-30" };
+		for (int i = 0; i < endTime.length; i++) {
 			req.setStartDate(startTime);
 			req.setEndDate(endTime[i]);
 			try {
@@ -178,11 +354,6 @@ public class Main {
 
 			}
 		}
-
-
-			
-			
-		
 
 	}
 

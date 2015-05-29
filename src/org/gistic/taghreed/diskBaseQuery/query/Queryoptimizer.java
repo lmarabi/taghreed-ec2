@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.print.attribute.standard.Severity;
+
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.gistic.taghreed.Commons;
 import org.gistic.taghreed.basicgeom.MBR;
@@ -74,6 +76,7 @@ public class Queryoptimizer {
 		writerTime.write("\n"+spatialRatio+"_startTime,endTime,q-multi,q-month,q-week,q-day,q-BigIndex,query-plan(Month-Week-Day)");
 		closewriter();
 	}
+	
 
 	public void addHandler(Responder handler) {
 		this.trigger = new Initiater();
@@ -230,10 +233,15 @@ public class Queryoptimizer {
 	 * @throws Exception 
 	 */
 	public double executeAllIndex() throws Exception {
+		writerTime = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_whole.log", true), "UTF-8");
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		Thread t = executeRangeQuery(serverRequest.getRect(),"all", queryLevel.Whole);
 		t.join();
+		writerTime.write(this.spatialRatio+","+"whole"+","+respondHandler.getTotalExecutionTimes());
+		writerTime.flush();
+		writerTime.close();
 		return respondHandler.getAvgExecutionTimes();
 	}
 	
@@ -243,6 +251,8 @@ public class Queryoptimizer {
 	 * @throws Exception 
 	 */
 	public double executeDayLevelOnly() throws Exception {
+		writerTime = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_day.log", true), "UTF-8");
 //		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
@@ -262,8 +272,11 @@ public class Queryoptimizer {
 //					.getKey().toString(), queryLevel.Day));
 			executeRangeQuery(serverRequest.getRect(), entry
 					.getKey().toString(), queryLevel.Day);
+			writerTime.write(this.spatialRatio+","+entry.getKey().toString()+","+respondHandler.getTotalExecutionTimes()+"\n");
+			
 		}
-		
+		writerTime.flush();
+		writerTime.close();
 //		for (Thread t : threads) {
 //			t.join();
 //		}
@@ -278,6 +291,8 @@ public class Queryoptimizer {
 	 * @throws Exception 
 	 */
 	public double executeMonthLevelOnly() throws Exception {
+		writerTime = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_month.log", true), "UTF-8");
 //		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
@@ -289,8 +304,11 @@ public class Queryoptimizer {
 			System.out.println("#Start Reading index of "+m);
 //			threads.add(executeRangeQuery(serverRequest.getRect(), m, queryLevel.Month));
 			executeRangeQuery(serverRequest.getRect(), m, queryLevel.Month);
+			writerTime.write(this.spatialRatio+","+m+","+respondHandler.getTotalExecutionTimes()+"\n");
 		}
 		
+		 writerTime.flush();
+		 writerTime.close();
 //		for (Thread t : threads) {
 //			t.join();
 //		}
@@ -306,7 +324,9 @@ public class Queryoptimizer {
 	 * @throws Exception 
 	 */
 	public double executeWeekLevelOnly() throws Exception {
-//		List<Thread> threads = new ArrayList<Thread>();
+		writerTime = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_week.log", true), "UTF-8");
+		//		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
 		Map<Week, String> index = lookup.getTweetsFromWeekIndex(
@@ -321,11 +341,14 @@ public class Queryoptimizer {
 //					.getKey().toString(), queryLevel.Week));
 			executeRangeQuery(serverRequest.getRect(), entry
 					.getKey().toString(), queryLevel.Week);
+			writerTime.write(this.spatialRatio+","+week.getWeekName()+","+respondHandler.getTotalExecutionTimes()+"\n");
 		}
 		
 //		for (Thread t : threads) {
 //			t.join();
 //		}
+		writerTime.flush();
+		writerTime.close();
 		
 		return respondHandler.getTotalExecutionTimes();
 				
@@ -344,7 +367,7 @@ public class Queryoptimizer {
 		String cmd = this.conf.getHadoopDir() + "hadoop jar "
 				+ this.conf.getShadoopJar() + " rangequery " + "-libjars "
 				+ this.conf.getLibJars() + " " + ec2AccessCode + " " + indexDir
-				+ " " + rect + " shape:" + shape + "  -no-local";
+				+ " " + rect + " shape:" + shape + "  -local";
 		return cmd;
 	}
 
