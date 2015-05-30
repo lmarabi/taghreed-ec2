@@ -15,6 +15,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -256,6 +257,7 @@ public class Queryoptimizer {
 //		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
+		List<String> days = new ArrayList<String>();
 		List<String> weeks = new ArrayList<String>();
 		List<String> months = new ArrayList<String>();
 		// Query missing days in head week
@@ -270,10 +272,13 @@ public class Queryoptimizer {
 					+ entry.getKey().toString());
 //			threads.add(executeRangeQuery(serverRequest.getRect(), entry
 //					.getKey().toString(), queryLevel.Day));
-			executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Day);
-			writerTime.write(this.spatialRatio+","+entry.getKey().toString()+","+respondHandler.getTotalExecutionTimes()+"\n");
-			
+			days.add(entry.getKey().toString());
+		}
+		
+		Collections.sort(days);
+		for(String day : days){
+			executeRangeQuery(serverRequest.getRect(),day, queryLevel.Day);
+			writerTime.write(this.spatialRatio+","+day+","+respondHandler.getTotalExecutionTimes()+"\n");
 		}
 		writerTime.flush();
 		writerTime.close();
@@ -329,6 +334,7 @@ public class Queryoptimizer {
 		//		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
+		List<String> weeks = new ArrayList<String>();
 		Map<Week, String> index = lookup.getTweetsFromWeekIndex(
 				serverRequest.getStartDate(), serverRequest.getEndDate());
 		System.out.println("#number of Weeks found: " + index.size());
@@ -339,9 +345,13 @@ public class Queryoptimizer {
 			System.out.println("#Start Reading Week " + week.getWeekName());
 //			threads.add(executeRangeQuery(serverRequest.getRect(), entry
 //					.getKey().toString(), queryLevel.Week));
-			executeRangeQuery(serverRequest.getRect(), entry
-					.getKey().toString(), queryLevel.Week);
-			writerTime.write(this.spatialRatio+","+week.getWeekName()+","+respondHandler.getTotalExecutionTimes()+"\n");
+			weeks.add(week.getWeekName());
+		}
+		
+		Collections.sort(weeks);
+		for(String week : weeks){
+			executeRangeQuery(serverRequest.getRect(), week, queryLevel.Week);
+			writerTime.write(this.spatialRatio+","+week+","+respondHandler.getTotalExecutionTimes()+"\n");
 		}
 		
 //		for (Thread t : threads) {

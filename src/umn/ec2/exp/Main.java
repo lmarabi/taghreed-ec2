@@ -59,7 +59,8 @@ public class Main {
 					.println("To use this program you must pass the following arguments\n*********\n"
 							+ "index [level(day,week,month)]\n"
 							+ "query [level(day,week,month)]\n"
-							+ "query [spatial|temporal]\tstartDay - int number only for example 1 or 13");
+							+ "query [spatial|temporal]\tstartDay - int number only for example 1 or 13\n"
+							+ "query whole [day|week|month|all]\n");
 		}
 	}
 
@@ -70,10 +71,15 @@ public class Main {
 		} else if (parameter.equals("temporal")) {
 			temporalRangeQueryExpr(startDay);
 		} else {
-			spatialRangeQueryDays(startDay);
-			spatialRangeQueryWeek(startDay);
-			spatialRangeQueryMonth(startDay);
-			spatialRangeQueryWhole(startDay);
+			if(parameter.equals("day")){
+				spatialRangeQueryDays(startDay);
+			}else if(parameter.equals("week")){
+				spatialRangeQueryWeek(startDay);
+			}else if(parameter.equals("month")){
+				spatialRangeQueryMonth(startDay);
+			}else{
+				spatialRangeQueryWhole(startDay);
+			}
 		}
 	}
 
