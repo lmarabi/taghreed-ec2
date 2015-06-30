@@ -1,8 +1,12 @@
 package umn.ec2.exp;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +17,7 @@ public class HistogramRatioIdea {
 	List<hDay> day = new ArrayList<hDay>();
 	List<hWeek> week = new ArrayList<hWeek>();
 	hMonth month = new hMonth();
-	int globalRatio = 100;
+	int globalRatio = 30;
 
 	/**
 	 ******************************************************************************************* 
@@ -21,15 +25,25 @@ public class HistogramRatioIdea {
 
 	private static class hDay implements Comparable<hDay> {
 		int day;
-		float execution;
+		int execution;
+		String plan;
 
-		public hDay(int day, float execution) {
+		public hDay(int day, int execution) {
 			this.day = day;
 			this.execution = execution;
+			this.plan = "";
+		}
+
+		public void setPlan(String plan) {
+			this.plan = plan;
+		}
+
+		public String getPlan() {
+			return plan;
 		}
 
 		public void print() {
-			System.out.println("day= " + this.day + "  exe=" + this.execution);
+			System.out.println("day= " + this.day + "  exe=" + this.execution+" plan="+this.plan);
 		}
 
 		@Override
@@ -46,10 +60,10 @@ public class HistogramRatioIdea {
 	private static class hWeek implements Comparable<hWeek> {
 		int startDay;
 		int endDay;
-		float execution;
+		int execution;
 		int volume;
 
-		public hWeek(int start, int end, float execution) {
+		public hWeek(int start, int end, int execution) {
 			this.startDay = start;
 			this.endDay = end;
 			this.execution = execution;
@@ -79,9 +93,9 @@ public class HistogramRatioIdea {
 		int start;
 		int end;
 		int volume;
-		float execution;
+		int execution;
 
-		public hMonth(int start, int end, float execution) {
+		public hMonth(int start, int end, int execution) {
 			this.start = start;
 			this.end = end;
 			this.volume = end - start;
@@ -113,7 +127,7 @@ public class HistogramRatioIdea {
 			reader = new BufferedReader(new FileReader(
 					System.getProperty("user.dir") + "/hday.txt"));
 			while ((line = reader.readLine()) != null) {
-				day.add(new hDay(counter, Float.parseFloat(line)));
+				day.add(new hDay(counter, Integer.parseInt(line)));
 				counter++;
 			}
 			reader.close();
@@ -129,7 +143,7 @@ public class HistogramRatioIdea {
 			while ((line = reader.readLine()) != null) {
 				String[] temp = line.split(",");
 				week.add(new hWeek(Integer.parseInt(temp[0]), Integer
-						.parseInt(temp[1]), Float.parseFloat(temp[2])));
+						.parseInt(temp[1]), Integer.parseInt(temp[2])));
 			}
 			reader.close();
 		} catch (IOException e) {
@@ -144,7 +158,7 @@ public class HistogramRatioIdea {
 			while ((line = reader.readLine()) != null) {
 				String[] temp = line.split(",");
 				month = new hMonth(Integer.parseInt(temp[0]),
-						Integer.parseInt(temp[1]), Float.parseFloat(temp[2]));
+						Integer.parseInt(temp[1]), Integer.parseInt(temp[2]));
 			}
 			reader.close();
 		} catch (IOException e) {
@@ -163,16 +177,16 @@ public class HistogramRatioIdea {
 		System.out
 				.println("\nCalculate Day Level\nStart - end - ExecutionTime ");
 		for (int i = 0; i < this.day.size(); i++) {
-			float executionTime = getDayexecutionRange(0, i);
-			System.out.println("(" + 1 + " - " + (i + 1) + ") = "
+			int executionTime = getDayexecutionRange(0, i);
+			System.out.println("(" + 1 + " - " + i  + ") = "
 					+ executionTime);
 			result.add(new hDay(i, executionTime));
 		}
 		return result;
 	}
 
-	private float getDayexecutionRange(int start, int end) {
-		float result = 0;
+	private int getDayexecutionRange(int start, int end) {
+		int result = 0;
 		while (start <= end) {
 			result += this.day.get(start).execution;
 			start++;
@@ -186,8 +200,8 @@ public class HistogramRatioIdea {
 		List<hDay> result = new ArrayList<hDay>();
 		System.out
 				.println("\nCalculate Week Level\nStart - end - ExecutionTime ");
-		for (int i = 1; i < this.day.size(); i++) {
-			float executionTime = getWeeklexecutionRange(1, i, 1);
+		for (int i = 0; i < this.day.size(); i++) {
+			int executionTime = getWeeklexecutionRange(1, i, 1);
 			System.out.println("(" + 1 + " - " + i + ") = " + executionTime);
 			result.add(new hDay(i, executionTime));
 		}
@@ -196,30 +210,53 @@ public class HistogramRatioIdea {
 
 	private List<hDay> CalculateMultiLevel() {
 		List<hDay> result = new ArrayList<hDay>();
+		int executionTime = 0;
 		System.out
 				.println("\nCalculate multi Level\nStart - end - ExecutionTime ");
-		for (int i = 1; i < this.day.size() + 1; i++) {
-			List<hWeek> tempweek = getWeekRange(1, i);
-			System.out.print("\n(" + 1 + " - " + i + ") = ");
-			if (tempweek.size() >= 1) {
-				for (hWeek w : tempweek) {
-					System.out.print(" " + w.startDay + "," + w.endDay);
-				}
+		for (int i = 0; i < this.day.size(); i++) {
+			executionTime = CalculateMonthLevel(1, i);
+			if (executionTime == 0) {
+				List<hWeek> tempweek = getWeekRange(1, i);
+				System.out.print("\n(" + 1 + " - " + i + ") = ");
+				if (tempweek.size() >= 1) {
+					for (hWeek w : tempweek) {
+						System.out.print(" " + w.startDay + "," + w.endDay);
+						executionTime += w.execution;
+					}
 
-				Collections.sort(tempweek);
-				int begin = tempweek.get(0).startDay;
-				int finish = tempweek.get(tempweek.size()-1).endDay;
-				if(finish != i) {
-					getDayexecutionRange(finish, i);
-					System.out.print(" query from "+finish+" to " + i);
+					Collections.sort(tempweek);
+					int begin = tempweek.get(0).startDay;
+					int finish = tempweek.get(tempweek.size() - 1).endDay;
+					int countDay = i-finish;
+					countDay++;
+					if (finish != i) {
+						executionTime += getDayexecutionRange(finish, i);
+						System.out.print(" query from " + finish + " to " + i);
+					}
+					hDay temp = new hDay(i, executionTime);
+					temp.setPlan(countDay + "-" + tempweek.size() + "-0");
+					result.add(temp);
+				} else {
+					// Execute days that are not query from month or week
+					executionTime = getDayexecutionRange(1, i);
+					System.out.println("query form 1 to" + i);
+					hDay temp = new hDay(i, executionTime);
+					int countDay = i - 1;
+					countDay++;
+					temp.setPlan(countDay + "-0-0");
+					result.add(temp);
 				}
-			}else{
-				System.out.println("query form 1 to"+i);
+			} else {
+				// Execute when month above or equal the selected ratio.
+				System.out
+						.println("(" + 1 + " - " + i + ") = " + executionTime);
+				hDay temp = new hDay(i, executionTime);
+				temp.setPlan("0-0-1");
+				result.add(temp);
+
 			}
-			// float executionTime = getWeeklexecutionRange(1,i,globalRatio);
-			// System.out.println("("+1+" - "+i+") = "+executionTime);
-			// result.add(new hDay(i,executionTime));
 		}
+		Collections.sort(result);
 		return result;
 	}
 
@@ -248,8 +285,8 @@ public class HistogramRatioIdea {
 		return result;
 	}
 
-	private float getWeeklexecutionRange(int start, int end, int ratio) {
-		float result = 0;
+	private int getWeeklexecutionRange(int start, int end, int ratio) {
+		int result = 0;
 		int numberOfDays = end - start;
 		numberOfDays++;
 		for (hWeek w : week) {
@@ -275,21 +312,63 @@ public class HistogramRatioIdea {
 		return result;
 	}
 
-	public static void main(String[] args) {
+	// **********************
+	private int CalculateMonthLevel(int start, int end) {
+		if (end == 30)
+			System.out.println("&");
+		int result = 0;
+		int numberofDays = end - start;
+		numberofDays++;
+		float ratio = ((float) numberofDays / month.volume) * 100;
+		int monthRatio = (int) ratio;
+		if (monthRatio >= globalRatio) {
+			System.out.println("Success the global ratio");
+			result = month.execution;
+		}
+		return result;
+	}
+
+	public static void main(String[] args) throws Exception, IOException {
+
 		HistogramRatioIdea test = new HistogramRatioIdea();
+		// test.globalRatio = Integer.parseInt(args[0]);
+		OutputStreamWriter writer = new OutputStreamWriter(
+				new FileOutputStream(System.getProperty("user.dir") + "/"
+						+ test.globalRatio + ".csv", false), "UTF-8");
 		test.loadData();
-		for (hDay d : test.day) {
+		 for (hDay d : test.day) {
+		 d.print();
+		 }
+		//
+		// for (hWeek w : test.week) {
+		// w.print();
+		// }
+		// test.month.print();
+		List<hDay> day = test.CalculateDayLevel();
+		List<hDay> week = test.CalculateWeekLevel();
+		List<hDay> multi = test.CalculateMultiLevel();
+		System.out.println("==================Day===================");
+		for(hDay d: day)
 			d.print();
+		System.out.println("===================Week==================");
+		for(hDay d: week)
+			d.print();
+		System.out.println("=================Multi====================");
+		for(hDay d: multi)
+			d.print();
+		System.out.println("dayCount=" + day.size() + "\tweekCount="
+				+ week.size() + "\tmultiCount=" + multi.size());
+		writer.write("start,end,q.day,q.week,q.month,q.multi\n");
+		for (int i = 0; i < day.size(); i++) {
+			System.out.println("1," +i + "," + day.get(i).execution
+					+ "," + week.get(i).execution + "," + test.month.execution
+					+ "," + multi.get(i).execution + ","
+					+ multi.get(i).getPlan());
+			writer.write("\n1," + i  + "," + day.get(i).execution + ","
+					+ week.get(i).execution + "," + test.month.execution + ","
+					+ multi.get(i).execution + "," + multi.get(i).getPlan());
 		}
-
-		for (hWeek w : test.week) {
-			w.print();
-		}
-
-		test.month.print();
-		// test.CalculateDayLevel();
-		// test.CalculateWeekLevel();
-		test.CalculateMultiLevel();
+		writer.close();
 
 	}
 
