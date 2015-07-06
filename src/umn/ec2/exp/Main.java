@@ -10,8 +10,8 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 public class Main {
-	static String globalStartDate = "";
-	static String globalEndDate = "";
+	static String globalStartDate = "2013-10-01";
+	static String globalEndDate = "2015-03-31";
 
 	public static void main(String[] args) throws Exception {
 		// args = new String[2];
