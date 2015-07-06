@@ -10,6 +10,8 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 public class Main {
+	static String globalStartDate = "";
+	static String globalEndDate = "";
 
 	public static void main(String[] args) throws Exception {
 		// args = new String[2];
@@ -153,8 +155,8 @@ public class Main {
 
 			SamplersCollector sampleHandler = new SamplersCollector();
 			ServerRequest req = new ServerRequest();
-			req.setStartDate("2014-05-01");
-			req.setEndDate("2014-05-31");
+			req.setStartDate(globalStartDate);
+			req.setEndDate(globalEndDate);
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
 			req.setNumSamples(1);
@@ -196,8 +198,8 @@ public class Main {
 
 			SamplersCollector sampleHandler = new SamplersCollector();
 			ServerRequest req = new ServerRequest();
-			req.setStartDate("2014-05-01");
-			req.setEndDate("2014-05-31");
+			req.setStartDate(globalStartDate);
+			req.setEndDate(globalEndDate);
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
 			req.setNumSamples(1);
@@ -239,8 +241,8 @@ public class Main {
 
 			SamplersCollector sampleHandler = new SamplersCollector();
 			ServerRequest req = new ServerRequest();
-			req.setStartDate("2014-05-01");
-			req.setEndDate("2014-05-31");
+			req.setStartDate(globalStartDate);
+			req.setEndDate(globalEndDate);
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
 			req.setNumSamples(1);
@@ -281,8 +283,8 @@ public class Main {
 
 			SamplersCollector sampleHandler = new SamplersCollector();
 			ServerRequest req = new ServerRequest();
-			req.setStartDate("2014-05-01");
-			req.setEndDate("2014-05-31");
+			req.setStartDate(globalStartDate);
+			req.setEndDate(globalEndDate);
 			req.setType(queryType.tweet);
 			req.setIndex(queryIndex.rtree);
 			req.setNumSamples(1);
