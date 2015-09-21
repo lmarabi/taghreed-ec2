@@ -10,14 +10,16 @@ import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryIndex;
 import org.gistic.taghreed.diskBaseQuery.server.ServerRequest.queryType;
 
 public class Main {
-	static String globalStartDate = "2013-10-01";
-	static String globalEndDate = "2015-03-31";
+	static String globalStartDate = "2014-03-01";
+	static String globalEndDate = "2014-03-02";
 
 	public static void main(String[] args) throws Exception {
-		// args = new String[2];
-		// args[0] = "query";
-		// args[1] = "spatial";
-		// TODO Auto-generated method stub
+		 args = new String[4];
+		 args[0] = "query";
+		 args[1] = "week";
+		 args[2] = "2013-10-01";
+		 args[3] = "2015-05-30";
+//		 TODO Auto-generated method stub
 		if (args.length == 2) {
 			String operation = args[0];
 			String level = args[1];
@@ -47,16 +49,25 @@ public class Main {
 				writer.close();
 
 			}
+			
 		} else if (args.length == 3) {
 			String operation = args[0];
 			String parameter = args[1];
+			
 			int startDay = Integer.parseInt(args[2]);
 			if (operation.equals("query")) {
-				System.out.println("Query operation is running Now");
+				System.out.println("Query operation is running");
 				RangeQueryExperiments(parameter, startDay);
 			}
 
-		} else {
+		}else if (args.length == 4) {
+			String operation = args[0];
+			String level = args[1];
+			globalStartDate = args[2];
+			globalEndDate = args[3];
+				System.out.println("Query operation is running Now");
+				RangeQueryExperiments(level, 0);
+			} else {
 			System.out
 					.println("To use this program you must pass the following arguments\n*********\n"
 							+ "index [level(day,week,month)]\n"
@@ -175,7 +186,7 @@ public class Main {
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial_day"+area[i]);
 			try {
-				queryExec.executeDayLevelOnly();
+				queryExec.executeDayLevelOnly(area[i]);
 			} catch (Exception ex) {
 
 			}
@@ -218,7 +229,7 @@ public class Main {
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial_week"+area[i]);
 			try {
-				queryExec.executeWeekLevelOnly();
+				queryExec.executeWeekLevelOnly(area[i]);
 			} catch (Exception ex) {
 
 			}
@@ -261,7 +272,7 @@ public class Main {
 			queryExec.setSpatialRatio(area[i]);
 			queryExec.setExpName("RangeQueryExp_Spatial_month"+area[i]);
 			try {
-				queryExec.executeMonthLevelOnly();
+				queryExec.executeMonthLevelOnly(area[i]);
 			} catch (Exception ex) {
 
 			}

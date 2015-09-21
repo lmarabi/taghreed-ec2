@@ -185,8 +185,8 @@ public class Queryoptimizer {
 		
 		double multiCost = respondHandler.getTotalExecutionTimes();
 	    double daysCost = 0;//executeDayLevelOnly();
-	    double weekCost = executeWeekLevelOnly();
-	    double monthCost = executeMonthLevelOnly();
+	    double weekCost = executeWeekLevelOnly(0);
+	    double monthCost = executeMonthLevelOnly(0);
 	    double allCost = executeAllIndex();
 
 		System.out.println("*****************************************************\n"
@@ -251,9 +251,9 @@ public class Queryoptimizer {
 	 * @return
 	 * @throws Exception 
 	 */
-	public double executeDayLevelOnly() throws Exception {
+	public double executeDayLevelOnly(double area) throws Exception {
 		writerTime = new OutputStreamWriter(
-				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_day.log", true), "UTF-8");
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_day_"+area+".txt", true), "UTF-8");
 //		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
@@ -295,9 +295,9 @@ public class Queryoptimizer {
 	 * @return
 	 * @throws Exception 
 	 */
-	public double executeMonthLevelOnly() throws Exception {
+	public double executeMonthLevelOnly(double area) throws Exception {
 		writerTime = new OutputStreamWriter(
-				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_month.log", true), "UTF-8");
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_month_"+area+".txt", true), "UTF-8");
 //		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
@@ -328,9 +328,9 @@ public class Queryoptimizer {
 	 * @return
 	 * @throws Exception 
 	 */
-	public double executeWeekLevelOnly() throws Exception {
+	public double executeWeekLevelOnly(double area) throws Exception {
 		writerTime = new OutputStreamWriter(
-				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_week.log", true), "UTF-8");
+				new FileOutputStream(System.getProperty("user.dir") + "/"+ "temporalQuery_time_week_"+area+".txt", true), "UTF-8");
 		//		List<Thread> threads = new ArrayList<Thread>();
 		Responder respondHandler = new Responder();
 		this.addHandler(respondHandler);
@@ -367,7 +367,7 @@ public class Queryoptimizer {
 	private String getCommand(String rect, String index, queryLevel level) {
 		String ec2AccessCode = "-Dfs.s3n.awsAccessKeyId=" +conf.getEc2AccessCode()
 				+" -Dfs.s3n.awsSecretAccessKey="+ conf.getEc2SecretCode();
-		String indexDir = this.conf.getHadoopHDFSPath() + level.toString()
+		String indexDir = "file://"+this.conf.getHadoopHDFSPath() + level.toString()
 				+ "/index." + index;
 		String shape = "org.gistic.taghreed.spatialHadoop.Tweets";
 //		Rectangle rectangle = new Rectangle(mbr.getMin().getLat(), mbr.getMin()

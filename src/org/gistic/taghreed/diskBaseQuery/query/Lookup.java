@@ -388,6 +388,9 @@ public class Lookup {
 					+ (weekdate.get(Calendar.MONTH) + 1) + "-"
 					+ weekdate.get(Calendar.WEEK_OF_MONTH);
 			intermediateResult.add(weekofDay);
+//			System.out.print("\n"+weekofDay+","+ weekdate.get(Calendar.YEAR) + "-"
+//					+ (weekdate.get(Calendar.MONTH) + 1) + "-"
+//					+ weekdate.get(Calendar.DATE));
 		}
 		while (!(weekdate.get(Calendar.YEAR) == cend.get(Calendar.YEAR)
 				&& (weekdate.get(Calendar.MONTH) == cend.get(Calendar.MONTH)) && (weekdate
@@ -398,6 +401,10 @@ public class Lookup {
 
 			if (!intermediateResult.contains(weekofDay)) {
 				intermediateResult.add(weekofDay);
+				
+//				System.out.print("\n"+weekofDay+","+ weekdate.get(Calendar.YEAR) + "-"
+//						+ (weekdate.get(Calendar.MONTH) + 1) + "-"
+//						+ weekdate.get(Calendar.DATE));
 
 			}
 
